@@ -5,6 +5,8 @@ import { Loader } from "lucide-react";
 import { useRef, useEffect, useCallback, useState, useLayoutEffect } from "react";
 import useSWRInfinite from "swr/infinite";
 import { VList } from "virtua";
+import { generateTiptapJson } from "./helper";
+import TiptapRenderer from "./TiptapRenderer";
 
 const LIMIT = 50;
 
@@ -17,19 +19,18 @@ const getKey = (pageIndex, previousPageData) => {
 
 const Item = ({ value, me }) => {
 
-  return <div style={{ border: "1px solid rgb(204, 204, 204)",
+  return <div style={{ border: me ? "1px solid red": "1px solid rgb(204, 204, 204)",
   background: "rgb(255, 255, 255)",
   margin: "10px 80px 10px 10px",
   padding: "10px",
   borderRadius: "8px",
-  whiteSpace: "pre-wrap"}}>{value}</div>
+  whiteSpace: "pre-wrap"}}><TiptapRenderer jsonContent={value} /></div>
 }
 
 const MessageVList = () => {
   const id = useRef(0);
-  console.log('faker.lorem.paragraphs(1),', faker.lorem.paragraphs(1))
     const createItem = ({
-      value = faker.lorem.paragraphs(1),
+      value = generateTiptapJson(id.current++),
       me = false
     }= {}) => ({
       id: id.current++,
@@ -75,8 +76,10 @@ const MessageVList = () => {
     const submit = () => {
       if (disabled) return;
       shouldStickToBottom.current = true;
+      const currentId = id.current++;
+      const currentValue =generateTiptapJson(currentId,  value);
       setItems(p => [...p, createItem({
-        value,
+        value: currentValue,
         me: true
       })]);
       setValue("");
