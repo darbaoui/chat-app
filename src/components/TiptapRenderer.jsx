@@ -1,6 +1,5 @@
 import { PureEditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Fragment } from 'react';
 
 // Renders Tiptap JSON content to React elements
 const TiptapRenderer = ({ jsonContent }) => {

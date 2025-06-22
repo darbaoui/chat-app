@@ -9,6 +9,7 @@ import { generateTiptapJson } from "./helper";
 import TiptapRenderer from "./TiptapRenderer";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 const LIMIT = 50;
 
@@ -21,14 +22,7 @@ const getKey = (pageIndex, previousPageData) => {
 
 const Item = ({ value, me }) => {
 
-  return <div style={{
-    border: me ? "1px solid red" : "1px solid rgb(204, 204, 204)",
-    background: "rgb(255, 255, 255)",
-    margin: "10px 80px 10px 10px",
-    padding: "10px",
-    borderRadius: "8px",
-    whiteSpace: "pre-wrap"
-  }}><TiptapRenderer jsonContent={value} /></div>
+  return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-red-500 bg-white' : 'border border-gray-300 bg-white')}><TiptapRenderer jsonContent={value} /></div>
 }
 
 const MessageVList = () => {
