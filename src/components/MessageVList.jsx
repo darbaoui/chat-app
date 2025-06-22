@@ -21,13 +21,13 @@ const getKey = (pageIndex, previousPageData) => {
 };
 
 const Item = ({ value, me }) => {
-    return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={value} /></div>
+  return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={value} /></div>
 }
 
 const MessageVList = () => {
 
   const id = useRef(0);
-  
+
   const createItem = ({
     value = generateTiptapJson(id.current++),
     me = false
@@ -36,11 +36,11 @@ const MessageVList = () => {
     value,
     me
   });
-  
+
   const [items, setItems] = useState(() => Array.from({
     length: 100
   }, () => createItem()));
-  
+
   const ref = useRef(null);
   const isPrepend = useRef(false);
   const shouldStickToBottom = useRef(true);
@@ -92,7 +92,8 @@ const MessageVList = () => {
     setValue("");
   };
 
-return <div className="flex flex-col h-full w-full relative">
+
+  return <div className="flex flex-col h-full w-full relative">
     <VList ref={ref} style={{
       flex: 1
     }} reverse shift={isPrepend.current} onScroll={offset => {
@@ -118,18 +119,18 @@ return <div className="flex flex-col h-full w-full relative">
     }}>
       <div className="w-full flex flex-col gap-2 border-t  pt-2 p-2 ">
 
-      <Textarea 
-      placeholder="Type your message here." 
-      autosize={false}
-      rows={6} value={value} onChange={e => {
-        setValue(e.target.value);
-      }} onKeyDown={e => {
-        if (e.code === "Enter" && (e.ctrlKey || e.metaKey)) {
-          submit();
-          e.preventDefault();
-        }
-      }} />
-    <div className="flex items-center gap-2">
+        <Textarea
+          placeholder="Type your message here."
+          rows={6}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.code === "Enter" && (e.ctrlKey || e.metaKey)) {
+              submit();
+              e.preventDefault();
+            }
+          }} />
+        <div className="flex items-center gap-2">
 
           <Button variant="default" type="submit" disabled={disabled}>
             submit
@@ -140,7 +141,7 @@ return <div className="flex flex-col h-full w-full relative">
           }}>
             jump to top
           </Button>
-    </div>
+        </div>
       </div>
     </form>
   </div>;
