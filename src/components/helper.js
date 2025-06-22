@@ -21,10 +21,34 @@ export const generateTiptapJson = (messageNumber=0, value=null) => {
           },
           {
             type: 'text',
-            text: value ? value: faker.lorem.paragraphs(1),
+            text: value ?? faker.lorem.paragraphs(1),
           },
         ],
       },
     ],
   };
+};
+
+
+/**
+ * Formats a date string into a human-readable separator like "Today", "Yesterday", or "Month Day, Year".
+ * @param {Date} date - The date object to format.
+ * @returns {string} - The formatted date string.
+ */
+export const formatDateSeparator = (date) => {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+    }
+    if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+    }
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }).format(date);
 };
