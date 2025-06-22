@@ -5,7 +5,7 @@ import { Loader } from "lucide-react";
 import { useRef, useEffect, useCallback, useState, useLayoutEffect } from "react";
 import useSWRInfinite from "swr/infinite";
 import { VList } from "virtua";
-import { generateTiptapJson } from "./helper";
+import { formatDateSeparator, generateTiptapJson } from "./helper";
 import TiptapRenderer from "./TiptapRenderer";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
@@ -20,11 +20,41 @@ const getKey = (pageIndex, previousPageData) => {
   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
 };
 
+/**
+ * Renders the date separator UI.
+ */
+const DateSeparator = ({ dateString }) => (
+    <div className="relative flex py-4 items-center">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <span className="flex-shrink mx-4 text-xs font-semibold text-gray-500 bg-gray-50 px-2">{dateString}</span>
+        <div className="flex-grow border-t border-gray-300"></div>
+    </div>
+);
+
+const Message = ({ message }) => {
+
+  const {text, user} = message
+  const me = false
+
+  return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={text} /></div>
+}
 const Item = ({ value, me }) => {
   return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={value} /></div>
 }
 
 const MessageVList = () => {
+
+  const { data, error, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
+      revalidateFirstPage: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 0,
+      shouldRetryOnError: true,
+    })
+
+  const messages = data ? data.flatMap(page => page.messages).reverse() : [];
+  
+
 
   const id = useRef(0);
 
@@ -49,16 +79,22 @@ const MessageVList = () => {
 
   useLayoutEffect(() => {
     isPrepend.current = false;
-  });
+  }, [messages.length]);
+
 
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
-    ref.current.scrollToIndex(items.length - 1, {
+    ref.current.scrollToIndex(messages.length - 1, {
       align: "end"
     });
-  }, [items.length]);
+  }, [messages.length]);
 
+  /**
+   * Used to create a new message after 5 seconds.
+   * This simulates a new message arriving in the chat.
+   * It will create a new message with a random value and add it to the list.
+   */
   useEffect(() => {
     let canceled = false;
     let timer = null;
@@ -101,14 +137,17 @@ const MessageVList = () => {
       shouldStickToBottom.current = offset - ref.current.scrollSize + ref.current.viewportSize >=
         // FIXME: The sum may not be 0 because of sub-pixel value when browser's window.devicePixelRatio has decimal value
         -1.5;
-      if (offset < 100) {
+      if (offset < 100 && !isPrepend.current && !isValidating) {
         isPrepend.current = true;
-        setItems(p => [...Array.from({
-          length: 100
-        }, () => createItem()), ...p]);
+        setSize(p => p + 1);
+        // setItems(p => [...Array.from({
+        //   length: 100
+        // }, () => createItem()), ...p]);
       }
     }}>
-      {items.map(d => <Item key={d.id} {...d} />)}
+      {/* {renderMessagesWithSeparators()} */}
+      {/* {items.map(d => <Item key={d.id} {...d} />)} */}
+      {messages.map(d => <Message key={d.id} message={d}/>)}
     </VList>
     <form style={{
       margin: 0

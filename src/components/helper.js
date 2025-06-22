@@ -52,3 +52,4 @@ export const formatDateSeparator = (date) => {
         day: 'numeric',
     }).format(date);
 };
+

@@ -39,7 +39,7 @@ function generateMessage(index: number) {
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 60000).toISOString();
   return {
     id: faker.string.uuid(),
-    text: generateTiptapContent(`This is message #${index + 1}`),
+    text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
     created_at: createdAt,
     user,
   };
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    messages,
+    messages, // Reverse to maintain chronological order
     page,
     limit,
     total: TOTAL_MESSAGES,
