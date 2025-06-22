@@ -21,12 +21,13 @@ const getKey = (pageIndex, previousPageData) => {
 };
 
 const Item = ({ value, me }) => {
-
-  return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-red-500 bg-white' : 'border border-gray-300 bg-white')}><TiptapRenderer jsonContent={value} /></div>
+    return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={value} /></div>
 }
 
 const MessageVList = () => {
+
   const id = useRef(0);
+  
   const createItem = ({
     value = generateTiptapJson(id.current++),
     me = false
@@ -35,9 +36,11 @@ const MessageVList = () => {
     value,
     me
   });
+  
   const [items, setItems] = useState(() => Array.from({
     length: 100
   }, () => createItem()));
+  
   const ref = useRef(null);
   const isPrepend = useRef(false);
   const shouldStickToBottom = useRef(true);
@@ -48,7 +51,6 @@ const MessageVList = () => {
     isPrepend.current = false;
   });
 
-
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
@@ -56,7 +58,6 @@ const MessageVList = () => {
       align: "end"
     });
   }, [items.length]);
-
 
   useEffect(() => {
     let canceled = false;
@@ -76,7 +77,9 @@ const MessageVList = () => {
       }
     };
   }, []);
+
   const disabled = !value.length;
+
   const submit = () => {
     if (disabled) return;
     shouldStickToBottom.current = true;
@@ -88,7 +91,8 @@ const MessageVList = () => {
     })]);
     setValue("");
   };
-  return <div className="flex flex-col h-full w-full relative">
+
+return <div className="flex flex-col h-full w-full relative">
     <VList ref={ref} style={{
       flex: 1
     }} reverse shift={isPrepend.current} onScroll={offset => {
