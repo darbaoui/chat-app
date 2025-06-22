@@ -32,7 +32,7 @@ const MessageVList = () => {
     value = generateTiptapJson(id.current++),
     me = false
   } = {}) => ({
-    id: id.current++,
+    id: faker.string.uuid(),
     value,
     me
   });

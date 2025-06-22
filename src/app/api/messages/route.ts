@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";
 
 const TOTAL_MESSAGES = 2000;
@@ -37,7 +38,7 @@ function generateMessage(index: number) {
   const user = USERS[index % USERS.length];
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 60000).toISOString();
   return {
-    id: `msg_${index}`,
+    id: faker.string.uuid(),
     text: generateTiptapContent(`This is message #${index + 1}`),
     created_at: createdAt,
     user,
