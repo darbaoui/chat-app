@@ -16,7 +16,7 @@ const TiptapRenderer = ({ jsonContent }) => {
   });
 
   return (
-    <div className="text-sm leading-relaxed">
+    <div className="text-[12px] leading-relaxed">
       <PureEditorContent editor={editor} />
     </div>
   );

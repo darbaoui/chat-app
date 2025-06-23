@@ -11,6 +11,7 @@ import { generateTiptapJson } from "./helper";
 import TiptapRenderer from "./TiptapRenderer";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import  BoxCorner  from "@/icons/BoxCorner";
 
 const LIMIT = 50;
 
@@ -25,12 +26,9 @@ const getKey = (pageIndex, previousPageData) => {
  * Renders the date separator UI.
  */
 const DateSeparator = ({ dateString }) => (
-  <div className="relative flex py-4 items-center">
-    <div className="flex-grow border-t border-gray-300"></div>
-    <span className="flex-shrink mx-4 text-xs font-semibold text-gray-500 bg-gray-50 px-2">
-      {dateString}
-    </span>
-    <div className="flex-grow border-t border-gray-300"></div>
+  <div style={{position:"sticky",top:".625rem",cursor:"pointer",pointerEvents:"none",zIndex:"10",marginTop:"1rem",marginBottom:"1rem",opacity:"1",transition:"opacity .3s ease"}}>
+
+    {dateString}
   </div>
 );
 
@@ -49,6 +47,9 @@ const Message = ({ message, prevMessage = {} }) => {
     hour: "numeric",
     minute: "2-digit",
   });
+
+
+  const index = 0;
   return (
     <div
       className={cn(
@@ -57,7 +58,7 @@ const Message = ({ message, prevMessage = {} }) => {
         showAvatarAndName ? "mt-4" : ""
       )}
     >
-      <div className="w-8 h-8 mr-3">
+      <div className="w-6.5 h-6.5 mr-3">
         {showAvatarAndName && (
           <Avatar>
             <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
@@ -69,27 +70,35 @@ const Message = ({ message, prevMessage = {} }) => {
       <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
         {/* Sender Name and Time */}
         {showAvatarAndName && (
-          <div className="flex items-baseline space-x-2 mb-1">
-            <p className="text-sm font-semibold text-gray-800">{user.name}</p>
-            <p className="text-xs text-gray-500">{time}</p>
+          <div className="flex items-baseline text-meta-icon space-x-2 mb-1">
+            <p className="text-[11px] break-words flex">{user.name}</p>
+            <p className="text-[11px] ">{time}</p>
           </div>
         )}
 
         {/* Message Bubble */}
         <div
-          className={`max-w-xs md:max-w-md lg:max-w-lg rounded-2xl px-4 py-2 ${
+          className={`max-w-md rounded-3xl px-5 py-2.5 relative ${
             isMe
-              ? "bg-blue-500 text-white rounded-br-none"
-              : "bg-gray-200 text-gray-800 rounded-bl-none"
+              ? "bg-blue-500 text-white"
+              : "bg-accent text-title "
           }`}
         >
+          {index === 0 && (
+                    <BoxCorner
+                      className={cn(
+                        ' absolute -right-1 top-0.5 z-0',
+                        isMe
+                          ? 'text-blue-100 -right-1 top-0.5'
+                          : 'text-accent -left-1 top-0.5 rotate-45',
+                      )}
+                    />
+                  )}
           <TiptapRenderer jsonContent={text} />
-          <p className="text-xs text-right mt-1 opacity-70">{time}</p>
         </div>
       </div>
     </div>
   );
-  // return <div className={cn('p-2.5 rounded-lg whitespace-pre-wrap  max-w-3/4 m-2.5', me ? 'border border-destructive bg-card' : 'border border-border bg-card')}><TiptapRenderer jsonContent={text} /></div>
 };
 
 const MessageVList = () => {
