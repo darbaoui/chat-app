@@ -34,15 +34,23 @@ function generateTiptapContent(text: string) {
   };
 }
 
-function generateMessage(index: number) {
+function generateMessage(index: number, message_count: number) {
   const user = USERS[index % USERS.length];
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 60000).toISOString();
-  return {
-    id: faker.string.uuid(),
-    text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
-    created_at: createdAt,
-    user,
-  };
+   let messageIndex = 0;
+   const messages = [];
+   while (messageIndex < message_count) {
+     messages.push( {
+       id: faker.string.uuid(),
+       text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
+       created_at: createdAt,
+       user,
+     });
+
+     messageIndex++;
+   }
+
+   return messages;
 }
 
 export async function GET(req: NextRequest) {
@@ -56,7 +64,9 @@ export async function GET(req: NextRequest) {
 
   const messages = [];
   for (let i = start; i >= end; i--) {
-    messages.push(generateMessage(i));
+
+    const message_count = faker.number.int({ min: 1, max: 5 });
+    messages.push(...generateMessage(i, message_count));
   }
 
   return NextResponse.json({

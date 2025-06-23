@@ -54,7 +54,7 @@ const Message = ({ message, prevMessage = {} }) => {
   return (
     <div
       className={cn(
-        "flex items-start my-1 px-2.5",
+        "flex items-start mb-1 px-2.5",
         isMe ? "flex-row-reverse" : "",
         showAvatarAndName ? "mt-4" : ""
       )}
@@ -87,7 +87,7 @@ const Message = ({ message, prevMessage = {} }) => {
               : "bg-accent text-title "
           }`}
         >
-          {index === 0 && (
+          {showAvatarAndName && (
                     <BoxCorner
                       className={cn(
                         ' absolute -right-1 top-0.5 z-0',
