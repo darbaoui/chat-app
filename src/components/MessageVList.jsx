@@ -186,6 +186,13 @@ const MessageVList = () => {
     setValue("");
   };
 
+  if (isLoading)
+    return (
+      <div className="absolute inset-0 w-full  flex items-center justify-center">
+        <Loader className="animate-spin" />
+      </div>
+    );
+
   return (
     <div className="flex flex-col h-full w-full relative">
       <VList

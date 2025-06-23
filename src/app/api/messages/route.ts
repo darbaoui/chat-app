@@ -51,9 +51,9 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "50", 10);
   if (page > 1)
   {
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
+    
   }
+  await new Promise(resolve => setTimeout(resolve, 1000));
   // Calculate descending indices
   const start = TOTAL_MESSAGES - (page - 1) * limit - 1;
   const end = Math.max(start - limit + 1, 0);
