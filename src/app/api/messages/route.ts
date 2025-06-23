@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const TOTAL_MESSAGES = 2000;
 const USERS = [
   {
-    id: "user_1",
+    id: "current_user",
     name: "John Doe",
     avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
   },
@@ -49,10 +49,6 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "50", 10);
-  if (page > 1)
-  {
-    
-  }
   await new Promise(resolve => setTimeout(resolve, 1000));
   // Calculate descending indices
   const start = TOTAL_MESSAGES - (page - 1) * limit - 1;

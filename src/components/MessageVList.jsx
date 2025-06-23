@@ -34,7 +34,8 @@ const DateSeparator = ({ dateString }) => (
 
 const Message = ({ message, prevMessage = {} }) => {
   const { text, user } = message;
-  const isMe = false;
+
+  const isMe = user.id ==='current_user';
   // Check if the sender is different from the previous message's sender
   // or if the previous message was on a different day.
   const messageDate = new Date(message.created_at).toDateString();
@@ -42,7 +43,7 @@ const Message = ({ message, prevMessage = {} }) => {
     ? new Date(prevMessage?.created_at).toDateString()
     : null;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
-  console.log("showAvatarAndName -->", showAvatarAndName);
+  // console.log("showAvatarAndName -->", showAvatarAndName);
   const time = new Date(message.created_at).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -54,11 +55,13 @@ const Message = ({ message, prevMessage = {} }) => {
     <div
       className={cn(
         "flex items-start my-1 px-2.5",
-        isMe ? "justify-end" : "justify-start",
+        isMe ? "flex-row-reverse" : "",
         showAvatarAndName ? "mt-4" : ""
       )}
     >
-      <div className="w-6.5 h-6.5 mr-3">
+
+      
+      <div className={cn("w-6.5 h-6.5", isMe ? "ms-3" : "me-3")}>
         {showAvatarAndName && (
           <Avatar>
             <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
@@ -70,7 +73,7 @@ const Message = ({ message, prevMessage = {} }) => {
       <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
         {/* Sender Name and Time */}
         {showAvatarAndName && (
-          <div className="flex items-baseline text-meta-icon space-x-2 mb-1">
+          <div className={cn("flex items-baseline text-meta-icon gap-2.5 mb-1",  isMe ? "flex-row-reverse pe-4" : "ps-4")}>
             <p className="text-[11px] break-words flex">{user.name}</p>
             <p className="text-[11px] ">{time}</p>
           </div>
@@ -80,7 +83,7 @@ const Message = ({ message, prevMessage = {} }) => {
         <div
           className={`max-w-md rounded-3xl px-5 py-2.5 relative ${
             isMe
-              ? "bg-blue-500 text-white"
+              ? "bg-[#BFDBFE] text-[#0C4A6E]"
               : "bg-accent text-title "
           }`}
         >
@@ -89,7 +92,7 @@ const Message = ({ message, prevMessage = {} }) => {
                       className={cn(
                         ' absolute -right-1 top-0.5 z-0',
                         isMe
-                          ? 'text-blue-100 -right-1 top-0.5'
+                          ? 'text-[#BFDBFE] -right-1 top-0.5'
                           : 'text-accent -left-1 top-0.5 rotate-45',
                       )}
                     />
@@ -115,7 +118,7 @@ const MessageVList = () => {
   const isLoadingMore =
     isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
   const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < 10);
+  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < LIMIT);
 
   const id = useRef(0);
 
