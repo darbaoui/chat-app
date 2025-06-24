@@ -37,20 +37,12 @@ function generateTiptapContent(text: string) {
 function generateMessage(index: number, message_count: number) {
   const user = USERS[index % USERS.length];
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 3600000).toISOString(); // 1 minute per message = 60000 ms , 1h = 3600000 ms
-   let messageIndex = 0;
-   const messages = [];
-   while (messageIndex < message_count) {
-     messages.push( {
-       id: faker.string.uuid(),
-       text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
-       created_at: createdAt,
-       user,
-     });
-
-     messageIndex++;
-   }
-
-   return messages;
+   return Array.from({ length: message_count }, () => ({
+     id: faker.string.uuid(),
+     text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
+     created_at: createdAt,
+     user,
+   }));
 }
 
 export async function GET(req: NextRequest) {

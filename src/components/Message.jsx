@@ -5,16 +5,8 @@ import { cn } from "@/lib/utils";
 
 const Message = ({ message, prevMessage = {} }) => {
   const { text, user } = message;
-
   const isMe = user.id === 'current_user';
-  // Check if the sender is different from the previous message's sender
-  // or if the previous message was on a different day.
-  const messageDate = new Date(message.created_at).toDateString();
-  const prevMessageDate = prevMessage
-    ? new Date(prevMessage?.created_at).toDateString()
-    : null;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
-  // console.log("showAvatarAndName -->", showAvatarAndName);
   const time = new Date(message.created_at).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",

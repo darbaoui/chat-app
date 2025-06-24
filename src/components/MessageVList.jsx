@@ -141,7 +141,6 @@ const MessageVList = () => {
     }
   }
 
-  console.log({activeIndex:  activeIndex,stickyIndexes: listItems.dateIndexs})
 
   if (isLoading)
     return (
@@ -180,7 +179,7 @@ const MessageVList = () => {
                   key={item.id}
                   className="flex justify-center py-3"
                 >
-                  <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+                  <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
                     {item.date}
                   </div>
                 </div>
