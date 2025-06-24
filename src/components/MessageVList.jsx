@@ -1,10 +1,11 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { Fragment, useEffect, useLayoutEffect, useRef } from "react";
+import { createContext, forwardRef, Fragment, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { VList } from "virtua";
 import Message from "./Message";
+import { formatDateSeparator } from "./helper";
 
 const LIMIT = 50;
 
@@ -17,9 +18,30 @@ const getKey = (pageIndex, previousPageData) => {
   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
 };
 
+const StickyIndexContext = createContext(-1);
 
-
-
+const StickyItem = forwardRef(
+  ({ children, style, index }, ref) => {
+    const {activeIndex, stickyIndexes} = useContext(StickyIndexContext);
+    return (
+      <div
+        ref={ref}
+        style={{
+          ...style,
+          ...(stickyIndexes.has(index) && {
+            zIndex: 1,
+          }),
+          ...(activeIndex === index && {
+            position: "sticky",
+            top: 0,
+          }),
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 const MessageVList = () => {
   const { data, error, size, setSize, isLoading, isValidating } =
@@ -40,29 +62,69 @@ const MessageVList = () => {
   const ref = useRef(null);
   const isPrepend = useRef(false);
   const shouldStickToBottom = useRef(true);
+  const [activeIndex, setActiveIndex] = useState(0)
 
-  useLayoutEffect(() => {
-    isPrepend.current = false;
-  }, [messages.length]);
+ // Group messages by date and create list items
+  const listItems = useMemo(() => {
+    const items = [];
+    const dateIndexs = new Set();
+    let currentDate = null;
+    
+    messages.forEach((message, index) => {
+      
+      const messageDate = new Date(message.created_at);
+      
+      const messageDateString = formatDateSeparator(messageDate);
+
+      // Add date separator if it's a new day
+      if (messageDateString !== currentDate) {
+        currentDate = messageDateString;
+        // activeIndex.current = items.length;
+        dateIndexs.add(items.length);
+
+        items.push({
+          type: 'date',
+          date: messageDateString,
+          id: `date-${messageDateString}`,
+          // formattedDate: formatDateSeparator(messageDate),
+        });
+      }
+      
+      items.push({
+        type: 'message',
+        ...message,
+      });
+    });
+    
+    return {items, dateIndexs};
+
+  }, [messages]);
 
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
-    ref.current.scrollToIndex(messages.length - 1, {
+    ref.current.scrollToIndex(listItems.items.length - 1, {
       align: "end",
     });
-  }, [messages.length]);
+  }, [listItems.items.length]);
+  
 
+   useLayoutEffect(() => {
+    isPrepend.current = false;
+  }, [listItems.items.length]);
 
 
   const handleScroll = (offset) => {
     if (!ref.current) return;
 
     const start = ref.current.findStartIndex();
-    console.log("start -->", start);
-    // const activeStickyIndex = [...stickyIndexes]
-    //   .reverse()
-    //   .find((index) => start >= index);
+    const activeStickyIndex = [...listItems.dateIndexs]
+              .reverse()
+              .find((index) => start >= index);
+
+    setActiveIndex(activeStickyIndex);
+
+
 
 
 
@@ -79,6 +141,8 @@ const MessageVList = () => {
     }
   }
 
+  console.log({activeIndex:  activeIndex,stickyIndexes: listItems.dateIndexs})
+
   if (isLoading)
     return (
       <div className="absolute inset-0 w-full  flex items-center justify-center">
@@ -87,6 +151,9 @@ const MessageVList = () => {
     );
 
   return (
+    <StickyIndexContext.Provider value={{activeIndex:  activeIndex ,stickyIndexes: listItems.dateIndexs}}>
+
+
     <div className="flex flex-col h-full w-full relative">
 
       <VList
@@ -94,7 +161,8 @@ const MessageVList = () => {
         style={{
           flex: 1,
         }}
-        // keepMounted={[activeIndex.current]}
+        item={StickyItem}
+        keepMounted={[activeIndex]}
         reverse
         shift={isPrepend.current}
         onScroll={handleScroll}
@@ -105,21 +173,32 @@ const MessageVList = () => {
           </div>
         )}
 
-        {messages.map((message, index) => {
-
-          return <Fragment key={message.id}>
+        {listItems.items.map((item, index) => {
+          if (item.type === 'date') {
+              return (
+                <div
+                  key={item.id}
+                  className="flex justify-center py-3"
+                >
+                  <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+                    {item.date}
+                  </div>
+                </div>
+              );
+            }
+          return (
 
             <Message
-              // key={message.id}
-              message={message}
-              prevMessage={index > 0 ? messages[index - 1] : {}}
+              key={item.id}
+              message={item}
+              prevMessage={index > 0 ? listItems.items[index - 1] : {}}
             />
-          </Fragment>
+          )
+
         })}
-
-
       </VList>
     </div>
+    </StickyIndexContext.Provider>
   );
 };
 

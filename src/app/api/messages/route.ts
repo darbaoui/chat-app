@@ -36,7 +36,7 @@ function generateTiptapContent(text: string) {
 
 function generateMessage(index: number, message_count: number) {
   const user = USERS[index % USERS.length];
-  const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 60000).toISOString();
+  const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 3600000).toISOString(); // 1 minute per message = 60000 ms , 1h = 3600000 ms
    let messageIndex = 0;
    const messages = [];
    while (messageIndex < message_count) {
@@ -61,11 +61,11 @@ export async function GET(req: NextRequest) {
   // Calculate descending indices
   const start = TOTAL_MESSAGES - (page - 1) * limit - 1;
   const end = Math.max(start - limit + 1, 0);
-
+  
+  
   const messages = [];
   for (let i = start; i >= end; i--) {
-
-    const message_count = faker.number.int({ min: 1, max: 5 });
+    const message_count = 1; // faker.number.int({ min: 1, max: 5 });
     messages.push(...generateMessage(i, message_count));
   }
 
