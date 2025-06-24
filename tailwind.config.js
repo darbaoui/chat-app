@@ -63,10 +63,10 @@ module.exports = {
       colors: {
         chatBox: 'var(--chat-box-color)',
         chat: 'var(--chat-background)',
-        'chat-sp': 'var(--chat-sperator)',
+        'chat-sp': 'var(--chat-seperator)',
         chatBoxMe: {
           DEFAULT: 'var(--chat-box-me)',
-          foreground: 'var(--chat-box-me-forground)',
+          foreground: 'var(--chat-box-me-foreground)',
         },
         sideMenu: 'var(--side_menu-background)',
         title: {

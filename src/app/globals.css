@@ -51,9 +51,9 @@
     /* Zamma colors */
     --chat-box-color: #ECECEE;
     --chat-box-me: #DCF0FE;
-    --chat-box-me-forground: #0c4a6eb3;
+    --chat-box-me-foreground: #0c4a6eb3;
     --chat-background: #FAFAFA;
-    --chat-sperator: #71717A;
+    --chat-separator: #71717A;
 
     --bg-colors: #ffffff;
     /*--background*/
@@ -256,7 +256,7 @@
     /* Zamma colors */
     --chat-box-color: #27272A;
     --chat-box-me: #09324E;
-    --chat-box-me-forground: #0c4a6ebf;
+    --chat-box-me-foreground: #0c4a6ebf;
     --meta: #A1A1AA;
     --meta-icon: #797986;
     --box-bg:  #222226;
