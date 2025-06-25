@@ -1,12 +1,11 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { createContext, forwardRef, Fragment, Suspense, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, forwardRef, Fragment, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { VList } from "virtua";
 import Message from "./Message";
 import { formatDateSeparator } from "./helper";
-import { Facebook } from "react-content-loader";
 
 const LIMIT = 50;
 
@@ -27,7 +26,6 @@ const StickyItem = forwardRef(
     return (
       <div
         ref={ref}
-        className="item-list"
         style={{
           ...style,
           ...(stickyIndexes.has(index) && {
@@ -44,9 +42,10 @@ const StickyItem = forwardRef(
     );
   }
 );
-
-
-const MessageVList = () => {
+const Item = ({children}) => {
+  return children
+}
+const MessageVListGroup = () => {
   const { data, error, size, setSize, isLoading, isValidating } =
     useSWRInfinite(getKey, fetcher, {
       revalidateFirstPage: false,
@@ -103,18 +102,48 @@ const MessageVList = () => {
 
   }, [messages]);
 
+
+
+  const groupedMessages = useMemo(() => {
+    // Use `reduce` to group messages into an object where keys are dates.
+    const groups = messages.reduce((acc, message) => {
+      // Get the date string (e.g., "2023-10-26") from the message's timestamp.
+      const messageDate = formatDateSeparator(new Date(message.created_at));
+
+      // If a group for this date doesn't exist yet, create it.
+      if (!acc[messageDate]) {
+        acc[messageDate] = [];
+      }
+
+      // Add the current message to the group for its date.
+      acc[messageDate].push(message);
+      
+      return acc;
+    }, {}); // The initial value for the accumulator is an empty object.
+
+    // Convert the groups object into an array of {date, messages} objects.
+    return Object.keys(groups).map(date => ({
+      date: date,
+      messages: groups[date],
+    }));
+
+  }, [messages]);
+
+
+  console.log('groupedMessages --->', groupedMessages)
+
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
-    ref.current.scrollToIndex(listItems.items.length - 1, {
+    ref.current.scrollToIndex(groupedMessages.length - 1, {
       align: "end",
     });
-  }, [listItems.items.length]);
+  }, [groupedMessages.length]);
   
 
    useLayoutEffect(() => {
     isPrepend.current = false;
-  }, [listItems.items.length]);
+  }, [groupedMessages.length]);
 
 
   const handleScroll = (offset) => {
@@ -126,10 +155,6 @@ const MessageVList = () => {
               .find((index) => start >= index);
 
     setActiveIndex(activeStickyIndex);
-
-
-
-
 
     shouldStickToBottom.current =
       offset - ref.current.scrollSize + ref.current.viewportSize >=
@@ -153,30 +178,7 @@ const MessageVList = () => {
     );
 
   return (
-    <>
-    <style>
-        {`@supports(animation-timeline: view()) {
-			@keyframes fade-in-on-enter--fade-out-on-exit {
-				
-				entry -100px {
-					opacity: 1;
-          border-color: red;
-        }
-        
-            
-          entry 100% {
-            opacity: 1;
-            border-color: blue;
-          }
-			}
-
-			.item-date hr {
-				animation: linear fade-in-on-enter--fade-out-on-exit;
-				animation-timeline: view();
-			}
-		}`}
-      </style>
-    <StickyIndexContext.Provider value={{activeIndex:  activeIndex ,stickyIndexes: listItems.dateIndexs}}>
+    // <StickyIndexContext.Provider value={{activeIndex:  activeIndex ,stickyIndexes: listItems.dateIndexs}}>
 
 
     <div className="flex flex-col h-full w-full relative">
@@ -186,11 +188,8 @@ const MessageVList = () => {
         style={{
           flex: 1,
         }}
-
-        id="list-view"
-        
-        item={StickyItem}
-        keepMounted={[activeIndex]}
+        // item={StickyItem}
+        // keepMounted={[activeIndex]}
         reverse
         shift={isPrepend.current}
         onScroll={handleScroll}
@@ -201,40 +200,36 @@ const MessageVList = () => {
           </div>
         )}
 
-        {listItems.items.map((item, index) => {
-          if (item.type === 'date') {
-              return (
-                <div
-                  key={item.id}
-                  className="item-date flex justify-center items-baseline py-3"
-                  style={{
-                        // backdropFilter: 'blur(10px)'
-                  }}
-                >
-                  <hr className="flex-1 border-t border-gray-500" />
-                  {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                  </div> */}
-                  <span className="px-3" style={{width: 'fit-content'}}>
+     
+        {groupedMessages.map((item, index) => {
+          return <Fragment key={item.date}>
+              {item.date && (
+                <div className="sticky top-2.5 py-3 w-full flex items-center text-xs justify-center pointer-events-none my-2 opacity-100 transition-opacity duration-300 z-10">
+                  <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
                     {item.date}
-                    </span>
-                  <hr className="flex-1 border-t border-gray-500" />
+                  </div>
                 </div>
-              );
-            }
-          return (
-              <Message
-                key={item.id}
-                message={item}
-                prevMessage={index > 0 ? listItems.items[index - 1] : {}}
-              />
-          )
+              )}
+<Item>
+
+              {item.messages.map((item) => (
+
+                <Message
+                  key={item.id}
+                  
+                  message={item}
+                  prevMessage={index > 0 ? listItems.items[index - 1] : {}}
+                />
+              ))
+              }
+</Item>
+          </Fragment>
 
         })}
       </VList>
     </div>
-    </StickyIndexContext.Provider>
-    </>
+    // </StickyIndexContext.Provider>
   );
 };
 
-export default MessageVList;
+export default MessageVListGroup;

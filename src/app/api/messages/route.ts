@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
   
   const messages = [];
   for (let i = start; i >= end; i--) {
-    const message_count = 1; // faker.number.int({ min: 1, max: 5 });
+    const message_count = faker.number.int({ min: 1, max: 5 });
     messages.push(...generateMessage(i, message_count));
   }
 
