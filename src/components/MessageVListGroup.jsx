@@ -130,8 +130,6 @@ const MessageVListGroup = () => {
   }, [messages]);
 
 
-  console.log('groupedMessages --->', groupedMessages)
-
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
