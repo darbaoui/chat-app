@@ -7,7 +7,7 @@ import { VList } from "virtua";
 import Message from "./Message";
 import { formatDateSeparator } from "./helper";
 import { Facebook } from "react-content-loader";
-
+import { motion, AnimatePresence } from 'framer-motion';
 const LIMIT = 50;
 
 
@@ -144,6 +144,28 @@ const MessageVList = () => {
     }
   }
 
+  const messageVariants = {
+    initial: {
+      opacity: 0,
+      y: -10
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -10,
+      transition: {
+        duration: 0.2,
+        ease: "easeIn"
+      }
+    }
+  };
 
   if (isLoading)
     return (
@@ -201,11 +223,17 @@ const MessageVList = () => {
           </div>
         )}
 
+
         {listItems.items.map((item, index) => {
           if (item.type === 'date') {
               return (
-                <div
+                <motion.div
                   key={item.id}
+                  variants={messageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  layout
                   className="item-date flex justify-center items-baseline py-3"
                   style={{
                         // backdropFilter: 'blur(10px)'
@@ -218,10 +246,11 @@ const MessageVList = () => {
                     {item.date}
                     </span>
                   <hr className="flex-1 border-t border-gray-500" />
-                </div>
+                </motion.div>
               );
             }
           return (
+            
               <Message
                 key={item.id}
                 message={item}

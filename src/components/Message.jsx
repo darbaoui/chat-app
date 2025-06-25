@@ -2,6 +2,29 @@ import { BoxCorner } from "@/icons";
 import TiptapRenderer from "./TiptapRenderer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+export const messageVariants = {
+    initial: {
+      opacity: 0,
+      y: -10
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -10,
+      transition: {
+        duration: 0.2,
+        ease: "easeIn"
+      }
+    }
+  };
 
 const Message = ({ message, prevMessage = {} }) => {
   const { text, user } = message;
@@ -14,7 +37,13 @@ const Message = ({ message, prevMessage = {} }) => {
 
 
   return (
-    <div
+    <motion.div
+              key={message.id}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              layout
       className={cn(
         "flex items-start mb-1 px-2.5",
         isMe ? "flex-row-reverse" : "",
@@ -59,7 +88,7 @@ const Message = ({ message, prevMessage = {} }) => {
           <TiptapRenderer jsonContent={text} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
