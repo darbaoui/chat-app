@@ -1,10 +1,11 @@
+import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";
 
 const TOTAL_MESSAGES = 2000;
 const USERS = [
   {
-    id: "current_user",
+    id: CURRENT_USER,
     name: "John Doe",
     avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
   },

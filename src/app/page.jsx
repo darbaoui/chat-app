@@ -1,5 +1,5 @@
 import MessageVList from "@/components/MessageVList";
-import MessageVListGroup from "@/components/MessageVListGroup ";
+import MessageVListGroup from "@/components/MessageVListGroup";
 
 export default function Home() {
   return (

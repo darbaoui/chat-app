@@ -1,13 +1,13 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { createContext, forwardRef, Fragment, Suspense, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { VList } from "virtua";
 import Message from "./Message";
 import { formatDateSeparator } from "./helper";
-import { Facebook } from "react-content-loader";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { MESSAGE_VARIANTS } from "@/constants";
 const LIMIT = 50;
 
 
@@ -144,28 +144,6 @@ const MessageVList = () => {
     }
   }
 
-  const messageVariants = {
-    initial: {
-      opacity: 0,
-      y: -10
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      transition: {
-        duration: 0.2,
-        ease: "easeIn"
-      }
-    }
-  };
 
   if (isLoading)
     return (
@@ -229,7 +207,7 @@ const MessageVList = () => {
               return (
                 <motion.div
                   key={item.id}
-                  variants={messageVariants}
+                  variants={MESSAGE_VARIANTS}
                   initial="initial"
                   animate="animate"
                   exit="exit"

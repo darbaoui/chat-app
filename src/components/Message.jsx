@@ -2,33 +2,13 @@ import { BoxCorner } from "@/icons";
 import TiptapRenderer from "./TiptapRenderer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from 'framer-motion';
-export const messageVariants = {
-    initial: {
-      opacity: 0,
-      y: -10
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      transition: {
-        duration: 0.2,
-        ease: "easeIn"
-      }
-    }
-  };
+import { motion } from 'framer-motion';
+import { CURRENT_USER, MESSAGE_VARIANTS } from "@/constants";
+
 
 const Message = ({ message, prevMessage = {} }) => {
   const { text, user } = message;
-  const isMe = user.id === 'current_user';
+  const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
   const time = new Date(message.created_at).toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -39,7 +19,7 @@ const Message = ({ message, prevMessage = {} }) => {
   return (
     <motion.div
               key={message.id}
-              variants={messageVariants}
+              variants={MESSAGE_VARIANTS}
               initial="initial"
               animate="animate"
               exit="exit"
