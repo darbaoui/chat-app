@@ -8,6 +8,7 @@ import Message from "./Message";
 import { formatDateSeparator } from "./helper";
 import { motion } from 'framer-motion';
 import { MESSAGE_VARIANTS } from "@/constants";
+import DateSeparator from "./DateSeparator";
 const LIMIT = 50;
 
 
@@ -183,28 +184,7 @@ const MessageVList = () => {
 
             {listItems.items.map((item, index) => {
               if (item.type === 'date') {
-                return (
-                  <motion.div
-                    key={item.id}
-                    variants={MESSAGE_VARIANTS}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    layout
-                    className="item-date flex justify-center items-baseline py-3"
-                    style={{
-                      // backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <hr className="flex-1 border-t border" />
-                    {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                      </div> */}
-                    <span className="px-3 text-sidebar text-[12px] font-medium" style={{ width: 'fit-content' }}>
-                      {item.date}
-                    </span>
-                    <hr className="flex-1 border-t border" />
-                  </motion.div>
-                );
+                return <DateSeparator dateString={item.date}  key={item.id} />
               }
               return (
 
