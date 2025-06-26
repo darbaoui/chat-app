@@ -210,12 +210,12 @@ const MessageVListGroup = () => {
               )}
 <Item>
 
-              {item.messages.map((item) => (
+              {item.messages.map((message) => (
 
                 <Message
-                  key={item.id}
+                  key={message.id}
                   
-                  message={item}
+                  message={message}
                   prevMessage={index > 0 ? listItems.items[index - 1] : {}}
                 />
               ))

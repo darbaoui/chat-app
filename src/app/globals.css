@@ -1,49 +1,10 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
-
-:root {
+@layer base {
+  :root {
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue";
     --radius: 0.625rem;
     --animate-duration: 0.5s;
     --animate-delay: 1s;
@@ -200,17 +161,17 @@
     --title-secondary: #5c5e63;
     --border: #E4E4E7;
     --border-dropdown: #d8d8d8;
-    
+
     --meta: #71717A;
     --meta-icon: #7D7D87;
-    --box-bg: #FFFFFF ;
-    --base-alt: #FAFAFA ;
-    --base-bg: #FFFFFF ;
+    --box-bg: #FFFFFF;
+    --base-alt: #FAFAFA;
+    --base-bg: #FFFFFF;
     --base-alt-2: #F2F2F2;
     --field: #bdbdc245;
-    --field-off:#bdbdc2cc;
+    --field-off: #bdbdc2cc;
     --accent-2: #007BD936;
-   
+
 
 
     /* Field
@@ -224,7 +185,7 @@
     #bbbbc3cc */
 
     --description: #78716c;
-    
+
     /* input used in many places and use cases like onboarding skeleton */
     --input: #e7e5e4;
     --accent-foreground: #0f172a;
@@ -259,14 +220,14 @@
     --chat-box-me-foreground: #0c4a6ebf;
     --meta: #A1A1AA;
     --meta-icon: #797986;
-    --box-bg:  #222226;
-    --base-bg:  #09090B;
-    --base-alt:  #18181B;
-    --base-alt-2:  #1F1F23;
+    --box-bg: #222226;
+    --base-bg: #09090B;
+    --base-alt: #18181B;
+    --base-alt-2: #1F1F23;
     --field: #bbbbc326;
-    --field-off:#bbbbc3cc;
-     --accent-2: #076BD266;
-       --green-h: #14532D;
+    --field-off: #bbbbc3cc;
+    --accent-2: #076BD266;
+    --green-h: #14532D;
     /*Zamma colors end */
 
     --github-color: #ffffff;
@@ -313,35 +274,24 @@
     --tw-shadow-colored: 0 10px 15px -3px var(--background),
       0 4px 6px -4px var(--background);
   }
-
-
-  @supports(animation-timeline: view()) {
-			@keyframes fade-in-on-enter--fade-out-on-exit {
-				entry 0%  {
-					opacity: 1;
-				  border-color: red;
-				}
-				entry 100%  {
-					opacity: 1;
-					border-color: blue;
-				}
-			
-			}
-
-			.item-date hr {
-				animation: linear fade-in-on-enter--fade-out-on-exit;
-				animation-timeline: view();
-			}
 }
 
+/* @supports(animation-timeline: view()) {
+  @keyframes fade-in-on-enter--fade-out-on-exit {
+    entry 0% {
+      opacity: 1;
+      border-color: red;
+    }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+    entry 100% {
+      opacity: 1;
+      border-color: blue;
+    }
+
   }
-  body {
-    @apply bg-background text-foreground font-sans;
+
+  .item-date hr {
+    animation: linear fade-in-on-enter--fade-out-on-exit;
+    animation-timeline: view();
   }
-}
-
-
+} */
