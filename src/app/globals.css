@@ -276,7 +276,7 @@
   }
 }
 
-/* @supports(animation-timeline: view()) {
+@supports(animation-timeline: view()) {
   @keyframes fade-in-on-enter--fade-out-on-exit {
     entry 0% {
       opacity: 1;
@@ -294,4 +294,4 @@
     animation: linear fade-in-on-enter--fade-out-on-exit;
     animation-timeline: view();
   }
-} */
+} 

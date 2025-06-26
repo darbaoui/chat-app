@@ -3,7 +3,7 @@
 import { Loader } from "lucide-react";
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
-import { VList } from "virtua";
+import VList from "@/components/VList";
 import Message from "./Message";
 import { formatDateSeparator } from "./helper";
 import { motion } from 'framer-motion';
@@ -180,64 +180,65 @@ const MessageVList = () => {
 
 
     <div className="flex flex-col h-full w-full relative">
+          <VList
+            ref={ref}
+            style={{
+              flex: 1,
+            }}
 
-      <VList
-        ref={ref}
-        style={{
-          flex: 1,
-        }}
-
-        id="list-view"
-        
-        item={StickyItem}
-        keepMounted={[activeIndex]}
-        reverse
-        shift={isPrepend.current}
-        onScroll={handleScroll}
-      >
-        {isLoadingMore && (
-          <div className="h-12 w-full  flex items-center justify-center">
-            <Loader className="animate-spin" />
-          </div>
-        )}
-
-
-        {listItems.items.map((item, index) => {
-          if (item.type === 'date') {
-              return (
-                <motion.div
-                  key={item.id}
-                  variants={MESSAGE_VARIANTS}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  layout
-                  className="item-date flex justify-center items-baseline py-3"
-                  style={{
-                        // backdropFilter: 'blur(10px)'
-                  }}
-                >
-                  <hr className="flex-1 border-t border" />
-                  {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                  </div> */}
-                  <span className="px-3 text-sidebar text-[12px] font-medium" style={{width: 'fit-content'}}>
-                    {item.date}
-                    </span>
-                  <hr className="flex-1 border-t border" />
-                </motion.div>
-              );
-            }
-          return (
+            id="list-view"
             
-              <Message
-                key={item.id}
-                message={item}
-                prevMessage={index > 0 ? listItems.items[index - 1] : {}}
-              />
-          )
+            item={StickyItem}
+            keepMounted={[activeIndex]}
+            reverse
+            shift={isPrepend.current}
+            onScroll={handleScroll}
+          >
+            {isLoadingMore && (
+              <div className="h-12 w-full  flex items-center justify-center">
+                <Loader className="animate-spin" />
+              </div>
+            )}
 
-        })}
-      </VList>
+
+            {listItems.items.map((item, index) => {
+              if (item.type === 'date') {
+                  return (
+                    <motion.div
+                      key={item.id}
+                      variants={MESSAGE_VARIANTS}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      layout
+                      className="item-date flex justify-center items-baseline py-3"
+                      style={{
+                            // backdropFilter: 'blur(10px)'
+                      }}
+                    >
+                      <hr className="flex-1 border-t border" />
+                      {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
+                      </div> */}
+                      <span className="px-3 text-sidebar text-[12px] font-medium" style={{width: 'fit-content'}}>
+                        {item.date}
+                        </span>
+                      <hr className="flex-1 border-t border" />
+                    </motion.div>
+                  );
+                }
+              return (
+                
+                  <Message
+                    key={item.id}
+                    message={item}
+                    prevMessage={index > 0 ? listItems.items[index - 1] : {}}
+                  />
+              )
+
+            })}
+          </VList>
+        {/* <ScrollArea externalRef={ref}>
+        </ScrollArea> */}
     </div>
     </StickyIndexContext.Provider>
     </>
