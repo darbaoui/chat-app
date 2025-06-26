@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { motion } from 'framer-motion';
 import { CURRENT_USER, MESSAGE_VARIANTS } from "@/constants";
+import MessageContent from "./MessageContent";
+import { useRef } from "react";
 
 
 const Message = ({ message, prevMessage = {} }) => {
@@ -50,10 +52,10 @@ const Message = ({ message, prevMessage = {} }) => {
 
         {/* Message Bubble */}
         <div
-          className={`max-w-md rounded-3xl px-5 py-2.5 relative ${isMe
+          className={cn('max-w-[min(400px,_calc(30vw_-_1rem))] rounded-3xl relative',  isMe
               ? "bg-[#BFDBFE] text-[#0C4A6E]"
               : "bg-accent text-title "
-            }`}
+              )}
         >
           {showAvatarAndName && (
             <BoxCorner
@@ -65,7 +67,11 @@ const Message = ({ message, prevMessage = {} }) => {
               )}
             />
           )}
-          <TiptapRenderer jsonContent={text} />
+          {/* <TiptapRenderer jsonContent={text} /> */}
+          <MessageContent message={message} className={cn(isMe
+              ? "bg-[#BFDBFE] text-[#0C4A6E]"
+              : "bg-accent text-title "
+              )} />
         </div>
       </div>
     </motion.div>

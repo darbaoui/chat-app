@@ -5,9 +5,7 @@ import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useM
 import useSWRInfinite from "swr/infinite";
 import VList from "@/components/VList";
 import Message from "./Message";
-import { formatDateSeparator } from "./helper";
-import { motion } from 'framer-motion';
-import { MESSAGE_VARIANTS } from "@/constants";
+import { formatDateSeparator} from "./helper";
 import DateSeparator from "./DateSeparator";
 const LIMIT = 50;
 

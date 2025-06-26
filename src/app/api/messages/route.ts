@@ -1,3 +1,4 @@
+import { getRandomMediaItems } from "@/components/helper";
 import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";
@@ -38,12 +39,20 @@ function generateTiptapContent(text: string) {
 function generateMessage(index: number, message_count: number) {
   const user = USERS[index % USERS.length];
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 3600000).toISOString(); // 1 minute per message = 60000 ms , 1h = 3600000 ms
-   return Array.from({ length: message_count }, () => ({
+  // If audio is present, the text content should be empty
+  
+  return Array.from({ length: message_count }, () => {
+    const { media, hasAudio } = getRandomMediaItems(); // Get media and check if audio is present
+    console.log({media, hasAudio })
+    const messageText = hasAudio ? null : generateTiptapContent(`#${index + 1} ${faker.lorem.paragraph({ min: 1, max: 5 })}`);
+    return {
      id: faker.string.uuid(),
-     text: generateTiptapContent(`#${index + 1} ${faker.lorem.sentence()}`),
+     text: messageText,
      created_at: createdAt,
      user,
-   }));
+     media ,
+   }
+  });
 }
 
 export async function GET(req: NextRequest) {
