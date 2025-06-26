@@ -23,7 +23,7 @@ const StickyIndexContext = createContext(-1);
 
 const StickyItem = forwardRef(
   ({ children, style, index }, ref) => {
-    const {activeIndex, stickyIndexes} = useContext(StickyIndexContext);
+    const { activeIndex, stickyIndexes } = useContext(StickyIndexContext);
     return (
       <div
         ref={ref}
@@ -67,16 +67,16 @@ const MessageVList = () => {
   const shouldStickToBottom = useRef(true);
   const [activeIndex, setActiveIndex] = useState(0)
 
- // Group messages by date and create list items
+  // Group messages by date and create list items
   const listItems = useMemo(() => {
     const items = [];
     const dateIndexs = new Set();
     let currentDate = null;
-    
+
     messages.forEach((message, index) => {
-      
+
       const messageDate = new Date(message.created_at);
-      
+
       const messageDateString = formatDateSeparator(messageDate);
 
       // Add date separator if it's a new day
@@ -92,14 +92,14 @@ const MessageVList = () => {
           // formattedDate: formatDateSeparator(messageDate),
         });
       }
-      
+
       items.push({
         type: 'message',
         ...message,
       });
     });
-    
-    return {items, dateIndexs};
+
+    return { items, dateIndexs };
 
   }, [messages]);
 
@@ -110,9 +110,9 @@ const MessageVList = () => {
       align: "end",
     });
   }, [listItems.items.length]);
-  
 
-   useLayoutEffect(() => {
+
+  useLayoutEffect(() => {
     isPrepend.current = false;
   }, [listItems.items.length]);
 
@@ -122,8 +122,8 @@ const MessageVList = () => {
 
     const start = ref.current.findStartIndex();
     const activeStickyIndex = [...listItems.dateIndexs]
-              .reverse()
-              .find((index) => start >= index);
+      .reverse()
+      .find((index) => start >= index);
 
     setActiveIndex(activeStickyIndex);
 
@@ -154,32 +154,10 @@ const MessageVList = () => {
 
   return (
     <>
-    <style>
-        {`@supports(animation-timeline: view()) {
-			@keyframes fade-in-on-enter--fade-out-on-exit {
-				
-				entry -100px {
-					opacity: 1;
-          border-color: red;
-        }
-        
-            
-          entry 100% {
-            opacity: 1;
-            border-color: blue;
-          }
-			}
-
-			.item-date hr {
-				animation: linear fade-in-on-enter--fade-out-on-exit;
-				animation-timeline: view();
-			}
-		}`}
-      </style>
-    <StickyIndexContext.Provider value={{activeIndex:  activeIndex ,stickyIndexes: listItems.dateIndexs}}>
+      <StickyIndexContext.Provider value={{ activeIndex: activeIndex, stickyIndexes: listItems.dateIndexs }}>
 
 
-    <div className="flex flex-col h-full w-full relative">
+        <div className="flex flex-col h-full w-full relative">
           <VList
             ref={ref}
             style={{
@@ -187,7 +165,7 @@ const MessageVList = () => {
             }}
 
             id="list-view"
-            
+
             item={StickyItem}
             keepMounted={[activeIndex]}
             reverse
@@ -197,7 +175,7 @@ const MessageVList = () => {
             {isLoadingMore && (
               <div className="h-8 w-full bg-transparent flex items-center justify-center">
                 <div className="w-8 rounded-3xl flex h-full items-center justify-center bg-title">
-                    <Loader className="animate-spin w-3 text-white" />
+                  <Loader className="animate-spin w-3 text-white" />
                 </div>
               </div>
             )}
@@ -205,44 +183,42 @@ const MessageVList = () => {
 
             {listItems.items.map((item, index) => {
               if (item.type === 'date') {
-                  return (
-                    <motion.div
-                      key={item.id}
-                      variants={MESSAGE_VARIANTS}
-                      initial="initial"
-                      animate="animate"
-                      exit="exit"
-                      layout
-                      className="item-date flex justify-center items-baseline py-3"
-                      style={{
-                            // backdropFilter: 'blur(10px)'
-                      }}
-                    >
-                      <hr className="flex-1 border-t border" />
-                      {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                      </div> */}
-                      <span className="px-3 text-sidebar text-[12px] font-medium" style={{width: 'fit-content'}}>
-                        {item.date}
-                        </span>
-                      <hr className="flex-1 border-t border" />
-                    </motion.div>
-                  );
-                }
-              return (
-                
-                  <Message
+                return (
+                  <motion.div
                     key={item.id}
-                    message={item}
-                    prevMessage={index > 0 ? listItems.items[index - 1] : {}}
-                  />
+                    variants={MESSAGE_VARIANTS}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    layout
+                    className="item-date flex justify-center items-baseline py-3"
+                    style={{
+                      // backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <hr className="flex-1 border-t border" />
+                    {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
+                      </div> */}
+                    <span className="px-3 text-sidebar text-[12px] font-medium" style={{ width: 'fit-content' }}>
+                      {item.date}
+                    </span>
+                    <hr className="flex-1 border-t border" />
+                  </motion.div>
+                );
+              }
+              return (
+
+                <Message
+                  key={item.id}
+                  message={item}
+                  prevMessage={index > 0 ? listItems.items[index - 1] : {}}
+                />
               )
 
             })}
           </VList>
-        {/* <ScrollArea externalRef={ref}>
-        </ScrollArea> */}
-    </div>
-    </StickyIndexContext.Provider>
+        </div>
+      </StickyIndexContext.Provider>
     </>
   );
 };
