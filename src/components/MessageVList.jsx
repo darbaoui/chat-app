@@ -195,8 +195,10 @@ const MessageVList = () => {
             onScroll={handleScroll}
           >
             {isLoadingMore && (
-              <div className="h-12 w-full  flex items-center justify-center">
-                <Loader className="animate-spin" />
+              <div className="h-8 w-full bg-transparent flex items-center justify-center">
+                <div className="w-8 rounded-3xl flex h-full items-center justify-center bg-title">
+                    <Loader className="animate-spin w-3 text-white" />
+                </div>
               </div>
             )}
 
