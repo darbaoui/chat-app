@@ -103,16 +103,8 @@ const AudioPreview = ({
             });
 
 
-            wavesurfer.on('loading', (percent) => {
-                console.log('percent --->', percent)
+            wavesurfer.on('loading', () => {
                 setIsLoading(true);
-            });
-
-            wavesurfer.on('timeupdate', (currentTime) => {
-                if (audioFinish) {
-                setAudioFinish(false);
-                }
-                setTime(currentTime);
             });
             
             wavesurfer.on('ready', () => {

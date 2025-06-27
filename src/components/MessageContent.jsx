@@ -4,7 +4,7 @@ import TiptapRenderer from "./TiptapRenderer";
 import { cn } from "@/lib/utils";
 
 const MessageContent = ({ message, className }) => {
-    const singleMediaFile = message?.media.length == 1 ? message?.media[0] : null;
+    const singleMediaFile = message?.media.length === 1 ? message?.media[0] : null;
     const text = message?.text;
     const isAudioMedia = singleMediaFile
         ? singleMediaFile.mime_type.startsWith('audio') && !text
