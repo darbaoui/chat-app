@@ -121,8 +121,11 @@ const MessageVList = () => {
   const handleScroll = (offset) => {
     if (!ref.current) return;
 
-    const start = ref.current.findStartIndex();    
-    const activeStickyIndex = [...listItems.dateIndexs].findLast((index) => start >= index);
+    const start = ref.current.findStartIndex();
+    const activeStickyIndex = [...listItems.dateIndexs]
+      .reverse()
+      .find((index) => start >= index);
+    
     setActiveIndex(activeStickyIndex);
 
 

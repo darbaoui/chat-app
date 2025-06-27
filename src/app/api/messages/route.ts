@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    messages, // Reverse to maintain chronological order
+    messages,
     page,
     limit,
     total: TOTAL_MESSAGES,
