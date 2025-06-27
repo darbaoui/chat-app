@@ -53,7 +53,7 @@ const Message = ({ message, prevMessage = {} }) => {
         {/* Message Bubble */}
         <div
           className={cn('max-w-[min(400px,_calc(30vw_-_1rem))] rounded-3xl relative',  isMe
-              ? "bg-[#BFDBFE] text-[#0C4A6E]"
+              ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
               )}
         >
@@ -62,14 +62,14 @@ const Message = ({ message, prevMessage = {} }) => {
               className={cn(
                 ' absolute -right-1 top-0.5 z-0',
                 isMe
-                  ? 'text-[#BFDBFE] -right-1 top-0.5'
+                  ? 'text-chatBoxMe -right-1 top-0.5'
                   : 'text-accent -left-1 top-0.5 rotate-45',
               )}
             />
           )}
           {/* <TiptapRenderer jsonContent={text} /> */}
           <MessageContent message={message} className={cn(isMe
-              ? "bg-[#BFDBFE] text-[#0C4A6E]"
+              ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
               )} />
         </div>

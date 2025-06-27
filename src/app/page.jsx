@@ -1,5 +1,4 @@
 import MessageVList from "@/components/MessageVList";
-import MessageVListGroup from "@/components/MessageVListGroup";
 
 export default function Home() {
   return (
@@ -7,9 +6,7 @@ export default function Home() {
       <section className="flex-1 max-w-3xl w-full border  rounded-lg overflow-hidden">
         {/* Message list with virtualization and grouping will go here */}
         <MessageVList />
-        {/* <MessageVListGroup /> */}
       </section>
-    
     </main>
   );
 }

@@ -43,7 +43,6 @@ function generateMessage(index: number, message_count: number) {
   
   return Array.from({ length: message_count }, () => {
     const { media, hasAudio } = getRandomMediaItems(); // Get media and check if audio is present
-    console.log({media, hasAudio })
     const messageText = hasAudio ? null : generateTiptapContent(`#${index + 1} ${faker.lorem.paragraph({ min: 1, max: 5 })}`);
     return {
      id: faker.string.uuid(),

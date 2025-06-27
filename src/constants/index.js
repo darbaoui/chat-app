@@ -59,14 +59,14 @@ export const AUDIO_DEFINITIONS = [
   {url: "https://cors-anywhere.herokuapp.com/https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", duration: 372.715083}, // Sample MP3 from soundhelix.com
   {url: "https://cors-anywhere.herokuapp.com/https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", duration: 425.952625}, // Another sample MP3
   
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/2s.m4a", duration: 2},
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/3.m4a", duration: 3}, 
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/5.m4a", duration: 5},
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/11s.m4a", duration: 11}, 
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/16s.m4a", duration: 16},
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/21.m4a", duration: 21},
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/30s.m4a", duration: 30},
-  {url: "https://cors-anywhere.herokuapp.com/https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/long.m4a", duration: 72.6},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/2s.m4a", duration: 2},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/3.m4a", duration: 3}, 
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/5.m4a", duration: 5},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/11s.m4a", duration: 11}, 
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/16s.m4a", duration: 16},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/21.m4a", duration: 21},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/30s.m4a", duration: 30},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/long.m4a", duration: 72.6},
 ];
 
 const AUDIO_URLS = AUDIO_DEFINITIONS.map(audio => audio.url);
