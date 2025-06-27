@@ -235,7 +235,7 @@ const AudioPreview = ({
                                 >
                                     <span className="w-9">{speed} x</span>
                                 </motion.span>
-                            ) : speed == 1.5 ? (
+                            ) : speed === 1.5 ? (
                                 <motion.span
                                     key={speed}
                                     initial={{ y: 15, opacity: 0 }}
@@ -269,6 +269,12 @@ const AudioPreview = ({
 
     );
 };
+
+AudioPreview.propTypes = {
+    audioUrl: PropTypes.string.isRequired,
+    audioDuration: PropTypes.number.isRequired,
+    className: PropTypes.string,
+}
 
 export default AudioPreview;
 
