@@ -34,7 +34,7 @@ const DateSeparator = ({ dateString, index }) => {
 
      <motion.div
         layout
-        className={cn("text-[12px] font-medium px-3", isSticky ? "bg-muted border text-muted-foreground rounded-full py-1" : "text-sideMenu")}
+        className={cn("text-[12px] font-medium px-3", isSticky ? "bg-muted border text-muted-foreground rounded-full py-1" : "text-title")}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {dateString}

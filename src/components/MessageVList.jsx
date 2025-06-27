@@ -69,9 +69,9 @@ const MessageVList = () => {
   const [activeIndex, setActiveIndex] = useState(0)
 
   // Group messages by date and create list items
-  const listItems = useMemo(() => {
+  const { items, dateIndexes, dateIndexesSet } = useMemo(() => {
     const items = [];
-    const dateIndexs = new Set();
+    const dateIndexesSet = new Set();
     let currentDate = null;
 
     messages.forEach((message, index) => {
@@ -84,7 +84,7 @@ const MessageVList = () => {
       if (messageDateString !== currentDate) {
         currentDate = messageDateString;
         // activeIndex.current = items.length;
-        dateIndexs.add(items.length);
+        dateIndexesSet.add(items.length);
 
         items.push({
           type: 'date',
@@ -100,32 +100,31 @@ const MessageVList = () => {
       });
     });
 
-    return { items, dateIndexs };
+    return { items, dateIndexes: Array.from(dateIndexesSet), dateIndexesSet };
 
   }, [messages]);
 
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
-    ref.current.scrollToIndex(listItems.items.length - 1, {
+    ref.current.scrollToIndex(items.length - 1, {
       align: "end",
     });
-  }, [listItems.items.length]);
+  }, [items.length]);
 
 
   useLayoutEffect(() => {
     isPrepend.current = false;
-  }, [listItems.items.length]);
+  }, [items.length]);
 
 
   const handleScroll = (offset) => {
     if (!ref.current) return;
 
     const start = ref.current.findStartIndex();
-    const activeStickyIndex = [...listItems.dateIndexs]
-      .reverse()
-      .find((index) => start >= index);
     
+    const activeStickyIndex = dateIndexes.findLast((index) => start >= index);
+
     setActiveIndex(activeStickyIndex);
 
 
@@ -155,7 +154,7 @@ const MessageVList = () => {
 
   return (
     <>
-      <StickyIndexContext.Provider value={{ activeIndex: activeIndex, stickyIndexes: listItems.dateIndexs }}>
+      <StickyIndexContext.Provider value={{ activeIndex: activeIndex, stickyIndexes: dateIndexesSet }}>
 
 
         <div className="flex flex-col h-full w-full relative">
@@ -182,7 +181,7 @@ const MessageVList = () => {
             )}
 
 
-            {listItems.items.map((item, index) => {
+            {items.map((item, index) => {
               if (item.type === 'date') {
                 return <DateSeparator dateString={item.date} index={index}  key={item.id} />
               }
@@ -191,7 +190,7 @@ const MessageVList = () => {
                 <Message
                   key={item.id}
                   message={item}
-                  prevMessage={index > 0 ? listItems.items[index - 1] : {}}
+                  prevMessage={index > 0 ? items[index - 1] : {}}
                 />
               )
 
