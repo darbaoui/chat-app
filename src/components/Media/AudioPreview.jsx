@@ -6,7 +6,7 @@ import WaveSurfer from 'wavesurfer.js';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
-import { Pause, Play } from 'lucide-react';
+import { LoaderCircle, Pause, Play } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const AudioPreview = ({
@@ -25,9 +25,11 @@ const AudioPreview = ({
 
     const [wavesurfer, setWavesurfer] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [showRemaining, setShowRemaining] = useState(false);
     const [time, setTime] = useState(0);
     const [audioFinish, setAudioFinish] = useState(false);
     const [speed, setSpeed] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         // Initialize the WaveSurfer instance
@@ -38,7 +40,7 @@ const AudioPreview = ({
             url: audioUrl,
         });
 
-        // ws.setPlaybackRate(0.5);
+        ws.setPlaybackRate(1);
         setWavesurfer(ws);
 
         // Cleanup on component unmount
@@ -52,9 +54,6 @@ const AudioPreview = ({
             )
         }
     })
-
-
-  
 
     useEffect(() => {
 
@@ -103,6 +102,23 @@ const AudioPreview = ({
                 setTime(currentTime);
             });
 
+
+            wavesurfer.on('loading', (percent) => {
+                console.log('percent --->', percent)
+                setIsLoading(true);
+            });
+
+            wavesurfer.on('timeupdate', (currentTime) => {
+                if (audioFinish) {
+                setAudioFinish(false);
+                }
+                setTime(currentTime);
+            });
+            
+            wavesurfer.on('ready', () => {
+                setIsLoading(false);
+            });
+
             wavesurfer.on('seeking', (currentTime) => {
                 setIsPlaying(wavesurfer.isPlaying());
             });
@@ -123,8 +139,16 @@ const AudioPreview = ({
         wavesurfer.play();
     };
 
-    const updateSpeed = () => { }
-    const setShowRemaining = () => { }
+    const updateSpeed = () => {
+        if (speed === 2) {
+        wavesurfer.setPlaybackRate(1);
+        setSpeed(1);
+        } else {
+        const newSpeed = speed + 0.5;
+        wavesurfer.setPlaybackRate(newSpeed);
+        setSpeed(newSpeed);
+        }
+    };
     
     return (
 
@@ -134,8 +158,16 @@ const AudioPreview = ({
                 className,
 
             )}
-        >
-            {isPlaying ? (
+        >   
+        
+            {isLoading ? (
+
+                <div
+                    className="rounded-full flex items-center justify-center w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
+                >
+                    <LoaderCircle className="animate-spin text-background w-[14px]" size={14} />
+                </div>
+            ) : isPlaying ? (
                 <Button
                     className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
                     onClick={() => onPause()}
@@ -163,20 +195,32 @@ const AudioPreview = ({
             <div className="relative h-6 flex items-center gap-2.5">
                 <div
                     className="text-exs font-medium flex items-center justify-center text-chatBoxMe-foreground cursor-pointer"
-                    onClick={() => { }}
+                    onClick={() => setShowRemaining(!showRemaining)}
                 >
-                    <AnimatePresence mode="popLayout">
-                        <motion.span
-                            key="duration"
-                            initial={{ y: 15, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1, type: 'spring' }}
-                            exit={{ y: -15, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="relative w-7 text-center text-chatBoxMe-foreground"
+                   <AnimatePresence mode="popLayout" initial={false}>
+                    {!showRemaining ? (
+                    <motion.span
+                        key="duration"
+                        initial={{ y: 5, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1, type: 'spring' }}
+                        exit={{ y: -5, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="relative w-7 text-center text-chatBoxMe-foreground"
                         >
-                            <span className="w-7"> {formatTime(audioDuration)}</span>
+                        <span className="w-7"> {formatTime(audioDuration)}</span>
                         </motion.span>
-
+                    ) : (
+                        <motion.span
+                        key="remaining"
+                        initial={{ y: 5, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1, type: 'spring' }}
+                        exit={{ y: -5, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="relative w-7 text-center text-chatBoxMe-foreground"
+                        >
+                        <span className="w-7">-{formatTime(audioDuration - time)}</span>
+                        </motion.span>
+                    )}
                     </AnimatePresence>
                 </div>
 
@@ -187,7 +231,7 @@ const AudioPreview = ({
                 >
                     <div className="absolute inset-0 border rounded-md border-chatBoxMe-foreground"></div>
                     <span className="w-full flex items-center justify-center text-center relative">
-                        <AnimatePresence mode="popLayout">
+                        <AnimatePresence mode="popLayout" initial={false}>
                             {speed === 1 ? (
                                 <motion.span
                                     key={speed}

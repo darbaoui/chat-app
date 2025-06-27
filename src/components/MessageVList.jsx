@@ -18,7 +18,7 @@ const getKey = (pageIndex, previousPageData) => {
   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
 };
 
-const StickyIndexContext = createContext(-1);
+export const StickyIndexContext = createContext(-1);
 
 const StickyItem = forwardRef(
   ({ children, style, index }, ref) => {
@@ -35,6 +35,7 @@ const StickyItem = forwardRef(
           ...(activeIndex === index && {
             position: "sticky",
             top: 0,
+            zIndex: 3,
           }),
         }}
       >
@@ -182,7 +183,7 @@ const MessageVList = () => {
 
             {listItems.items.map((item, index) => {
               if (item.type === 'date') {
-                return <DateSeparator dateString={item.date}  key={item.id} />
+                return <DateSeparator dateString={item.date} index={index}  key={item.id} />
               }
               return (
 
