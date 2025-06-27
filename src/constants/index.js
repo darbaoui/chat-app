@@ -1,3 +1,14 @@
+export const IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/svg+xml',
+  'image/webp',
+];
+
+export const MAX_IMAGE_SIZE = 450;
+
 export const CURRENT_USER = 'current_user'
 
 export const MESSAGE_VARIANTS = {
@@ -44,16 +55,16 @@ export const AUDIO_WAVEFORM_OPRIONS = {
 
 
 export const IMAGE_URLS = [
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/chris-weiher-SL5dYCFCgeE-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/duc-nguyen-Y4B8MNuLYfs-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/henrique-ferreira-8xXeYkZMm-c-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-Lg4D-QBuP5Q-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-N2ucuKloA34-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-VvIug1kr8yU-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/kevin-schmid-9WicLhY0tI8-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-6NmxNVlLcnU-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-gR5B7ocb-Ww-unsplash.jpg",
-  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/sasha-matic-99cZwcq7QyA-unsplash.jpg",
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/chris-weiher-SL5dYCFCgeE-unsplash.jpg", dimensions: { width: 1920, height: 1308}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/duc-nguyen-Y4B8MNuLYfs-unsplash.jpg", dimensions: { width: 1920, height: 2880}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/henrique-ferreira-8xXeYkZMm-c-unsplash.jpg", dimensions: { width: 1920, height: 1281}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-Lg4D-QBuP5Q-unsplash.jpg", dimensions: { width: 1920, height: 2880}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-N2ucuKloA34-unsplash.jpg", dimensions: { width: 1920, height: 2880}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-VvIug1kr8yU-unsplash.jpg", dimensions: { width: 1920, height: 1382}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/kevin-schmid-9WicLhY0tI8-unsplash.jpg", dimensions: { width: 1920, height: 1280}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-6NmxNVlLcnU-unsplash.jpg", dimensions: { width: 1920, height: 2880 }},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-gR5B7ocb-Ww-unsplash.jpg", dimensions: { width: 1920, height: 989}},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/sasha-matic-99cZwcq7QyA-unsplash.jpg", dimensions: { width: 1920, height: 2400}},
 ];
 
 export const PDF_URLS = [
@@ -79,7 +90,7 @@ const AUDIO_URLS = AUDIO_DEFINITIONS.map(audio => audio.url);
 // Combine media types and their associated URLs and MIME type prefixes
 // Separated non-audio media for easier selection
 export const NON_AUDIO_MEDIA_DEFINITIONS = [
-  { type: "image", urls: IMAGE_URLS, mime_prefix: "image/" },
+  { type: "image", urls: IMAGE_URLS.map((image) => image.url), mime_prefix: "image/" },
   { type: "pdf", urls: PDF_URLS, mime_prefix: "application/pdf" },
 ];
 

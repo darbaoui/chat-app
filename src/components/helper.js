@@ -1,4 +1,4 @@
-import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, NON_AUDIO_MEDIA_DEFINITIONS } from "@/constants";
+import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
 export const generateTiptapJson = (messageNumber=0, value=null) => {
@@ -70,6 +70,12 @@ export const  createMediaItem = (mediaDef, url) => {
     const exactAudioDef = AUDIO_DEFINITIONS.find(audio => audio.url === url);
     if (exactAudioDef) {
       mediaItem.duration = exactAudioDef.duration;
+    }
+  }
+  if (mediaDef.type === 'image') {
+    const exactImageDef = IMAGE_URLS.find(image => image.url === url);
+    if (exactImageDef) {
+      mediaItem.dimensions = exactImageDef.dimensions;
     }
   }
 
