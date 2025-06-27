@@ -262,9 +262,6 @@ const AudioPreview = ({
                     </span>
                 </div>
             </div>
-
-
-
         </div>
 
     );

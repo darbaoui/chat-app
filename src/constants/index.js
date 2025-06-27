@@ -1,24 +1,25 @@
 export const CURRENT_USER = 'current_user'
 
 export const MESSAGE_VARIANTS = {
+    viewport:{ once: true },
     initial: {
       opacity: 0,
-      y: -10
+      y: -5
     },
     animate: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.3,
-        ease: "easeOut"
+        duration: 0.2,
+        ease: "easeIn"
       }
     },
     exit: {
       opacity: 0,
-      y: -10,
+      y: 5,
       transition: {
         duration: 0.2,
-        ease: "easeIn"
+        ease: "easeOut"
       }
     }
 };
@@ -43,10 +44,16 @@ export const AUDIO_WAVEFORM_OPRIONS = {
 
 
 export const IMAGE_URLS = [
-  "https://placehold.co/600x400/FF5733/FFFFFF/png?text=Image+Demo+1",
-  "https://placehold.co/800x600/33FF57/000000/png?text=Image+Demo+2",
-  "https://placehold.co/400x300/3357FF/FFFFFF/png?text=Image+Demo+3",
-  "https://placehold.co/700x500/FFC300/000000/png?text=Image+Demo+4",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/chris-weiher-SL5dYCFCgeE-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/duc-nguyen-Y4B8MNuLYfs-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/henrique-ferreira-8xXeYkZMm-c-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-Lg4D-QBuP5Q-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-N2ucuKloA34-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/jonas-degener-VvIug1kr8yU-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/kevin-schmid-9WicLhY0tI8-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-6NmxNVlLcnU-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/leandra-rieger-gR5B7ocb-Ww-unsplash.jpg",
+  "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/sasha-matic-99cZwcq7QyA-unsplash.jpg",
 ];
 
 export const PDF_URLS = [

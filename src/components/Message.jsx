@@ -1,11 +1,9 @@
 import { BoxCorner } from "@/icons";
-import TiptapRenderer from "./TiptapRenderer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { motion } from 'framer-motion';
 import { CURRENT_USER, MESSAGE_VARIANTS } from "@/constants";
 import MessageContent from "./MessageContent";
-import { useRef } from "react";
 
 
 const Message = ({ message, prevMessage = {} }) => {
