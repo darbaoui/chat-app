@@ -15,8 +15,6 @@ const AudioPreview = ({
     className,
 }) => {
     const waveformRef = useRef(null);
-    // const canvasWidth = useRef(null);
-    // const canvasMaxWidth = useRef(null);
     const waveformWrapper = useRef(null)
 
 
@@ -36,7 +34,6 @@ const AudioPreview = ({
         const ws = WaveSurfer.create({
             container: waveformRef.current,
             ...AUDIO_WAVEFORM_OPRIONS,
-            //   renderFunction: renderFunction,
             url: audioUrl,
         });
 
@@ -68,11 +65,9 @@ const AudioPreview = ({
 
 
     useEffect(() => {
-        if(canvasMaxWidth && canvasWidth)
-        {
+        if (canvasMaxWidth && canvasWidth) {
             const width = canvasWidth > canvasMaxWidth ? canvasMaxWidth : canvasWidth;
-            if(width!==canvasWidth)
-            {
+            if (width !== canvasWidth) {
                 setCanvasWidth(width)
             }
         }
@@ -106,7 +101,7 @@ const AudioPreview = ({
             wavesurfer.on('loading', () => {
                 setIsLoading(true);
             });
-            
+
             wavesurfer.on('ready', () => {
                 setIsLoading(false);
             });
@@ -133,15 +128,15 @@ const AudioPreview = ({
 
     const updateSpeed = () => {
         if (speed === 2) {
-        wavesurfer.setPlaybackRate(1);
-        setSpeed(1);
+            wavesurfer.setPlaybackRate(1);
+            setSpeed(1);
         } else {
-        const newSpeed = speed + 0.5;
-        wavesurfer.setPlaybackRate(newSpeed);
-        setSpeed(newSpeed);
+            const newSpeed = speed + 0.5;
+            wavesurfer.setPlaybackRate(newSpeed);
+            setSpeed(newSpeed);
         }
     };
-    
+
     return (
 
         <div
@@ -150,8 +145,8 @@ const AudioPreview = ({
                 className,
 
             )}
-        >   
-        
+        >
+
             {isLoading ? (
 
                 <div
@@ -189,30 +184,30 @@ const AudioPreview = ({
                     className="text-exs font-medium flex items-center justify-center text-chatBoxMe-foreground cursor-pointer"
                     onClick={() => setShowRemaining(!showRemaining)}
                 >
-                   <AnimatePresence mode="popLayout" initial={false}>
-                    {!showRemaining ? (
-                    <motion.span
-                        key="duration"
-                        initial={{ y: 5, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1, type: 'spring' }}
-                        exit={{ y: -5, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="relative w-7 text-center text-chatBoxMe-foreground"
-                        >
-                        <span className="w-7"> {formatTime(audioDuration)}</span>
-                        </motion.span>
-                    ) : (
-                        <motion.span
-                        key="remaining"
-                        initial={{ y: 5, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1, type: 'spring' }}
-                        exit={{ y: -5, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="relative w-7 text-center text-chatBoxMe-foreground"
-                        >
-                        <span className="w-7">-{formatTime(audioDuration - time)}</span>
-                        </motion.span>
-                    )}
+                    <AnimatePresence mode="popLayout" initial={false}>
+                        {!showRemaining ? (
+                            <motion.span
+                                key="duration"
+                                initial={{ y: 5, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1, type: 'spring' }}
+                                exit={{ y: -5, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className="relative w-7 text-center text-chatBoxMe-foreground"
+                            >
+                                <span className="w-7"> {formatTime(audioDuration)}</span>
+                            </motion.span>
+                        ) : (
+                            <motion.span
+                                key="remaining"
+                                initial={{ y: 5, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1, type: 'spring' }}
+                                exit={{ y: -5, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className="relative w-7 text-center text-chatBoxMe-foreground"
+                            >
+                                <span className="w-7">-{formatTime(audioDuration - time)}</span>
+                            </motion.span>
+                        )}
                     </AnimatePresence>
                 </div>
 

@@ -4,7 +4,7 @@ export const MESSAGE_VARIANTS = {
     viewport:{ once: true },
     initial: {
       opacity: 0,
-      y: -5
+      y: 0
     },
     animate: {
       opacity: 1,
@@ -16,7 +16,7 @@ export const MESSAGE_VARIANTS = {
     },
     exit: {
       opacity: 0,
-      y: 5,
+      y: 0,
       transition: {
         duration: 0.2,
         ease: "easeOut"

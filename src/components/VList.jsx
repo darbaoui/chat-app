@@ -54,6 +54,7 @@ const VList = forwardRef(
         <div
           style={{
             visibility: "hidden", // TODO replace with other optimization methods
+            // contentVisibility: "auto",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
