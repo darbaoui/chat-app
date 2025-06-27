@@ -45,6 +45,7 @@ const StickyItem = forwardRef(
   }
 );
 
+StickyItem.displayName = 'StickyItem';
 
 const MessageVList = () => {
   const { data, error, size, setSize, isLoading, isValidating } =

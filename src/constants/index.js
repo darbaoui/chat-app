@@ -32,7 +32,6 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   cursorColor: 'transparent',
   // cursorColor: '#0c4a6e',
   height: 21,
-  normalize: true,
   barGap: 2,
   barHeight: 21,
   dragToSeek: true,

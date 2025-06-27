@@ -270,6 +270,8 @@ const AudioPreview = ({
     );
 };
 
+AudioPreview.displayName = 'AudioPreview';
+
 AudioPreview.propTypes = {
     audioUrl: PropTypes.string.isRequired,
     audioDuration: PropTypes.number.isRequired,

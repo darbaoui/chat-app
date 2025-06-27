@@ -1,4 +1,4 @@
-import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, MEDIA_DEFINITIONS, NON_AUDIO_MEDIA_DEFINITIONS } from "@/constants";
+import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, NON_AUDIO_MEDIA_DEFINITIONS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
 export const generateTiptapJson = (messageNumber=0, value=null) => {

@@ -83,4 +83,5 @@ const VList = forwardRef(
     );
   })
 
+VList.displayName = 'VList';
 export default VList
