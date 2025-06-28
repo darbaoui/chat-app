@@ -21,7 +21,6 @@ const VList = forwardRef(
       onScroll,
       onScrollEnd,
       style,
-    //   scrollRef,
       ...attrs
     },
     ref

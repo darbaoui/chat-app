@@ -83,9 +83,7 @@ const MessageVList = () => {
       // Add date separator if it's a new day
       if (messageDateString !== currentDate) {
         currentDate = messageDateString;
-        // activeIndex.current = items.length;
         dateIndexesSet.add(items.length);
-
         items.push({
           type: 'date',
           date: messageDateString,

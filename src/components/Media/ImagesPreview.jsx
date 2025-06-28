@@ -1,11 +1,9 @@
-import { MAX_IMAGE_SIZE } from "@/constants";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 const ImagesPreview = ({images}) => {
 
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-    
     const gridConfig = useMemo(() => {
         const count = images.length;
         if (count <= 2) return { cols: count, spans: [] };
@@ -71,7 +69,7 @@ const ImagesPreview = ({images}) => {
   };
 
   const renderGrid = () => (
-    <div className={`grid rounded-3xl overflow-hidden w-full grid-cols-${gridConfig.cols}`}>
+    <div className={cn("grid rounded-3xl overflow-hidden", images.length === 2 ? 'grid-cols-2': 'grid-cols-3')}>
       {images.map(renderGridImage)}
     </div>
   );

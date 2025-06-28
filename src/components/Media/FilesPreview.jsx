@@ -29,6 +29,6 @@ const FilesPreview = ({attachments, ...props}) => {
   );
 }
 
-FilesPreview.dispslayName = 'FilesPreview';
+FilesPreview.displayName = 'FilesPreview';
 
 export default FilesPreview;

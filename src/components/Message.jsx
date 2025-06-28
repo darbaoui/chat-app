@@ -65,7 +65,6 @@ const Message = ({ message, prevMessage = {} }) => {
               )}
             />
           )}
-          {/* <TiptapRenderer jsonContent={text} /> */}
           <MessageContent message={message} className={cn(isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "

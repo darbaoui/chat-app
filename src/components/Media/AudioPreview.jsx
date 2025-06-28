@@ -16,16 +16,14 @@ const AudioPreview = ({
 }) => {
     const waveformRef = useRef(null);
     const waveformWrapper = useRef(null)
+
     const [progressPercent, setPogressPercent] = useState(0);
-    // const progressIndex = useRef(0]
     const [canvasWidth, setCanvasWidth] = useState(null);
     const [canvasMaxWidth, setCanvasMaxWidth] = useState(null);
-
     const [wavesurfer, setWavesurfer] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showRemaining, setShowRemaining] = useState(false);
     const [time, setTime] = useState(0);
-    const [audioFinish, setAudioFinish] = useState(false);
     const [speed, setSpeed] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -176,14 +174,18 @@ const AudioPreview = ({
             )}
             <div className={cn('relative w-[calc(100%_-_7.5rem)]')} ref={waveformWrapper} data-width={canvasMaxWidth}>
 
-                <div
-                    data-audio-duration={audioDuration}
-                    className={cn(
-                        'absolute w-[2px]  top-0 bottom-0 bg-[#0c4a6e] ring-[2px] rounded-md ring-blue-100',
+                {
+                    !isLoading && (
+                        <div
+                            data-audio-duration={audioDuration}
+                            className={cn(
+                                'absolute w-[2px]  top-0 bottom-0 bg-[#0c4a6e] ring-[2px] rounded-md ring-blue-100',
 
-                    )}
-                    style={{ left: `${progressPercent}%` }}
-                ></div>
+                            )}
+                            style={{ left: `${progressPercent}%` }}
+                        ></div>
+                    )
+                }
                 <div
                     ref={waveformRef}
                     style={{ width: canvasWidth, position: 'relative' }}
