@@ -50,7 +50,7 @@ const Message = ({ message, prevMessage = {} }) => {
 
         {/* Message Bubble */}
         <div
-          className={cn('max-w-[min(400px,_calc(30vw_-_1rem))] rounded-3xl relative',  isMe
+          className={cn('max-w-[calc(100vw_-_1rem)] md:max-w-[min(400px,_calc(30vw_-_1rem))] rounded-3xl relative',  isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
               )}
