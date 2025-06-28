@@ -17,7 +17,7 @@ const AudioPreview = ({
     const waveformRef = useRef(null);
     const waveformWrapper = useRef(null)
 
-    const [progressPercent, setPogressPercent] = useState(0);
+    const [progressPercent, setProgressPercent] = useState(0);
     const [canvasWidth, setCanvasWidth] = useState(null);
     const [canvasMaxWidth, setCanvasMaxWidth] = useState(null);
     const [wavesurfer, setWavesurfer] = useState(null);
@@ -65,7 +65,7 @@ const AudioPreview = ({
     useEffect(() => {
         if (time && audioDuration && isPlaying) {
             const progress = time / audioDuration;
-            setPogressPercent(progress * 100)
+            setProgressPercent(progress * 100)
         }
     }, [time, audioDuration, isPlaying]);
 
@@ -113,7 +113,7 @@ const AudioPreview = ({
             });
 
             wavesurfer.on('finish', () => {
-                setPogressPercent(0)
+                setProgressPercent(0)
                 setIsPlaying(false);
             });
         }

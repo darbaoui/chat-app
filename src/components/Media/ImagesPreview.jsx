@@ -49,9 +49,11 @@ const ImagesPreview = ({images}) => {
     return (
       <div
         key={id || index}
-        className={`relative  h-36 ${
-          colSpan === 3 ? 'grid-cols-3' : colSpan === 2 ? 'grid-cols-2' : ''
-        }`}
+
+        className={cn('relative h-36', {
+          'col-span-3': colSpan === 3,
+          'col-span-2': colSpan === 2,
+        })}
       >
         <Image
           loading="lazy"
