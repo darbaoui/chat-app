@@ -83,7 +83,7 @@ export const AUDIO_DEFINITIONS = [
   {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/16s.m4a", duration: 16},
   {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/21.m4a", duration: 21},
   {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/30s.m4a", duration: 30},
-  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/long.m4a", duration: 72.6},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/long.m4a", duration: 81},
 ];
 
 const AUDIO_URLS = AUDIO_DEFINITIONS.map(audio => audio.url);

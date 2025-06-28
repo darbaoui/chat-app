@@ -16,8 +16,8 @@ const AudioPreview = ({
 }) => {
     const waveformRef = useRef(null);
     const waveformWrapper = useRef(null)
-
-
+    const [progressPercent, setPogressPercent] = useState(0);
+    // const progressIndex = useRef(0]
     const [canvasWidth, setCanvasWidth] = useState(null);
     const [canvasMaxWidth, setCanvasMaxWidth] = useState(null);
 
@@ -65,6 +65,14 @@ const AudioPreview = ({
 
 
     useEffect(() => {
+        if (time && audioDuration && isPlaying) {
+            const progress = time / audioDuration;
+            setPogressPercent(progress * 100)
+        }
+    }, [time, audioDuration, isPlaying]);
+
+
+    useEffect(() => {
         if (canvasMaxWidth && canvasWidth) {
             const width = canvasWidth > canvasMaxWidth ? canvasMaxWidth : canvasWidth;
             if (width !== canvasWidth) {
@@ -86,14 +94,10 @@ const AudioPreview = ({
         if (wavesurfer) {
             // Play/pause on click
             wavesurfer.on('interaction', () => {
-                setAudioFinish(false);
                 wavesurfer.play();
             });
 
             wavesurfer.on('timeupdate', (currentTime) => {
-                if (audioFinish) {
-                    setAudioFinish(false);
-                }
                 setTime(currentTime);
             });
 
@@ -111,7 +115,8 @@ const AudioPreview = ({
             });
 
             wavesurfer.on('finish', () => {
-                setAudioFinish(true);
+                setPogressPercent(0)
+                setIsPlaying(false);
             });
         }
     }, [wavesurfer]);
@@ -169,12 +174,22 @@ const AudioPreview = ({
                     <Play className="w-[14px]" size={14} />
                 </Button>
             )}
-            <div className={cn('w-[calc(100%_-_7.5rem)]')} ref={waveformWrapper} data-width={canvasMaxWidth}>
+            <div className={cn('relative w-[calc(100%_-_7.5rem)]')} ref={waveformWrapper} data-width={canvasMaxWidth}>
+
+                <div
+                    data-audio-duration={audioDuration}
+                    className={cn(
+                        'absolute w-[2px]  top-0 bottom-0 bg-[#0c4a6e] ring-[2px] rounded-md ring-blue-100',
+
+                    )}
+                    style={{ left: `${progressPercent}%` }}
+                ></div>
                 <div
                     ref={waveformRef}
-                    style={{ width: canvasWidth }}
+                    style={{ width: canvasWidth, position: 'relative' }}
 
-                ></div>
+                >
+                </div>
             </div>
 
 
