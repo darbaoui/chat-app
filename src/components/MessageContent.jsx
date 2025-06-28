@@ -17,7 +17,7 @@ const MessageContent = ({ message, className }) => {
             <AudioPreview audioDuration={singleMediaFile.duration} audioUrl={singleMediaFile.url} />
         </div>)
         : (
-            <div className={cn("w-full px-5 flex flex-col py-2.5 overflow-hidden z-[2] relative rounded-3xl", className)}>
+            <div className={cn("w-full px-5 flex flex-col gap-2.5 py-2.5 overflow-hidden z-[2] relative rounded-3xl", className)}>
                 <TiptapRenderer jsonContent={text} />
                 {
                      media.length > 0 && (

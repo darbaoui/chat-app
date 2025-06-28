@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 const ImagesPreview = ({images}) => {
 
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    
     const gridConfig = useMemo(() => {
         const count = images.length;
         if (count <= 2) return { cols: count, spans: [] };
@@ -21,64 +22,47 @@ const ImagesPreview = ({images}) => {
     if (!images?.length) return null;
 
 
-    const handleImageLoad = ({ naturalWidth, naturalHeight }) => {
 
-      console.log('naturalWidth -->', naturalWidth)
-      console.log('naturalHeight -->', naturalHeight)
-
-       if (naturalWidth <= MAX_IMAGE_SIZE && naturalHeight <= MAX_IMAGE_SIZE) {
-                  setDimensions({ width: naturalWidth, height: naturalHeight });
-                } else {
-                  const scale = Math.min(
-                    MAX_IMAGE_SIZE / naturalWidth,
-                    MAX_IMAGE_SIZE / naturalHeight,
-                  );
-                  setDimensions({
-                    width: Math.round(naturalWidth * scale),
-                    height: Math.round(naturalHeight * scale),
-                  });
-                }
-       
-  };
-
-
-  const renderSingleImage = () => (
-    <div
+  const renderSingleImage = () => {
+    const imageData = images[0];
+    const {url, name, dimensions: {width, height}} = imageData
+    return (<div
       className={`rounded-2xl overflow-hidden relative flex`}
-      style={{ height: dimensions.height, width: dimensions.width>=MAX_IMAGE_SIZE ?'100%': dimensions.width }}>
+      >
      
       <Image
-        src={images[0]?.url}
-        alt={images[0]?.name || 'Image'}
-        onLoadingComplete={handleImageLoad}
-        width={dimensions.width}
-        height={dimensions.height}
+        loading="lazy"
+        src={url}
+        alt={name || 'Image'}
+        width={width}
+        height={height}
         style={{ 
-          objectFit: 'cover',
+          objectFit: 'contain',
         }}
       />
     </div>
   );
+}
 
 
   const renderGridImage = (image, index) => {
     const colSpan = gridConfig.spans[index] || 1;
-    
+    const {id, url, name, dimensions: {width, height}} = image
     return (
       <div
-        key={image.id || index}
+        key={id || index}
         className={`relative  h-36 ${
-          colSpan === 3 ? 'col-span-3' : colSpan === 2 ? 'col-span-2' : ''
+          colSpan === 3 ? 'grid-cols-3' : colSpan === 2 ? 'grid-cols-2' : ''
         }`}
       >
         <Image
-          src={image.url}
-          alt={image.name || 'Image'}
+          loading="lazy"
+          src={url}
+          alt={name || 'Image'}
+          sizes={width}
           fill
-          sizes="100vw"
           style={{ 
             objectFit: 'cover',
-           
           }}
         />
         
@@ -97,6 +81,5 @@ const ImagesPreview = ({images}) => {
       
 }
 
-ImagesPreview.displayName = 'ImagesPreview';
 
 export default ImagesPreview;
