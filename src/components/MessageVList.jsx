@@ -3,10 +3,10 @@
 import { Loader } from "lucide-react";
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
-import VList from "@/components/VList";
 import Message from "./Message";
 import { formatDateSeparator} from "./helper";
 import DateSeparator from "./DateSeparator";
+import { VList } from "virtua";
 const LIMIT = 50;
 
 

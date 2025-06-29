@@ -12,16 +12,19 @@ const MessageContent = ({ message, className }) => {
         : null;
 
     return isAudioMedia ?
-        (<div className={cn("w-full py-1.5 ps-[7px] pe-[14px] overflow-hidden z-[2] relative rounded-3xl", className)}>
+        (<div className={cn("max-w-[calc(100vw_-_1rem)] md:max-w-[min(400px,_calc(30vw_-_1rem))] py-1.5 ps-[7px] pe-[14px] overflow-hidden z-[2] relative", className)}>
             <AudioPreview audioDuration={singleMediaFile.duration} audioUrl={singleMediaFile.url} />
         </div>)
         : (
-            <div className={cn("w-full px-5 flex flex-col gap-2.5 py-2.5 overflow-hidden z-[2] relative rounded-3xl", className)}>
+            <div className={cn("flex flex-col w-full max-w-[calc(100vw_-_1rem)] md:max-w-[min(400px,_calc(30vw_-_1rem))] px-5  gap-2.5 py-2.5 z-[2] relative", className)}>
+
                 <TiptapRenderer jsonContent={text} />
                 {
-                     media.length > 0 && (
+                    media.length > 0 ? (
+                    <div className={cn("w-full")}>
                         <FilesPreview attachments={media} />
-                     )
+                    </div>
+                    ): null
                 }
             </div>
         )

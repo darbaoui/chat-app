@@ -45,10 +45,7 @@ const Message = ({ message, prevMessage = {} }) => {
 
         {/* Message Bubble */}
         <div
-          className={cn('max-w-[calc(100vw_-_1rem)] md:max-w-[min(400px,_calc(30vw_-_1rem))] rounded-3xl relative',  isMe
-              ? "bg-chatBoxMe text-chatBoxMe-foreground"
-              : "bg-accent text-title "
-              )}
+          className={cn('relative')}
         >
           {showAvatarAndName && (
             <BoxCorner
@@ -60,7 +57,9 @@ const Message = ({ message, prevMessage = {} }) => {
               )}
             />
           )}
-          <MessageContent message={message} className={cn(isMe
+          <MessageContent message={message} className={cn(
+            "rounded-3xl",
+            isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
               )} />
