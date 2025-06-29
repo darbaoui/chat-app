@@ -24,22 +24,33 @@ const ImagesPreview = ({images}) => {
   const renderSingleImage = () => {
     const imageData = images[0];
     const {url, name, dimensions: {width, height}} = imageData
-    return (<div
-      className={`rounded-2xl overflow-hidden relative flex`}
-      >
-     
-      <Image
-        loading="lazy"
-        src={url}
-        alt={name || 'Image'}
-        width={width}
-        height={height}
-        style={{ 
-          objectFit: 'contain',
+      // Calculate the actual dimensions based on maxHeight constraint
+    const maxHeight = 350;
+    const aspectRatio = width / height;
+    const displayHeight = Math.min(height, maxHeight);
+    const displayWidth = displayHeight * aspectRatio;
+      return (<div
+        className={cn("rounded-2xl overflow-hidden relative flex")}
+        style={{
+          maxHeight: `${maxHeight}px`,
+          width: 'fit-content'
         }}
-      />
-    </div>
-  );
+        >
+      
+        <Image
+          loading="lazy"
+          src={url}
+          alt={name || 'Image'}
+          width={displayWidth}
+          height={displayHeight}
+          style={{ 
+            objectFit: 'contain',
+            maxWidth: '100%',
+            height: 'auto'
+          }}
+        />
+      </div>
+    );
 }
 
 
@@ -76,8 +87,13 @@ const ImagesPreview = ({images}) => {
     </div>
   );
 
-  return images.length === 1 ? renderSingleImage() : renderGrid()
-
+  return (<div style={{ borderRadius: "8px",
+  height: "100%",
+  maxWidth: "550px",
+  overflow: "hidden",
+  width: "100%"}}>
+  {images.length === 1 ? renderSingleImage() : renderGrid()}
+</div>)
       
 }
 

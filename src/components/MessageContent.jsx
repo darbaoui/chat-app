@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import AudioPreview from "./Media/AudioPreview";
 import FilesPreview from "./Media/FilesPreview";
 import TiptapRenderer from "./TiptapRenderer";

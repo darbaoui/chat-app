@@ -7,7 +7,7 @@ import MessageContent from "./MessageContent";
 
 
 const Message = ({ message, prevMessage = {} }) => {
-  const { text, user } = message;
+  const { user } = message;
   const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
   const time = new Date(message.created_at).toLocaleTimeString("en-US", {
@@ -15,15 +15,10 @@ const Message = ({ message, prevMessage = {} }) => {
     minute: "2-digit",
   });
 
-
+  // TODO: add animation like SlideIn/SlideOut
   return (
-    <motion.div
-              key={message.id}
-              variants={MESSAGE_VARIANTS}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              layout
+    <div
+      key={message.id}
       className={cn(
         "flex items-start mb-1 px-2.5",
         isMe ? "flex-row-reverse" : "",
@@ -71,7 +66,7 @@ const Message = ({ message, prevMessage = {} }) => {
               )} />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

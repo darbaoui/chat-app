@@ -25,7 +25,7 @@ const FilesPreview = ({attachments, ...props}) => {
     }, [attachments]);
 
     return (
-      <ImagesPreview images={images} {...props} />
+            <ImagesPreview images={images} {...props} />
   );
 }
 
