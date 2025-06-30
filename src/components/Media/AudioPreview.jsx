@@ -90,6 +90,10 @@ const AudioPreview = ({
 
     useEffect(() => {
         if (wavesurfer) {
+            
+            wavesurfer.on('play', () => setIsPlaying(true));
+            wavesurfer.on('pause', () => setIsPlaying(false));
+
             // Play/pause on click
             wavesurfer.on('interaction', () => {
                 wavesurfer.play();
