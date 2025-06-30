@@ -7,6 +7,7 @@ import Message from "./Message";
 import { formatDateSeparator} from "./helper";
 import DateSeparator from "./DateSeparator";
 import { VList } from "virtua";
+import { cn } from "@/lib/utils";
 const LIMIT = 50;
 
 
@@ -156,6 +157,13 @@ const MessageVList = () => {
 
 
         <div className="flex flex-col h-full w-full relative">
+          {isLoadingMore && (
+              <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
+                <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
+                  <Loader className="animate-spin w-3 text-white" />
+                </div>
+              </div>
+            )}
           <VList
             ref={ref}
             style={{
@@ -170,13 +178,7 @@ const MessageVList = () => {
             shift={isPrepend.current}
             onScroll={handleScroll}
           >
-            {isLoadingMore && (
-              <div className="h-8 w-full bg-transparent flex items-center justify-center">
-                <div className="w-8 rounded-3xl flex h-full items-center justify-center bg-title">
-                  <Loader className="animate-spin w-3 text-white" />
-                </div>
-              </div>
-            )}
+            
 
 
             {items.map((item, index) => {
