@@ -1,8 +1,9 @@
 'use client'
 
+import { useEffect, useState } from "react";
 import { IMAGE_MIME_TYPES } from "@/constants";
 import ImagesPreview from "./ImagesPreview";
-import { useEffect, useState } from "react";
+import DocsPreview from "./DocsPreview";
 
 const FilesPreview = ({attachments, ...props}) => {
     
@@ -25,7 +26,10 @@ const FilesPreview = ({attachments, ...props}) => {
     }, [attachments]);
 
     return (
+        <div className="w-full flex-col flex gap-2.5">
             <ImagesPreview images={images} {...props} />
+            <DocsPreview files={files} {...props} />
+        </div>
   );
 }
 

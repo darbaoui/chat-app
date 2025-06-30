@@ -68,8 +68,8 @@ export const IMAGE_URLS = [
 ];
 
 export const PDF_URLS = [
-  "https://www.africau.edu/images/default/sample.pdf", // Sample PDF from africau.edu
-  "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // Dummy PDF from w3.org
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/4793d546a45c6039f4b1122005a542af-invoice-template-PDF-2.pdf", size: 722636.8, preview_url: 'https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/prev_2.png'},
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/6668865.pdf", size: 1782579.2 , preview_url: 'https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/prev_1.png'},
 ];
 
 export const AUDIO_DEFINITIONS = [
@@ -91,7 +91,7 @@ const AUDIO_URLS = AUDIO_DEFINITIONS.map(audio => audio.url);
 // Separated non-audio media for easier selection
 export const NON_AUDIO_MEDIA_DEFINITIONS = [
   { type: "image", urls: IMAGE_URLS.map((image) => image.url), mime_prefix: "image/" },
-  { type: "pdf", urls: PDF_URLS, mime_prefix: "application/pdf" },
+  { type: "pdf", urls: PDF_URLS.map((pdf) => pdf.url), mime_prefix: "application/" },
 ];
 
 export const AUDIO_MEDIA_DEFINITION = { type: "audio", urls: AUDIO_URLS, mime_prefix: "audio/" };

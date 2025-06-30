@@ -1,4 +1,4 @@
-import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS } from "@/constants";
+import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
 export const generateTiptapJson = (messageNumber=0, value=null) => {
@@ -61,6 +61,7 @@ export const  createMediaItem = (mediaDef, url) => {
   const mediaItem = {
     id: faker.string.uuid(),
     file_name: fileName,
+    name: fileName,
     mime_type: mimeType,
     url: url,
   };
@@ -76,6 +77,15 @@ export const  createMediaItem = (mediaDef, url) => {
     const exactImageDef = IMAGE_URLS.find(image => image.url === url);
     if (exactImageDef) {
       mediaItem.dimensions = exactImageDef.dimensions;
+    }
+  }
+
+  if (mediaDef.type === 'pdf') {
+    const exactPDFDef = PDF_URLS.find(pdf => pdf.url === url);
+    if (exactPDFDef) {
+      mediaItem.size = exactPDFDef.size;
+      // mediaItem.mime_type = mediaDef.type;
+      mediaItem.preview_url = exactPDFDef.preview_url;
     }
   }
 
@@ -116,4 +126,17 @@ export const getRandomMediaItems = () => {
   return { media: mediaItems, hasAudio: hasAudio };
 }
 
+
+export function autoFormatSize(bytes) {
+  const MB = bytes / (1024 * 1024); // Convert bytes to MB
+
+  if (MB < 0.5) {
+    // If size is less than 0.5 MB, display in KB
+    const KB = bytes / 1024;
+    return KB.toFixed(2) + ' KB';
+  } else {
+    // Otherwise, display in MB
+    return MB.toFixed(2) + ' MB';
+  }
+}
 
