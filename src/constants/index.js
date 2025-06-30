@@ -73,8 +73,8 @@ export const PDF_URLS = [
 ];
 
 export const AUDIO_DEFINITIONS = [
-  {url: "https://cors-anywhere.herokuapp.com/https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", duration: 372.715083}, // Sample MP3 from soundhelix.com
-  {url: "https://cors-anywhere.herokuapp.com/https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", duration: 425.952625}, // Another sample MP3
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/SoundHelix-Song-1.mp3", duration: 372.715083}, // Sample MP3 from soundhelix.com
+  {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/SoundHelix-Song-2.mp3", duration: 425.952625}, // Another sample MP3
   
   {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/2s.m4a", duration: 2},
   {url: "https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/3.m4a", duration: 3}, 
