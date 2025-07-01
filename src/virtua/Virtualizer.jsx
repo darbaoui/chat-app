@@ -30,9 +30,7 @@ import {
   microtask,
   sort,
 } from "virtua/unstable_core";
-import { max } from "./utils";
 
-const startIndexArray = [];
 
 /**
  * Customizable list virtualizer for advanced usage. See {@link VirtualizerProps} and {@link VirtualizerHandle}.
@@ -103,21 +101,8 @@ export const Virtualizer = forwardRef(
     );
 
 
-
-    const oldStartIndex = useRef(null)
-    const oldEndIndex = useRef()
-
- 
-
     let [startIndex, endIndex] = store.$getRange();
 
-    if(startIndex !== oldStartIndex.current)
-    {
-        oldStartIndex.current = startIndex
-        startIndexArray.push(startIndex)
-    }
-
-    // const minValue = Math.min(...startIndexArray);
     startIndex = 0
 
 
@@ -236,8 +221,6 @@ export const Virtualizer = forwardRef(
     }
 
   
-    // console.log('currentStartIndex -->',  startIndex, endIndex)
-    
 
     return (
       <Element
