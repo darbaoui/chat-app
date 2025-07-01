@@ -18,29 +18,20 @@ const DateSeparator = ({ dateString, index }) => {
 
   
   return (
-    <motion.div
-      variants={MESSAGE_VARIANTS}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      layout
-      className="item-date flex justify-center items-center py-3 z-10"
+    <div
+      className="item-date flex justify-center items-baseline py-3 z-10"
+      style={{
+        // backdropFilter: 'blur(10px)'
+      }}
     >
-     <motion.hr
-        className="flex-1 bg-border h-px"
-        variants={hrVariants}
-        animate={isSticky ? "hidden" : "visible"}
-      />
-
-     <motion.div
-        layout
-        className={cn("text-[12px] font-medium px-3", isSticky ? "bg-muted border text-muted-foreground rounded-full py-1" : "text-title")}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
+      <hr className="flex-1 border-t border" />
+      {/* <div className="text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
+                      </div> */}
+      <span className="px-3 text-sidebar text-[12px] font-medium" style={{ width: 'fit-content' }}>
         {dateString}
-      </motion.div>
-      <motion.hr className="flex-1 bg-border h-px" variants={hrVariants} animate={isSticky ? "hidden" : "visible"} />
-    </motion.div>
+      </span>
+      <hr className="flex-1 border-t border" />
+    </div>
   )
 };
 
