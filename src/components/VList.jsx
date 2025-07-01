@@ -52,15 +52,12 @@ const VList = forwardRef(
       element = (
         <div
           style={{
-            // visibility: "hidden", // TODO replace with other optimization methods
+            visibility: "hidden", // TODO replace with other optimization methods
             // contentVisibility: "auto",
-            alignItems: "stretch",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
-            position: "relative",
-            overflowAnchor: "none"
           }}
         >
           {element}
@@ -73,13 +70,11 @@ const VList = forwardRef(
         ref={scrollRef}
         {...attrs}
         style={{
-          // display: horizontal ? "inline-block" : "block",
-          // [horizontal ? "overflowX" : "overflowY"]: "auto",
-          // contain: "strict",
-          // width: "100%",
-          // height: "100%",
-          minHeight: 0,
-          overflowY: "auto",
+          display: horizontal ? "inline-block" : "block",
+          [horizontal ? "overflowX" : "overflowY"]: "auto",
+          contain: "strict",
+          width: "100%",
+          height: "100%",
           ...style,
         }}
       >

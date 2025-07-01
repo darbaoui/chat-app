@@ -27,8 +27,6 @@ import {
   ACTION_START_OFFSET_CHANGE,
   createScroller,
   createResizer,
-  CacheSnapshot,
-  ScrollToIndexOpts,
   microtask,
   sort,
 } from "virtua/unstable_core";
@@ -119,9 +117,9 @@ export const Virtualizer = forwardRef(
         startIndexArray.push(startIndex)
     }
 
-    const minValue = Math.min(...startIndexArray);
-    startIndex = minValue
-    
+    // const minValue = Math.min(...startIndexArray);
+    startIndex = 0
+
 
     const isScrolling = store.$isScrolling();
     const totalSize = store.$getTotalSize();

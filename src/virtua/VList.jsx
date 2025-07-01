@@ -50,11 +50,13 @@ export const VList = forwardRef(
       element = (
         <div
           style={{
-            visibility: "hidden", // TODO replace with other optimization methods
+            alignItems: "stretch",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
+            position: "relative",
+            overflowAnchor: "none"
           }}
         >
           {element}
@@ -67,11 +69,8 @@ export const VList = forwardRef(
         ref={scrollRef}
         {...attrs}
         style={{
-          display: horizontal ? "inline-block" : "block",
-          [horizontal ? "overflowX" : "overflowY"]: "auto",
-          contain: "strict",
-          width: "100%",
-          height: "100%",
+           minHeight: 0,
+          overflowY: "auto",
           ...style,
         }}
       >
