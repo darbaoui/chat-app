@@ -54,7 +54,8 @@ const AudioPreview = ({
 
         if (audioDuration) {
             const minDuration = audioDuration < 6 ? 6 : audioDuration;
-            const maxLength = Math.floor(minDuration / 0.4);
+            const maxLength = Math.floor(minDuration / 0.5);
+            // const maxLength = minDuration
             let width = (AUDIO_WAVEFORM_OPRIONS.barWidth + AUDIO_WAVEFORM_OPRIONS.barGap) * maxLength;
             setCanvasWidth(width)
         }
@@ -96,7 +97,10 @@ const AudioPreview = ({
 
             // Play/pause on click
             wavesurfer.on('interaction', () => {
-                wavesurfer.play();
+                if(isPlaying)
+                {
+                    wavesurfer.play();
+                }
             });
 
             wavesurfer.on('timeupdate', (currentTime) => {
@@ -113,12 +117,14 @@ const AudioPreview = ({
             });
 
             wavesurfer.on('seeking', (currentTime) => {
+                // setTime(currentTime) TODO
                 setIsPlaying(wavesurfer.isPlaying());
             });
 
             wavesurfer.on('finish', () => {
                 setProgressPercent(0)
                 setIsPlaying(false);
+                wavesurfer.setTime(0)
             });
         }
     }, [wavesurfer]);

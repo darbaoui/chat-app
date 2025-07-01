@@ -38,7 +38,6 @@ const ImagesPreview = ({images}) => {
         >
       
         <Image
-          loading="lazy"
           src={url}
           alt={name || 'Image'}
           width={displayWidth}
@@ -67,10 +66,9 @@ const ImagesPreview = ({images}) => {
         })}
       >
         <Image
-          loading="lazy"
           src={url}
           alt={name || 'Image'}
-          sizes={width}
+          sizes="50vw"
           fill
           style={{ 
             objectFit: 'cover',

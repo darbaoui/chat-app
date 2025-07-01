@@ -19,7 +19,7 @@ const DocsPreview = ({files}) => {
                     <NextImage
                       src={file.preview_url}
                       fill
-                      sizes="100vw"
+                      sizes="45px"
                       className="rounded-lg overflow-hidden"
                       alt={file.name}
                       style={{ objectFit: 'contain' }}

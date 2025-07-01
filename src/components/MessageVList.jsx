@@ -6,7 +6,9 @@ import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
 import { formatDateSeparator} from "./helper";
 import DateSeparator from "./DateSeparator";
-import { VList } from "virtua";
+// import { VList } from "virtua";
+import { VList } from "@/virtua/VList";
+// import  VList from "./VList";
 import { cn } from "@/lib/utils";
 const LIMIT = 50;
 
@@ -27,6 +29,7 @@ const StickyItem = forwardRef(
     return (
       <div
         ref={ref}
+        data-index={index}
         className="item-list"
         style={{
           ...style,
@@ -169,9 +172,7 @@ const MessageVList = () => {
             style={{
               flex: 1,
             }}
-
-            id="list-view"
-
+            overscan={20}
             item={StickyItem}
             keepMounted={[activeIndex]}
             reverse

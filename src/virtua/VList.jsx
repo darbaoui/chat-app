@@ -1,10 +1,8 @@
-import { ReactElement, forwardRef, useRef } from "react";
-import { Virtualizer } from "virtua";
-import { ScrollArea } from "./ui/scroll-area";
+import {  forwardRef, useRef } from "react";
+import { Virtualizer } from "@/virtua/Virtualizer";
 
 
-
-const VList = forwardRef(
+export const VList = forwardRef(
   (
     {
       children,
@@ -27,7 +25,7 @@ const VList = forwardRef(
   ) => {
     const scrollRef = useRef(null);
     const shouldReverse = reverse && !horizontal;
-
+    
     let element = (
       <Virtualizer
         ref={ref}
@@ -52,15 +50,11 @@ const VList = forwardRef(
       element = (
         <div
           style={{
-            // visibility: "hidden", // TODO replace with other optimization methods
-            // contentVisibility: "auto",
-            alignItems: "stretch",
+            visibility: "hidden", // TODO replace with other optimization methods
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
-            position: "relative",
-            overflowAnchor: "none"
           }}
         >
           {element}
@@ -73,20 +67,16 @@ const VList = forwardRef(
         ref={scrollRef}
         {...attrs}
         style={{
-          // display: horizontal ? "inline-block" : "block",
-          // [horizontal ? "overflowX" : "overflowY"]: "auto",
-          // contain: "strict",
-          // width: "100%",
-          // height: "100%",
-          minHeight: 0,
-          overflowY: "auto",
+          display: horizontal ? "inline-block" : "block",
+          [horizontal ? "overflowX" : "overflowY"]: "auto",
+          contain: "strict",
+          width: "100%",
+          height: "100%",
           ...style,
         }}
       >
         {element}
       </div>
     );
-  })
-
-VList.displayName = 'VList';
-export default VList
+  }
+);
