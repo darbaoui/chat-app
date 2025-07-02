@@ -1,6 +1,6 @@
 import AudioPreview from "./Media/AudioPreview";
 import FilesPreview from "./Media/FilesPreview";
-import TiptapRenderer from "./TiptapRenderer";
+import TiptapEditorRead from "@/components/Editor/TiptapEditorRead";
 import { cn } from "@/lib/utils";
 
 const MessageContent = ({ message, className }) => {
@@ -18,7 +18,7 @@ const MessageContent = ({ message, className }) => {
         : (
             <div className={cn("flex flex-col w-full max-w-[calc(100vw_-_1rem)] md:max-w-[min(400px,_calc(30vw_-_1rem))]  gap-2.5 py-2.5 z-[2] relative", className)}>
                 <div className="px-5">
-                    <TiptapRenderer jsonContent={text} />
+                    <TiptapEditorRead jsonContent={text} />
                 </div>
                 {
                     media.length > 0 ? (

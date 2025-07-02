@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { cn } from '@/lib/utils';
 
 // Renders Tiptap JSON content to React elements
-const TiptapRenderer =({ jsonContent, className }) => {
+const TiptapEditorRead =({ jsonContent, className }) => {
   if (!jsonContent || !jsonContent.content) {
     return null;
   }
@@ -28,11 +28,11 @@ const TiptapRenderer =({ jsonContent, className }) => {
   );
 };
 
-TiptapRenderer.displayName = 'TiptapRenderer';
+TiptapEditorRead.displayName = 'TiptapEditorRead';
 
-TiptapRenderer.propTypes = {
+TiptapEditorRead.propTypes = {
   jsonContent: PropTypes.object,
   className: PropTypes.string,
 };
 
-export default memo(TiptapRenderer);
+export default memo(TiptapEditorRead);

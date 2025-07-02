@@ -11,27 +11,34 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 
 
 
 const MessageInput = () => {
 
+  const [content, setContent] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef(null);
   useOnClickOutside(containerRef, () => setIsExpanded(false));
+  const setNewMessage = (messageContent) => {
+    setContent(messageContent);
+    // handleTyping();
+  };
+
+  const handleExpends = (e) => {
+    e.stopPropagation()
+    if(!isExpanded)
+    {
+      setIsExpanded(!isExpanded);
+    }
+  };
 
 
   return (
-    <form className="w-full flex  min-h-16 items-center justify-center mx-auto border-t">
+    <div className="w-full flex  min-h-16 items-center justify-center mx-auto border-t">
       <div className="w-auto flex items-center gap-2.5">
 
         <DropdownMenu>
@@ -54,13 +61,14 @@ const MessageInput = () => {
 
         <motion.div
           ref={containerRef}
-          className="flex-1 w-[220px] flex items-center text-xs justify-center h-8 rounded-full bg-chat text-meta-icon"
+          className="flex-1 w-[220px] flex items-center text-xs justify-center min-h-8 rounded-full bg-chat text-meta-icon"
           animate={{ width: isExpanded ? '400px' : '200px' }}
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-          onClick={() => setIsExpanded(true)}
+          onClick={handleExpends}
         >
 
-          <span>Add a comment</span>
+          {isExpanded ? <TiptapEditorWrite onChange={(data) => setNewMessage(data)}  placeholder="Add a new message..." className="w-full px-2.5"/> :
+            (<span>Add a comment</span>)}
 
         </motion.div>
 
@@ -81,7 +89,7 @@ const MessageInput = () => {
                     variant="outline"
                     size="icon"
                     className="w-8 h-8 rounded-full bg-chat border-none"
-                    onClick={() => { }}
+                    
                   >
                     <Mic className="text-meta-icon w-4" />
                   </Button>
@@ -99,7 +107,7 @@ const MessageInput = () => {
                     variant="default"
                     size="icon"
                     className="w-8 h-8 rounded-full"
-                    onClick={() => { }}
+                    
                   >
                     <SendHorizonal className="text-background w-4" />
                   </Button>
@@ -108,16 +116,8 @@ const MessageInput = () => {
             </AnimatePresence>
           </div>
         </div>
-
-
-        {/* <Button variant="outline" className="!w-8 !h-8 rounded-full bg-chat border-none">
-          <Mic />
-        </Button>
-        <Button variant="outline" className="!w-8 !h-8 rounded-full bg-chat border-none">
-          <Send />
-        </Button> */}
       </div>
-    </form>
+    </div>
   );
 };
 
