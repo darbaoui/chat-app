@@ -1,10 +1,11 @@
 import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
-export const generateTiptapJson = (messageNumber=0, value=null) => {
+export const generateTiptapJson = (messageNumber=0, paragraphNumbers=1) => {
   const formats = ['bold', 'italic', 'code'];
   const selectedFormat = formats[Math.floor(Math.random() * formats.length)];
 
+  console.log('selectedFormat --<', selectedFormat)
   return {
     type: 'doc',
     content: [
@@ -18,11 +19,11 @@ export const generateTiptapJson = (messageNumber=0, value=null) => {
           {
             type: 'text',
             marks: [{ type: selectedFormat }],
-            text: `formatted as ${selectedFormat}`,
+            text: `formatted as ${selectedFormat} `,
           },
           {
             type: 'text',
-            text: value ?? faker.lorem.paragraphs(1),
+            text: faker.lorem.paragraph({ min: 1, max: 5 }) ,
           },
         ],
       },

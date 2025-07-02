@@ -1,19 +1,15 @@
 import { BoxCorner } from "@/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { motion } from 'framer-motion';
-import { CURRENT_USER, MESSAGE_VARIANTS } from "@/constants";
+import { cn, fromNow } from "@/lib/utils";
+import { CURRENT_USER } from "@/constants";
 import MessageContent from "./MessageContent";
 
 
 const Message = ({ message, prevMessage = {} }) => {
-  const { user } = message;
+  const { user, created_at } = message;
   const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
-  const time = new Date(message.created_at).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const time = fromNow(created_at)
 
   // TODO: add animation like SlideIn/SlideOut
   return (

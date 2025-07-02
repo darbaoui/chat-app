@@ -295,3 +295,153 @@
     animation-timeline: view();
   }
 } 
+
+
+
+
+.ProseMirror {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0;
+  position: relative;
+  color: var(--title-secondary);
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror .block-node:not(:last-child),
+.ProseMirror .text-node:not(:last-child),
+.ProseMirror .list-node:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+/* .ProseMirror p {
+  font-size: var(--font-size-regular);
+} */
+.ProseMirror p,
+.ProseMirror dl,
+.ProseMirror ol,
+.ProseMirror ul,
+.ProseMirror pre,
+.ProseMirror blockquote {
+  margin: 0px;
+}
+
+.ProseMirror p {
+  overflow-wrap: break-word;
+}
+
+.emoji-with-text .ProseMirror span.emoji:first-of-type {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.emoji-without-text .ProseMirror span.emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+
+.ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding: 0;
+}
+
+.ProseMirror ul[data-type='taskList'] li {
+  display: flex;
+}
+
+.ProseMirror ul[data-type='taskList'] li>label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.ProseMirror pre {
+  position: relative;
+  background: var(--input);
+  border-radius: 4px;
+  border: 1px solid rgb(239, 241, 244);
+  display: grid;
+  -webkit-font-smoothing: initial;
+  @apply text-xs;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
+  color: rgb(60, 65, 73);
+  overflow: auto;
+}
+
+.ProseMirror code {
+  border-radius: 8px;
+  border: 1px solid rgb(239, 241, 244);
+  background: var(--input);
+  /* font-size: .85rem; */
+  padding: .25em .3em;
+}
+
+.ProseMirror pre code {
+  display: block;
+  overflow-x: auto;
+  padding: 1.5em;
+  line-height: 1.6em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 27px;
+}
+
+.ProseMirror code.inline {
+  margin-bottom: 1px;
+  padding: 2px 0.25em 1px;
+  border-radius: 0.2em;
+  font-size: 0.8em;
+  background-color: var(--muted);
+  @apply border;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--description);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror blockquote {
+  padding-left: 14px;
+  position: relative;
+}
+
+.ProseMirror blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: 4px;
+  background: var(--border-dropdown);
+  border-radius: 2px;
+}
+
+.mention {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.1rem 0.3rem;
+  box-decoration-break: clone;
+  color: var(--primary);
+  font-weight: 500;
+  background-color: var(--accent);
+}

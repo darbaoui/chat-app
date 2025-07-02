@@ -1,4 +1,4 @@
-import { getRandomMediaItems } from "@/components/helper";
+import { generateTiptapJson, getRandomMediaItems } from "@/components/helper";
 import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";
@@ -43,7 +43,7 @@ function generateMessage(index: number, message_count: number) {
   
   return Array.from({ length: message_count }, () => {
     const { media, hasAudio } = getRandomMediaItems(); // Get media and check if audio is present
-    const messageText = hasAudio ? null : generateTiptapContent(`#${index + 1} ${faker.lorem.paragraph({ min: 1, max: 5 })}`);
+    const messageText = hasAudio ? null : generateTiptapJson(index + 1);
     return {
      id: faker.string.uuid(),
      text: messageText,
