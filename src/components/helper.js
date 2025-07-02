@@ -1,7 +1,7 @@
 import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
-export const generateTiptapJson = (messageNumber=0, paragraphNumbers=1) => {
+export const generateTiptapJson = (messageNumber=0) => {
   const formats = ['bold', 'italic', 'code'];
   const selectedFormat = formats[Math.floor(Math.random() * formats.length)];
 
