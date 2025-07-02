@@ -22,20 +22,6 @@ const USERS = [
   },
 ];
 
-function generateTiptapContent(text: string) {
-  return {
-    type: "doc",
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          { type: "text", text },
-        ],
-      },
-    ],
-  };
-}
-
 function generateMessage(index: number, message_count: number) {
   const user = USERS[index % USERS.length];
   const createdAt = new Date(Date.now() - (TOTAL_MESSAGES - index) * 3600000).toISOString(); // 1 minute per message = 60000 ms , 1h = 3600000 ms
