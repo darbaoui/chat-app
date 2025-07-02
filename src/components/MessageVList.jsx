@@ -10,6 +10,7 @@ import DateSeparator from "./DateSeparator";
 import { VList } from "@/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
+import MessageInput from "./MessageInput";
 const LIMIT = 50;
 
 
@@ -197,6 +198,7 @@ const MessageVList = () => {
 
             })}
           </VList>
+          <MessageInput />
         </div>
       </StickyIndexContext.Provider>
     </>
