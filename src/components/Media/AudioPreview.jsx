@@ -114,7 +114,7 @@ const AudioPreview = ({
             });
 
             wavesurfer.on('seeking', (currentTime) => {
-                // setTime(currentTime) TODO
+                setTime(currentTime)
                 setIsPlaying(wavesurfer.isPlaying());
             });
 

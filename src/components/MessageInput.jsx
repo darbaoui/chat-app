@@ -66,7 +66,7 @@ const MessageInput = () => {
           onClick={handleExpends}
         >
 
-          {isExpanded ? <TiptapEditorWrite onChange={(data) => setNewMessage(data)} placeholder="Add a new message..." className="w-full px-2.5" /> :
+          {isExpanded ? <TiptapEditorWrite setNoText={() => { }} onChange={(data) => setNewMessage(data)} placeholder="Add a new message..." className="w-full px-2.5" /> :
             (<span>Add a comment</span>)}
 
         </motion.div>
