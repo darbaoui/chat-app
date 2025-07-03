@@ -42,13 +42,6 @@ export const EmojiNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    let renderEmoji = false;
-
-    // const isBrowserEnv = isBrowser();
-
-    // if (isBrowserEnv) {
-    //   renderEmoji = isEmojiSupported(node.attrs.emoji);
-    // }
 
     const { emoji, annotation, ...restHTMLAttributes } = HTMLAttributes;
 
@@ -63,7 +56,7 @@ export const EmojiNode = Node.create({
         style: `user-select: text; font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;`,
       }),
       node.attrs.emoji,
-      
+
     ];
   },
 

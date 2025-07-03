@@ -29,11 +29,11 @@ Fetches a paginated list of messages for a specific chat room.
         {
           "id": "msg_123",
           "text": "Hello world!",
-          "createdAt": "2023-10-27T10:00:00Z",
-          "sender": {
+          "created_at": "2023-10-27T10:00:00Z",
+          "user": {
             "id": "user_abc",
             "name": "Alice",
-            "avatarUrl": "https://.../avatar.png"
+            "avatar_url": "https://.../avatar.png"
           }
         }
       ],
