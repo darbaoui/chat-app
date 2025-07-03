@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Paperclip, Pause, Plus, Send, SendHorizonal, Smile } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn, useOnClickOutside } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
+import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 
 
 
@@ -30,8 +30,7 @@ const MessageInput = () => {
 
   const handleExpends = (e) => {
     e.stopPropagation()
-    if(!isExpanded)
-    {
+    if (!isExpanded) {
       setIsExpanded(!isExpanded);
     }
   };
@@ -67,50 +66,17 @@ const MessageInput = () => {
           onClick={handleExpends}
         >
 
-          {isExpanded ? <TiptapEditorWrite onChange={(data) => setNewMessage(data)}  placeholder="Add a new message..." className="w-full px-2.5"/> :
+          {isExpanded ? <TiptapEditorWrite onChange={(data) => setNewMessage(data)} placeholder="Add a new message..." className="w-full px-2.5" /> :
             (<span>Add a comment</span>)}
 
         </motion.div>
 
 
         <div className="flex items-center relative">
-            <div
-                  key="pause"
-                  className="absolute inset-0"
-                 
-                >
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8 rounded-full bg-chat border-none"
-                    
-                  >
-                    <Pause className="text-meta-icon w-4" />
-                  </Button>
-                </div>
           <div className="relative w-8 h-8">
-
-
             <AnimatePresence initial={false} mode="wait">
               {!isExpanded ? (
-                <>
-                <motion.div
-                  key="pause"
-                  className="absolute inset-0"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8 rounded-full bg-chat border-none"
-                    
-                  >
-                    <Pause className="text-meta-icon w-4" />
-                  </Button>
-                </motion.div>
+
                 <motion.div
                   key="mic"
                   className="absolute inset-0"
@@ -123,12 +89,11 @@ const MessageInput = () => {
                     variant="outline"
                     size="icon"
                     className="w-8 h-8 rounded-full bg-chat border-none"
-                    
+
                   >
                     <Mic className="text-meta-icon w-4" />
                   </Button>
                 </motion.div>
-                </>
               ) : (
                 <motion.div
                   key="send"
@@ -142,7 +107,7 @@ const MessageInput = () => {
                     variant="default"
                     size="icon"
                     className="w-8 h-8 rounded-full"
-                    
+
                   >
                     <SendHorizonal className="text-background w-4" />
                   </Button>
