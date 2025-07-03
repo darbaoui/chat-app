@@ -25,6 +25,7 @@ import MenuBar from './MenuBar';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Trash } from 'lucide-react';
 
 
 const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, className }) => {
@@ -160,14 +161,18 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
     };
 
     const addHttpsIfNeeded = (value) => {
-        var urlRegex =
-            /^(https?:\/\/)?([\w\d.-]+)\.([a-z]{2,})(:\d{1,5})?([\/?].*)?$/i;
+        if (!value) return null;
 
-        if (urlRegex.test(value)) {
+        // Check if the URL already has any protocol
+        if (/^[a-z][a-z0-9+.-]*:/.test(value)) {
             return value;
-        } else if (value) {
+        }
+
+        // Basic check for a domain-like structure to prepend https
+        if (value.includes('.') && !value.includes(' ')) {
             return 'https://' + value;
         }
+
         return null;
     };
 

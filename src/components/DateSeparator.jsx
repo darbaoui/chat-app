@@ -2,7 +2,7 @@
 /**
  * Renders the date separator UI.
  */
-const DateSeparator = ({ dateString, index }) => {
+const DateSeparator = ({ dateString }) => {
   return (
     <div
       className="item-date flex justify-center items-baseline py-3 z-10"

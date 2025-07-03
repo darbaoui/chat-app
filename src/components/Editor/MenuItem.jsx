@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 
 const MenuItem = (props) => {
-  const { iconComp, title, action, isActive, className } = props;
+  const { iconComp, action, isActive } = props;
 
   const isActiveClass = isActive?.() ? 'text-title' : 'text-description';
 
