@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 
-const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, className }) => {
+const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }) => {
 
 
     const [isLink, setIsLink] = useState(false);
@@ -129,19 +129,16 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
             ],
             onUpdate: ({ editor }) => {
                 const contentJSON = editor.getJSON();
-                // const textContent = editor.state.doc?.textContent;
-                // setNoText(textContent === '');
+                const textContent = editor.state.doc?.textContent;
+                setNoText(textContent === '');
                 if (editor.isEmpty) {
                     onChange(null);
                 } else {
                     onChange(contentJSON);
                 }
             },
-            content: jsonContent,
-            // immediatelyRender: false, // This helps prevent hydration errors in SSR environments like Next.js
-            // shouldRerenderOnTransaction: false,
+            content: jsonContent
         },
-        // [c],
     );
 
 
