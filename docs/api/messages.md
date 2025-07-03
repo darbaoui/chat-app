@@ -71,8 +71,8 @@ Sends a new message to a specified chat room.
     {
       "id": "msg_124",
       "text": "This is a new message.",
-      "createdAt": "2023-10-27T10:05:00Z",
-      "sender": { ... }
+      "created_at": "2023-10-27T10:05:00Z",
+      "user": { ... }
     }
     ```
 
