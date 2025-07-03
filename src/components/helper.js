@@ -5,7 +5,6 @@ export const generateTiptapJson = (messageNumber=0) => {
   const formats = ['bold', 'italic', 'code'];
   const selectedFormat = formats[Math.floor(Math.random() * formats.length)];
 
-  console.log('selectedFormat --<', selectedFormat)
   return {
     type: 'doc',
     content: [

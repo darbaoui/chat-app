@@ -27,13 +27,13 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
 
-const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent=null, setEditorFocus = true, className }) => {
+const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, className }) => {
 
 
     const [isLink, setIsLink] = useState(false);
     const [inputLink, setInputLink] = useState('');
 
-   
+
 
     const editor = useEditor(
         {
@@ -151,55 +151,55 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent=null, set
 
 
     const HiddenBubbleMenu = () => {
-      setIsLink(false);
-      setInputLink('');
+        setIsLink(false);
+        setInputLink('');
     };
 
     const setLink = () => {
-      setIsLink(true);
+        setIsLink(true);
     };
 
     const addHttpsIfNeeded = (value) => {
-      var urlRegex =
-        /^(https?:\/\/)?([\w\d.-]+)\.([a-z]{2,})(:\d{1,5})?([\/?].*)?$/i;
+        var urlRegex =
+            /^(https?:\/\/)?([\w\d.-]+)\.([a-z]{2,})(:\d{1,5})?([\/?].*)?$/i;
 
-      if (urlRegex.test(value)) {
-        return value;
-      } else if (value) {
-        return 'https://' + value;
-      }
-      return null;
+        if (urlRegex.test(value)) {
+            return value;
+        } else if (value) {
+            return 'https://' + value;
+        }
+        return null;
     };
 
 
     const addLink = () => {
-      const url = addHttpsIfNeeded(inputLink);
-      if (url === null) {
-        return;
-      }
-      if (url === '') {
-        editor.chain().focus().extendMarkRange('link').unsetLink().run();
+        const url = addHttpsIfNeeded(inputLink);
+        if (url === null) {
+            return;
+        }
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
 
-        return;
-      }
+            return;
+        }
 
-      // update link
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange('link')
-        .setLink({ href: url })
-        .run();
+        // update link
+        editor
+            .chain()
+            .focus()
+            .extendMarkRange('link')
+            .setLink({ href: url })
+            .run();
 
-      setIsLink(false);
-      setInputLink('');
+        setIsLink(false);
+        setInputLink('');
     };
 
     return (
         <div className={cn('text-[12px] leading-relaxed', className)}>
             {editor && (
                 <BubbleMenu
-                    onClickOutside={() => console.log('click outside !!!!')}
+                    onClickOutside={() => HiddenBubbleMenu()}
                     editor={editor}
                     tippyOptions={{ duration: 100, onHidden: HiddenBubbleMenu }}
                 >

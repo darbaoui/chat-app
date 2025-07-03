@@ -30,6 +30,7 @@ import {
   microtask,
   sort,
 } from "virtua/unstable_core";
+import { BUFFER_MULTIPLIER } from "@/constants";
 
 
 /**
@@ -103,7 +104,38 @@ export const Virtualizer = forwardRef(
 
     let [startIndex, endIndex] = store.$getRange();
 
-    startIndex = 0
+    /**
+     * 
+     * The First Approad
+     * // Calculate viewport size
+     * const viewportSize = endIndex - startIndex + 1;
+     * 
+     * // Apply overscan with buffer
+     * const bufferSize = Math.ceil(viewportSize * BUFFER_MULTIPLIER);
+     * const halfBuffer = Math.floor(bufferSize / 2);
+     * 
+     * // Calculate custom range
+     * const customStart = Math.max(0, startIndex - halfBuffer - overscan);
+     * const customEnd = Math.min(
+     *   count - 1, 
+     *   endIndex + halfBuffer + overscan
+     * );
+     * 
+     * startIndex = customStart
+     * endIndex = customEnd
+     * 
+     * The Second Approad
+     * const customStart = Math.max(0, startIndex - overscan);
+     * const customEnd = Math.min(count - 1, endIndex + overscan);
+     * 
+     */
+    
+
+    const customStart = Math.max(0, startIndex - overscan);
+    const customEnd = Math.min(count - 1, endIndex + overscan);
+
+    startIndex = customStart
+    endIndex = customEnd
 
 
     const isScrolling = store.$isScrolling();

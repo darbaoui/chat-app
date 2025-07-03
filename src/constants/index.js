@@ -1,3 +1,4 @@
+export const BUFFER_MULTIPLIER = 1.5;
 export const IMAGE_MIME_TYPES = [
   'image/jpeg',
   'image/jpg',

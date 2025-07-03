@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Paperclip, Plus, Send, SendHorizonal, Smile } from "lucide-react";
+import { Mic, Paperclip, Pause, Plus, Send, SendHorizonal, Smile } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, useOnClickOutside } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ const MessageInput = () => {
         <motion.div
           ref={containerRef}
           className="flex-1 w-[220px] flex items-center text-xs justify-center min-h-8 rounded-full bg-chat text-meta-icon"
-          animate={{ width: isExpanded ? '400px' : '200px' }}
+          animate={{ width: isExpanded ? '400px' : '254px' }}
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
           onClick={handleExpends}
         >
@@ -73,10 +73,44 @@ const MessageInput = () => {
         </motion.div>
 
 
-        <div className="flex items-center">
+        <div className="flex items-center relative">
+            <div
+                  key="pause"
+                  className="absolute inset-0"
+                 
+                >
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8 rounded-full bg-chat border-none"
+                    
+                  >
+                    <Pause className="text-meta-icon w-4" />
+                  </Button>
+                </div>
           <div className="relative w-8 h-8">
+
+
             <AnimatePresence initial={false} mode="wait">
               {!isExpanded ? (
+                <>
+                <motion.div
+                  key="pause"
+                  className="absolute inset-0"
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8 rounded-full bg-chat border-none"
+                    
+                  >
+                    <Pause className="text-meta-icon w-4" />
+                  </Button>
+                </motion.div>
                 <motion.div
                   key="mic"
                   className="absolute inset-0"
@@ -94,6 +128,7 @@ const MessageInput = () => {
                     <Mic className="text-meta-icon w-4" />
                   </Button>
                 </motion.div>
+                </>
               ) : (
                 <motion.div
                   key="send"

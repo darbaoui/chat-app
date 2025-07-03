@@ -25,7 +25,7 @@ const Message = ({ message, prevMessage = {} }) => {
         {showAvatarAndName && (
           <Avatar>
             <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarFallback>{user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         )}
       </div>
@@ -58,7 +58,7 @@ const Message = ({ message, prevMessage = {} }) => {
             isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
-              )} />
+          )} />
         </div>
       </div>
     </div>

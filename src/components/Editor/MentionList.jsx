@@ -73,18 +73,18 @@ export const MentionList = forwardRef((props, ref) => {
           >
             <div className="flex items-center gap-1">
 
-             <Avatar className="rounded-full" style={{ background: item?.color }}>
+              <Avatar className="rounded-full" style={{ background: item?.color }}>
                 <AvatarImage
-                 className="w-5 h-5 border"
-                src={item.avatar}
-                alt={item.name}
-                
+                  className="w-5 h-5 border"
+                  src={item.avatar}
+                  alt={item.name}
+
                 />
-                <AvatarFallback>ER</AvatarFallback>
-            </Avatar>
-            <span>{item.name}</span>
+                <AvatarFallback>{item.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span>{item.name}</span>
             </div>
-            
+
           </div>
         ))
       ) : (

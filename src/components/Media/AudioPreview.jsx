@@ -91,16 +91,13 @@ const AudioPreview = ({
 
     useEffect(() => {
         if (wavesurfer) {
-            
+
             wavesurfer.on('play', () => setIsPlaying(true));
             wavesurfer.on('pause', () => setIsPlaying(false));
 
             // Play/pause on click
             wavesurfer.on('interaction', () => {
-                if(isPlaying)
-                {
-                    wavesurfer.play();
-                }
+                wavesurfer.playPause();
             });
 
             wavesurfer.on('timeupdate', (currentTime) => {

@@ -2,6 +2,10 @@
 
 import { cn } from "@/lib/utils";
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   Bold,
   Braces,
   Code,
@@ -121,7 +125,9 @@ class MenuBar extends React.Component {
                 type: "divider",
               },
               {
-                iconComp: "align-left",
+                iconComp:  (className) => (
+                <AlignLeft className={cn("w-4 h-4", className)} />
+                ),
                 title: "align-left",
                 class: "w-4 h-4",
                 action: () =>
@@ -130,7 +136,9 @@ class MenuBar extends React.Component {
                   this.props.editor.isActive({ textAlign: "left" }),
               },
               {
-                iconComp: "align-center",
+                iconComp:  (className) => (
+                <AlignCenter className={cn("w-4 h-4", className)} />
+                ),
                 title: "align-center",
                 class: "w-4 h-4",
                 action: () =>
@@ -143,7 +151,9 @@ class MenuBar extends React.Component {
                   this.props.editor.isActive({ textAlign: "center" }),
               },
               {
-                iconComp: "align-right",
+                iconComp:  (className) => (
+                <AlignRight className={cn("w-4 h-4", className)} />
+                ),
                 title: "align-right",
                 class: "w-4 h-4",
                 action: () =>
@@ -152,7 +162,9 @@ class MenuBar extends React.Component {
                   this.props.editor.isActive({ textAlign: "right" }),
               },
               {
-                iconComp: "align-justify",
+                iconComp:  (className) => (
+                <AlignJustify className={cn("w-4 h-4", className)} />
+                ),
                 title: "align-justify",
                 class: "w-4 h-4",
                 action: () =>

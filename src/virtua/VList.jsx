@@ -50,16 +50,28 @@ export const VList = forwardRef(
       element = (
         <div
           style={{
-            alignItems: "stretch",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
-            position: "relative",
-            overflowAnchor: "none"
+            // Flip the container
+            transform: "scaleY(-1)",
+            // Ensure proper rendering
+            transformOrigin: "center",
+            // Prevent text selection issues
+            userSelect: "none",
           }}
         >
-          {element}
+           <div 
+            style={{ 
+                  // Flip content back to normal
+                  transform: "scaleY(-1)",
+                  // Re-enable text selection
+                  userSelect: "auto",
+                }}
+              >
+            {element}
+          </div>
         </div>
       );
     }

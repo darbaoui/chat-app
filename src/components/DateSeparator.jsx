@@ -1,22 +1,8 @@
-import { MESSAGE_VARIANTS } from "@/constants";
-import { motion } from 'framer-motion';
-import { StickyIndexContext } from "./MessageVList";
-import { useContext } from "react";
-import { cn } from "@/lib/utils";
+
 /**
  * Renders the date separator UI.
  */
 const DateSeparator = ({ dateString, index }) => {
-  const { activeIndex } = useContext(StickyIndexContext);
-
-  const isSticky = activeIndex === index;
-
-  const hrVariants = {
-    visible: { opacity: 1, transition: { duration: 0.2 } },
-    hidden: { opacity: 0, transition: { duration: 0.2 } },
-  };
-
-  
   return (
     <div
       className="item-date flex justify-center items-baseline py-3 z-10"
