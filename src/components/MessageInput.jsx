@@ -8,6 +8,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 
+const itemVariants = {
+  initial: { opacity: 0, scale: 0.8 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.8 },
+  transition: { type: "spring", stiffness: 500, damping: 30 }
+};
+
+const editorVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
+
 const MessageInput = () => {
   const [content, setContent] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -44,18 +58,16 @@ const MessageInput = () => {
     setIsRecording(false);
   };
 
-  const itemVariants = {
-    initial: { opacity: 0, scale: 0.8 },
-    animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 },
-    transition: { type: "spring", stiffness: 500, damping: 30 }
-  };
+  const sendTextContent = () => {
+    // TODO: add logic how send json content from tiptap editor to server
+    // content state that store the text writing by the user
+  }
 
-  const editorVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-  };
+  const sendAudioContent = () => {
+    // TODO: add logic how send audio recording to server
+  }
+
+
 
   return (
     <div className="w-full flex min-h-16 items-center justify-center mx-auto border-t p-4">
@@ -169,7 +181,7 @@ const MessageInput = () => {
             ) : (
               // If not recording and HAS text, show the Send button
               <motion.div key="send" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="default" size="icon" className="w-8 h-8 rounded-full">
+                <Button variant="default" size="icon" className="w-8 h-8 rounded-full" onClick={sendTextContent}>
                   <SendHorizonal className="text-background w-4" />
                 </Button>
               </motion.div>
@@ -180,7 +192,7 @@ const MessageInput = () => {
           <AnimatePresence>
             {isRecording && (
               <motion.div key="send-record" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="default" size="icon" className="w-8 h-8 rounded-full">
+                <Button variant="default" size="icon" className="w-8 h-8 rounded-full" onClick={sendAudioContent}>
                   <SendHorizonal className="text-background w-4" />
                 </Button>
               </motion.div>
