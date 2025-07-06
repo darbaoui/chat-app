@@ -399,6 +399,8 @@ function AudioRecorder() {
             if (!canvas) return;
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
+
+            console.log('rect --->', rect)
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             const context = canvas.getContext('2d');
@@ -411,6 +413,9 @@ function AudioRecorder() {
 
         return () => window.removeEventListener('resize', setupCanvas);
     }, [drawPlaybackWaveform]);
+
+
+
 
     // Timer update effect
     useEffect(() => {

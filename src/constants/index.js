@@ -51,7 +51,7 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   fillParent: true,
   normalize: true,
   // cursorWidth: 2,
-  barMinHeight: 4,
+  barMinHeight: 2,
 };
 
 
