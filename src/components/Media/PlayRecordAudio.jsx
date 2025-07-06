@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 const PUSH_INTERVAL = 50;
 
-const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
+const PlayRecordAudio = forwardRef(({ updateRecordingState }, ref) => {
 
     // State for managing recording status, audio data, and UI
     const [recordingState, setRecordingState] = useState('inactive');
@@ -31,60 +31,8 @@ const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
     // Refs for timer logic
     const startTimeRef = useRef(0);
     const totalPausedTimeRef = useRef(0);
+    const pauseStartTimeRef = useRef(0);
     const lastPushTimeRef = useRef(0);
-
-    const handleRecordClick = async () => {
-        if (recordingState === 'inactive' || recordingState === 'stopped') {
-            // Start Recording
-            try {
-                resetRecorder();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-                analyserRef.current = audioContextRef.current.createAnalyser();
-                analyserRef.current.fftSize = 2048;
-                analyserRef.current.timeDomainDataArray = new Float32Array(analyserRef.current.fftSize);
-                sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
-                sourceRef.current.connect(analyserRef.current);
-
-                const recorder = new MediaRecorder(stream);
-                mediaRecorderRef.current = recorder;
-
-                recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
-
-                recorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-                    setFinalAudioBlob(audioBlob);
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    if (audioPlayerRef.current) audioPlayerRef.current.src = audioUrl;
-                    stream.getTracks().forEach(track => track.stop());
-                    generateWaveformFromFile(audioBlob);
-                };
-
-                recorder.start();
-                setRecordingState('recording');
-                startTimeRef.current = Date.now();
-                visualizeDuringRecording();
-
-            } catch (error) {
-                console.error('Error accessing microphone:', error);
-                alert("Could not access the microphone. Please grant permission and try again.");
-                resetRecorder();
-            }
-        } else if (recordingState === 'recording') {
-            // Pause Recording
-            mediaRecorderRef.current?.pause();
-            setRecordingState('paused');
-            pauseStartTimeRef.current = Date.now();
-            if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
-        } else if (recordingState === 'paused') {
-            // Resume Recording
-            mediaRecorderRef.current?.resume();
-            setRecordingState('recording');
-            totalPausedTimeRef.current += Date.now() - pauseStartTimeRef.current;
-            visualizeDuringRecording();
-        }
-    };
 
     // Utility to draw a rounded rectangle, used for waveform bars
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
@@ -109,7 +57,6 @@ const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
 
-        console.log('height ---->', height)
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = AUDIO_WAVEFORM_OPRIONS.waveColor // '#60a5fa';
 
@@ -165,26 +112,43 @@ const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
         });
     }, [drawRoundedRect]);
 
-    const updateTimer = useCallback(() => {
-        if (startTimeRef.current === 0) return;
-        const elapsed = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-    }, []);
-
-    // Timer update effect
-    useEffect(() => {
-        let timerInterval;
-        if (recordingState === 'recording') {
-            updateTimer(); // Update immediately on start/resume
-            timerInterval = setInterval(updateTimer, 1000);
+    // Resets the recorder to its initial state
+    const resetRecorder = useCallback(() => {
+        // UPDATED: If there's an active recorder, nullify its onstop handler
+        // to prevent it from processing partial data after being stopped.
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.onstop = null;
         }
-        return () => {
-            clearInterval(timerInterval);
-        };
-    }, [recordingState, updateTimer]);
 
+        // Stop stream tracks, which also stops the recorder
+        if (mediaRecorderRef.current?.stream) {
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
+
+        if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
+        if (playbackAnimationIdRef.current) cancelAnimationFrame(playbackAnimationIdRef.current);
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+            audioContextRef.current.close();
+        }
+
+        setRecordingState('inactive');
+        setFinalAudioBlob(null);
+        setOutputAudioURL('');
+        setTimer('00:00');
+        setIsPlaying(false);
+
+        audioChunksRef.current = [];
+        waveformDataRef.current = [];
+        totalPausedTimeRef.current = 0;
+        startTimeRef.current = 0;
+
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.src = '';
+            audioPlayerRef.current.currentTime = 0;
+        }
+
+        drawPlaybackWaveform(0);
+    }, [drawPlaybackWaveform]);
 
 
     // Animation loop for live recording visualization
@@ -221,24 +185,6 @@ const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
         drawLiveWaveform();
     }, [drawLiveWaveform]);
 
-
-    // This hook tells the parent component (MessageInput) what the ref should contain.
-    useImperativeHandle(ref, () => ({
-        startRecord() {
-            handleRecordClick();
-        },
-        removeRecord() {
-            console.log('remove Record');
-        },
-        pauseRecord() {
-            console.log('pause Record');
-        },
-        resumeRecord() {
-            console.log('resume Record');
-        }
-    }),
-        [] // Dependencies for when to re-create the handle. Empty is fine here.
-    );
 
 
     // Generates a static waveform from the final audio blob
@@ -280,43 +226,175 @@ const PlayRecordAudio = forwardRef(({ isRecording }, ref) => {
     }, [drawPlaybackWaveform]);
 
 
-    // Resets the recorder to its initial state
-    const resetRecorder = useCallback(() => {
-        // UPDATED: If there's an active recorder, nullify its onstop handler
-        // to prevent it from processing partial data after being stopped.
-        if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.onstop = null;
-        }
+    const startRecording = useCallback(async (canvasRef) => {
+        // This will contain the logic from handleRecordClick for 'inactive'/'stopped' state
+        // Make sure to pass canvasRef to visualizeDuringRecording
+        try {
+            resetRecorder(canvasRef); // Pass canvasRef to resetRecorder
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        // Stop stream tracks, which also stops the recorder
-        if (mediaRecorderRef.current?.stream) {
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-        }
+            audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+            analyserRef.current = audioContextRef.current.createAnalyser();
+            analyserRef.current.fftSize = 2048;
+            analyserRef.current.timeDomainDataArray = new Float32Array(analyserRef.current.fftSize);
+            sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
+            sourceRef.current.connect(analyserRef.current);
 
+            const recorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = recorder;
+
+            recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
+
+            recorder.onstop = () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                setFinalAudioBlob(audioBlob);
+                // Note: audioPlayerRef.current.src will be set in the component
+                stream.getTracks().forEach(track => track.stop());
+                generateWaveformFromFile(audioBlob, canvasRef); // Pass canvasRef
+            };
+
+            recorder.start();
+            setRecordingState('recording');
+            startTimeRef.current = Date.now();
+            visualizeDuringRecording(canvasRef); // Pass canvasRef
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            alert("Could not access the microphone. Please grant permission and try again.");
+            resetRecorder(canvasRef); // Pass canvasRef
+        }
+    }, [resetRecorder, visualizeDuringRecording, generateWaveformFromFile]);
+
+    const pauseRecording = useCallback(() => {
+        mediaRecorderRef.current?.pause();
+        setRecordingState('paused');
+        pauseStartTimeRef.current = Date.now();
         if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
-        if (playbackAnimationIdRef.current) cancelAnimationFrame(playbackAnimationIdRef.current);
-        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-            audioContextRef.current.close();
+    }, []);
+
+    const resumeRecording = useCallback((canvasRef) => {
+        mediaRecorderRef.current?.resume();
+        setRecordingState('recording');
+        totalPausedTimeRef.current += Date.now() - pauseStartTimeRef.current;
+        visualizeDuringRecording(canvasRef); // Pass canvasRef
+    }, [visualizeDuringRecording]);
+
+    const stopRecording = useCallback((canvasRef) => {
+        mediaRecorderRef.current?.stop();
+        setRecordingState('stopped');
+        if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
+        // generateWaveformFromFile will be called by recorder.onstop
+    }, []);
+
+
+    // const handleRecordClick = async () => {
+    //     console.log('recordingState --->', recordingState)
+    //     if (recordingState === 'inactive' || recordingState === 'stopped') {
+    //         // Start Recording
+    //         try {
+    //             resetRecorder();
+    //             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    //             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    //             analyserRef.current = audioContextRef.current.createAnalyser();
+    //             analyserRef.current.fftSize = 2048;
+    //             analyserRef.current.timeDomainDataArray = new Float32Array(analyserRef.current.fftSize);
+    //             sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
+    //             sourceRef.current.connect(analyserRef.current);
+
+    //             const recorder = new MediaRecorder(stream);
+    //             mediaRecorderRef.current = recorder;
+
+    //             recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
+
+    //             recorder.onstop = () => {
+    //                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+    //                 setFinalAudioBlob(audioBlob);
+    //                 const audioUrl = URL.createObjectURL(audioBlob);
+    //                 if (audioPlayerRef.current) audioPlayerRef.current.src = audioUrl;
+    //                 stream.getTracks().forEach(track => track.stop());
+    //                 generateWaveformFromFile(audioBlob);
+    //             };
+
+    //             recorder.start();
+    //             setRecordingState('recording');
+    //             startTimeRef.current = Date.now();
+    //             visualizeDuringRecording();
+
+    //         } catch (error) {
+    //             console.error('Error accessing microphone:', error);
+    //             alert("Could not access the microphone. Please grant permission and try again.");
+    //             resetRecorder();
+    //         }
+    //     } else if (recordingState === 'recording') {
+
+    //         console.log('im here !!!!!!')
+    //         // Pause Recording
+    //         mediaRecorderRef.current?.pause();
+    //         setRecordingState('paused');
+    //         pauseStartTimeRef.current = Date.now();
+    //         if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
+    //     } else if (recordingState === 'paused') {
+    //         // Resume Recording
+    //         mediaRecorderRef.current?.resume();
+    //         setRecordingState('recording');
+    //         totalPausedTimeRef.current += Date.now() - pauseStartTimeRef.current;
+    //         visualizeDuringRecording();
+    //     }
+    // };
+
+    useEffect(() => {
+        updateRecordingState(recordingState)
+    }, [recordingState])
+
+
+
+    const updateTimer = useCallback(() => {
+        if (startTimeRef.current === 0) return;
+        const elapsed = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+    }, []);
+
+    // Timer update effect
+    useEffect(() => {
+        let timerInterval;
+        if (recordingState === 'recording') {
+            updateTimer(); // Update immediately on start/resume
+            timerInterval = setInterval(updateTimer, 1000);
         }
+        return () => {
+            clearInterval(timerInterval);
+        };
+    }, [recordingState, updateTimer]);
 
-        setRecordingState('inactive');
-        setFinalAudioBlob(null);
-        setOutputAudioURL('');
-        setTimer('00:00');
-        setIsPlaying(false);
 
-        audioChunksRef.current = [];
-        waveformDataRef.current = [];
-        totalPausedTimeRef.current = 0;
-        startTimeRef.current = 0;
 
-        if (audioPlayerRef.current) {
-            audioPlayerRef.current.src = '';
-            audioPlayerRef.current.currentTime = 0;
+
+
+
+    // This hook tells the parent component (MessageInput) what the ref should contain.
+    useImperativeHandle(ref, () => ({
+        startRecord() {
+            startRecording();
+        },
+        removeRecord() {
+            resetRecorder();
+        },
+        pauseRecord() {
+            pauseRecording()
+        },
+        resumeRecord() {
+            resumeRecording();
         }
+    }),
+        [] // Dependencies for when to re-create the handle. Empty is fine here.
+    );
 
-        drawPlaybackWaveform(0);
-    }, [drawPlaybackWaveform]);
+
+
+
+
 
 
     const handleWaveformClick = (e) => {

@@ -25,6 +25,7 @@ const editorVariants = {
 
 const MessageInput = () => {
 
+  const [recordingState, setRecordingState] = useState('inactive');
   const audioRecorderRef = useRef(null)
 
   const [content, setContent] = useState(null);
@@ -34,6 +35,8 @@ const MessageInput = () => {
 
   // --- CHANGE 1: Create a ref for the entire component wrapper ---
   const wrapperRef = useRef(null);
+
+
 
   // --- CHANGE 2: useOnClickOutside now watches the entire wrapper ---
   useOnClickOutside(wrapperRef, () => {
@@ -52,6 +55,14 @@ const MessageInput = () => {
     }
   };
 
+
+  const handlePauseRecord = () => {
+    audioRecorderRef.current.pauseRecord();
+  }
+  const handleResumeRecord = () => {
+    audioRecorderRef.current.resumeRecord();
+  }
+
   const handleStartRecording = (e) => {
     console.log("1. handleStartRecording called. Setting isRecording to true."); //
     // e.stopPropagation();
@@ -61,7 +72,10 @@ const MessageInput = () => {
 
 
   const handleStopRecording = () => {
-    setIsRecording(false);
+    audioRecorderRef.current.removeRecord();
+    setTimeout(() => {
+      setIsRecording(false);
+    })
   };
 
   const sendTextContent = () => {
@@ -78,6 +92,18 @@ const MessageInput = () => {
       audioRecorderRef.current.startRecord();
     }
   }, [isRecording]);
+
+
+
+
+  const isAudioRecording = recordingState === 'recording';
+  const isAudioPaused = recordingState === 'paused';
+  const isAudioStopped = recordingState === 'stopped';
+  const isAudioInactive = recordingState === 'inactive';
+
+
+  console.log('recordingState --->', recordingState)
+
 
   return (
     <div className="w-full flex min-h-16 items-center justify-center mx-auto border-t p-4">
@@ -136,7 +162,7 @@ const MessageInput = () => {
               animate="animate"
               exit="exit"
             >
-              <PlayRecordAudio ref={audioRecorderRef} isRecording={isRecording} />
+              <PlayRecordAudio ref={audioRecorderRef} isRecording={isRecording} updateRecordingState={setRecordingState} />
             </motion.div>
           ) : !isExpanded ? (
             <motion.span
@@ -174,11 +200,18 @@ const MessageInput = () => {
 
           {/* This single AnimatePresence handles all button swaps to prevent jumps */}
           <AnimatePresence mode="wait">
-            {isRecording ? (
-              // If recording, show the Pause button
+            {isRecording && !isAudioPaused ? (
+              // If recording. ana not paused, show the Pause button
               <motion.div key="pause" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={handleStopRecording}>
+                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={() => handlePauseRecord()}>
                   <Pause className="text-meta-icon w-4" />
+                </Button>
+              </motion.div>
+            ) : isRecording && isAudioPaused ? (
+              // If recording and  paused, show the resume button
+              <motion.div key="resume" variants={itemVariants} initial="initial" animate="animate" exit="exit">
+                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={() => handleResumeRecord()}>
+                  <Mic className="text-meta-icon w-4" />
                 </Button>
               </motion.div>
             ) : hasNoText ? (
