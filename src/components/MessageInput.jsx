@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
-import PlayRecordAudio from "./Media/PlayRecordAudio";
+import RecordAudio from "./Media/RecordAudio";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -162,7 +162,7 @@ const MessageInput = () => {
               animate="animate"
               exit="exit"
             >
-              <PlayRecordAudio ref={audioRecorderRef} isRecording={isRecording} updateRecordingState={setRecordingState} />
+              <RecordAudio ref={audioRecorderRef} isRecording={isRecording} updateRecordingState={setRecordingState} />
             </motion.div>
           ) : !isExpanded ? (
             <motion.span
