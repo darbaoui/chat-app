@@ -7,17 +7,17 @@ import { cn } from "@/lib/utils";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 const PUSH_INTERVAL = 50;
 
-const PlayRecordAudio = ({ audioBlob, waveformDataRef }) => {
+const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
 
-    const canvasRef = useRef(null)
-    const waveformContainer = useRef(null)
-    const audioPlayerRef = useRef(null)
-    const [timer, setTimer] = useState('00:00')
-    const [recordingState, setRecordingState] = useState('pause'); // pause, playing
+    const canvasRef = useRef(null);
+    const waveformContainer = useRef(null);
+    const audioPlayerRef = useRef(null);
+    const [timer, setTimer] = useState('00:00');
+    const [recordingState, setRecordingState] = useState('pause');
 
     const handleWaveformClick = (e) => {
-        if (recordingState !== 'paused' || !audioPlayerRef.current?.duration) return;
+        if (recordingState !== 'pause' || !audioPlayerRef.current?.duration) return;
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
@@ -25,73 +25,56 @@ const PlayRecordAudio = ({ audioBlob, waveformDataRef }) => {
         audioPlayerRef.current.currentTime = audioPlayerRef.current.duration * percentage;
     };
 
-
     const playPauseAudio = () => {
-
         if (audioPlayerRef.current) {
             if (audioPlayerRef.current.paused) {
-                setRecordingState('play')
+                setRecordingState('play');
                 audioPlayerRef.current.play();
             } else {
-                setRecordingState('pause')
+                setRecordingState('pause');
                 audioPlayerRef.current.pause();
             }
         }
-    }
-
-
-
-
-
-    // Initial canvas setup and resize listener
-    const setupCanvas = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const dpr = window.devicePixelRatio || 1;
-        const rect = waveformContainer.current.getBoundingClientRect();
-
-        console.log('rect --->', rect)
-        const width = 200; //parent is 300 and timer=40px and padding is 10px (300-40-10 = 250) but width 240 works perfectly
-        canvas.width = width * dpr;
-        // console.log('width --->', rect)
-        canvas.height = rect.height * dpr;
-        const context = canvas.getContext('2d');
-        context.scale(dpr, dpr);
-        // drawPlaybackWaveform(0);
     };
 
+    // Fixed canvas setup
+    const setupCanvas = useCallback(() => {
+        const canvas = canvasRef.current;
+        const container = waveformContainer.current;
+        if (!canvas || !container) return;
 
-    // function setupCanvas() {
-    //     const canvas = canvasRef.current;
-    //     if (!canvas) return
-    //     canvas.width = waveformContainer.current.clientWidth;
-    //     canvas.height = waveformContainer.current.clientHeight;
-    // }
+        const dpr = window.devicePixelRatio || 1;
+        const rect = container.getBoundingClientRect();
 
+        // Use actual container dimensions
+        const width = rect.width;
+        const height = rect.height;
 
-    function getBarCount() {
+        // Set canvas size accounting for device pixel ratio
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
 
-        const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS
-        return Math.floor(canvasRef.current.width / (barWidth + barGap));
-    }
+        // Scale canvas back down using CSS
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
 
-    // const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
-    //     // if (width < 2 * radius) radius = width / 2;
-    //     // if (height < 2 * radius) radius = height / 2;
-    //     ctx.beginPath();
-    //     ctx.moveTo(x + radius, y);
-    //     ctx.arcTo(x + width, y, x + width, y + height, radius);
-    //     ctx.arcTo(x + width, y + height, x, y + height, radius);
-    //     ctx.arcTo(x, y + height, x, y, radius);
-    //     ctx.arcTo(x, y, x + width, y, radius);
-    //     ctx.closePath();
-    //     ctx.fill();
-    // }, []);
+        // Scale the context to match device pixel ratio
+        const context = canvas.getContext('2d');
+        context.scale(dpr, dpr);
+    }, []);
 
+    // Fixed bar count calculation
+    const getBarCount = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return 0;
 
+        const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS;
+        const availableWidth = canvas.clientWidth; // Use clientWidth for actual display width
+        return Math.floor(availableWidth / (barWidth + barGap));
+    }, []);
 
-
-    function drawRoundedRect(ctx, x, y, width, height, radius) {
+    // Fixed drawRoundedRect function
+    const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
         ctx.arcTo(x + width, y, x + width, y + height, radius);
@@ -100,145 +83,148 @@ const PlayRecordAudio = ({ audioBlob, waveformDataRef }) => {
         ctx.arcTo(x, y, x + width, y, radius);
         ctx.closePath();
         ctx.fill();
-    }
-
-
-    function drawFinalWaveform() {
-        const { waveColor } = AUDIO_WAVEFORM_OPRIONS
-        const scaledData = scaleDataToFit(waveformDataRef, getBarCount());
-        drawStaticBars(scaledData, waveColor);
-    }
-
-
-    function scaleDataToFit(data, count) {
-        if (data.length <= count) return data;
-        const scaled = [];
-        const scale = data.length / count;
-        for (let i = 0; i < count; i++) {
-            const chunk = data.slice(Math.floor(i * scale), Math.floor((i + 1) * scale));
-            scaled.push(chunk.length ? Math.max(...chunk) : 0);
-        }
-        return scaled;
-    }
-
-
-
-    function drawStaticBars(data, color, progress = 0) {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        const progressIndex = Math.floor(data.length * progress);
-        const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS
-        const BAR_TOTAL_WIDTH = barWidth + barGap
-
-        const canvasHeight = canvas.height
-        const canvasWidth = canvas.width
-
-        const dpr = window.devicePixelRatio || 1;
-        const { progressColor } = AUDIO_WAVEFORM_OPRIONS
-        data.forEach((barHeight, i) => {
-            const x = (i * BAR_TOTAL_WIDTH);
-            const y = ((canvasHeight / dpr) - barHeight) / 2;
-            context.fillStyle = i < progressIndex ? progressColor : color;
-            drawRoundedRect(context, x, y, barWidth, barHeight, barWidth / 2);
-        });
-    }
-
-
-    useEffect(() => {
-
-        setupCanvas();
-        window.addEventListener('resize', setupCanvas);
-
-        return () => window.removeEventListener('resize', setupCanvas);
     }, []);
 
+    // Fixed data scaling
+    const scaleDataToFit = useCallback((data, count) => {
+        if (!data || data.length === 0) return [];
+        if (data.length <= count) return [...data];
 
+        const scaled = [];
+        const scale = data.length / count;
+
+        for (let i = 0; i < count; i++) {
+            const startIndex = Math.floor(i * scale);
+            const endIndex = Math.floor((i + 1) * scale);
+            const chunk = data.slice(startIndex, endIndex);
+            scaled.push(chunk.length ? Math.max(...chunk) : 0);
+        }
+
+        return scaled;
+    }, []);
+
+    // Fixed drawStaticBars function
+    const drawStaticBars = useCallback((data, color, progress = 0) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const context = canvas.getContext('2d');
+        const canvasWidth = canvas.clientWidth;
+        const canvasHeight = canvas.clientHeight;
+
+        // Clear canvas
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        if (!data || data.length === 0) return;
+
+        const progressIndex = Math.floor(data.length * progress);
+        const { barWidth, barGap, progressColor } = AUDIO_WAVEFORM_OPRIONS;
+        const BAR_TOTAL_WIDTH = barWidth + barGap;
+
+        // Find max value for normalization
+        const maxValue = Math.max(...data);
+        if (maxValue === 0) return;
+
+        data.forEach((value, i) => {
+            const x = i * BAR_TOTAL_WIDTH;
+
+            // Normalize the bar height to canvas height
+            const normalizedHeight = (value / maxValue) * canvasHeight * 0.85; // 85% of canvas height
+            const barHeight = Math.max(1, normalizedHeight); // Minimum height of 1px
+
+            // Center the bar vertically
+            const y = (canvasHeight - barHeight) / 2;
+
+            // Set color based on progress
+            context.fillStyle = i < progressIndex ? progressColor : color;
+
+            // For 1px width bars, use simple rectangle for better visibility
+            if (barWidth === 1) {
+                context.fillRect(x, y, barWidth, barHeight);
+            } else {
+                // Use rounded rectangle for wider bars
+                const radius = Math.min(AUDIO_WAVEFORM_OPRIONS.barRadius, barWidth / 2, barHeight / 2);
+                drawRoundedRect(context, x, y, barWidth, barHeight, radius);
+            }
+        });
+    }, [drawRoundedRect]);
+
+    // Fixed drawFinalWaveform function
+    const drawFinalWaveform = useCallback((progress = 0) => {
+        if (!waveformData || waveformData.length === 0) return;
+
+        const { waveColor } = AUDIO_WAVEFORM_OPRIONS;
+        const barCount = getBarCount();
+
+        if (barCount === 0) return;
+
+        const scaledData = scaleDataToFit(waveformData, barCount);
+        drawStaticBars(scaledData, waveColor, progress);
+    }, [waveformData, getBarCount, scaleDataToFit, drawStaticBars]);
+
+    // Setup canvas on mount and resize
     useEffect(() => {
-        drawFinalWaveform()
-    }, [audioBlob, waveformDataRef])
+        setupCanvas();
+        const handleResize = () => {
+            setupCanvas();
+            // Redraw waveform after resize
+            setTimeout(() => drawFinalWaveform(), 100);
+        };
 
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [setupCanvas, drawFinalWaveform]);
 
-
-    // Audio player event listeners
-    // useEffect(() => {
-    //     const player = audioPlayerRef.current;
-    //     if (!player) return;
-
-    //     const handlePlay = () => {
-    //         setIsPlaying(true);
-    //         const visualize = () => {
-    //             if (player.paused) return;
-    //             drawPlaybackWaveform(player.currentTime);
-    //             playbackAnimationIdRef.current = requestAnimationFrame(visualize);
-    //         };
-    //         visualize();
-    //     };
-    //     const handlePause = () => {
-    //         setIsPlaying(false);
-    //         if (playbackAnimationIdRef.current) cancelAnimationFrame(playbackAnimationIdRef.current);
-    //     };
-    //     const handleEnded = () => {
-    //         setIsPlaying(false);
-    //         drawPlaybackWaveform(0);
-    //     };
-    //     const handleTimeUpdate = () => {
-    //         if (player.paused) {
-    //             drawPlaybackWaveform(player.currentTime);
-    //         }
-    //     };
-
-    //     player.addEventListener('play', handlePlay);
-    //     player.addEventListener('pause', handlePause);
-    //     player.addEventListener('ended', handleEnded);
-    //     player.addEventListener('timeupdate', handleTimeUpdate);
-
-    //     return () => {
-    //         player.removeEventListener('play', handlePlay);
-    //         player.removeEventListener('pause', handlePause);
-    //         player.removeEventListener('ended', handleEnded);
-    //         player.removeEventListener('timeupdate', handleTimeUpdate);
-    //     };
-    // }, [drawPlaybackWaveform]);
-
+    // Draw waveform when data changes
+    useEffect(() => {
+        if (waveformData && waveformData.length > 0) {
+            // Small delay to ensure canvas is properly set up
+            setTimeout(() => drawFinalWaveform(), 50);
+        }
+    }, [waveformData, drawFinalWaveform]);
 
     return (
-        <div
-            className={cn('flex items-center justify-start h-auto gap-2.5 w-full px-1')}
-        >
-            {
-                recordingState === 'play' && <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
-                    onClick={() => playPauseAudio()}
+        <div className="flex items-center justify-start h-auto gap-2.5 w-full px-1">
+            {recordingState === 'play' && (
+                <Button
+                    className="rounded-full w-6.5 h-6.5 p-0 bg-blue-600 border-none flex items-center justify-center"
+                    onClick={playPauseAudio}
                 >
                     <Pause className="w-[14px]" size={14} />
                 </Button>
-            }
+            )}
 
-            {
-                recordingState === 'pause' &&
+            {recordingState === 'pause' && (
                 <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
-                    onClick={() => playPauseAudio()}
+                    className="rounded-full w-6.5 h-6.5 p-0 bg-blue-600 border-none flex items-center justify-center"
+                    onClick={playPauseAudio}
                 >
                     <Play className="w-[14px]" size={14} />
                 </Button>
-            }
+            )}
 
-
-            <div ref={waveformContainer} className="flex items-center justify-start h-6 cursor-pointer rounded-lg relative w-[224px] border border-red-500" onClick={handleWaveformClick}>
-                <canvas ref={canvasRef} id="waveform" className="w-full h-full"></canvas>
-            </div>
-            <span
-                key="duration"
-                className="relative w-10 text-center text-chatBoxMe-foreground"
+            <div
+                ref={waveformContainer}
+                className="flex items-center justify-start h-6 cursor-pointer rounded-lg relative w-[224px] border border-gray-300 bg-white"
+                onClick={handleWaveformClick}
             >
+                <canvas
+                    ref={canvasRef}
+                    id="waveform"
+                    className="w-full h-full rounded-lg"
+                    style={{
+                        imageRendering: 'pixelated',
+                        imageRendering: '-moz-crisp-edges',
+                        imageRendering: 'crisp-edges'
+                    }}
+                />
+            </div>
+
+            <span className="relative w-10 text-center text-gray-700">
                 {timer}
             </span>
 
-
-            <audio ref={audioPlayerRef} className="hidden"></audio>
+            <audio ref={audioPlayerRef} className="hidden" />
         </div>
     );
 };

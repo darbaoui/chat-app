@@ -406,7 +406,7 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
                 <div className="flex flex-grow relative w-full items-center">
 
                     {isAudioPaused && <div className="absolute inset-0 z-10 bg-chat">
-                        <PlayRecordAudio audioBlob={finalAudioBlob} waveformDataRef={waveformDataRef.current} />
+                        <PlayRecordAudio audioBlob={finalAudioBlob} waveformData={waveformDataRef.current} />
                     </div>
                     }
                     <div className="flex items-center justify-start h-6 cursor-pointer rounded-lg relative w-[250px] border border-red-500" onClick={handleWaveformClick}>
