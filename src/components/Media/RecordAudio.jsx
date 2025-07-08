@@ -1,6 +1,8 @@
-// Media/RecordAudio.jsx
+// Media/PlayRecordAudio.jsx
 
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import { Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
@@ -30,6 +32,8 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
     const totalPausedTimeRef = useRef(0);
     const pauseStartTimeRef = useRef(0);
     const lastPushTimeRef = useRef(0);
+
+
 
     // Fixed drawRoundedRect function
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
@@ -77,88 +81,62 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
         });
     }, [drawRoundedRect]);
 
-    // Fixed canvas setup with proper DPR handling and accurate dimension measurement
+
+
+    // Fixed canvas setup with proper DPR handling
     const setupCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         const container = waveformContainer.current;
         if (!canvas || !container) return;
 
-        // Function to update canvas dimensions
-        const updateCanvasDimensions = () => {
-            // Force layout recalculation
-            container.style.display = 'none';
-            container.offsetHeight; // Trigger reflow
-            container.style.display = '';
+        // Force a reflow to ensure we get the latest dimensions
+        container.offsetHeight;
 
-            // Get computed styles to ensure all CSS is applied
-            const computedStyle = window.getComputedStyle(container);
-            const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-            const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = container.getBoundingClientRect();
 
-            // Use getBoundingClientRect for most accurate dimensions
-            const rect = container.getBoundingClientRect();
-            const width = rect.width - paddingLeft - paddingRight;
-            const height = rect.height;
+        // Use actual container dimensions
+        const width = rect.width;
+        const height = rect.height;
 
-            console.log('Container dimensions:', {
-                width,
-                height,
-                rectWidth: rect.width,
-                paddingLeft,
-                paddingRight,
-                computedWidth: computedStyle.width
-            });
+        // Only update if dimensions are valid
+        if (width <= 0 || height <= 0) return;
 
-            if (width <= 0 || height <= 0) {
-                console.warn('Invalid container dimensions, retrying...');
-                // Retry after a frame if dimensions are invalid
-                requestAnimationFrame(updateCanvasDimensions);
-                return;
-            }
+        // IMPORTANT: Always update canvas dimensions, don't check if they're the same
+        // This ensures the canvas resizes when the container changes size
 
-            const dpr = window.devicePixelRatio || 1;
+        // Set canvas size accounting for device pixel ratio
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
 
-            // Set canvas size accounting for device pixel ratio
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
+        // Scale canvas back down using CSS
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
 
-            // Scale canvas back down using CSS
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
+        // Scale the context to match device pixel ratio
+        const context = canvas.getContext('2d');
+        context.save(); // Save the current state
+        context.scale(dpr, dpr);
 
-            // Scale the context to match device pixel ratio
-            const context = canvas.getContext('2d');
-            context.setTransform(1, 0, 0, 1, 0, 0); // Reset any existing transforms
-            context.scale(dpr, dpr);
+        // Redraw the waveform after canvas resize
+        drawLiveWaveform();
+    }, [drawLiveWaveform]);
 
-            // Redraw the waveform after canvas resize
-            drawLiveWaveform();
-        };
 
-        // Initial setup with delay to ensure layout is complete
-        setTimeout(updateCanvasDimensions, 0);
+    useEffect(() => {
+        const container = waveformContainer.current;
+        if (!container) return;
 
-        // Use ResizeObserver for responsive updates
-        const resizeObserver = new ResizeObserver((entries) => {
-            // Use requestAnimationFrame to ensure we're not in the middle of a layout
-            requestAnimationFrame(() => {
-                for (const entry of entries) {
-                    updateCanvasDimensions();
-                }
-            });
+        const resizeObserver = new ResizeObserver(() => {
+            setupCanvas();
         });
 
         resizeObserver.observe(container);
 
-        // Store the observer for cleanup
-        container._resizeObserver = resizeObserver;
-
-        // Also observe the parent element in case it affects the container size
-        const parentElement = container.parentElement;
-        if (parentElement) {
-            resizeObserver.observe(parentElement);
-        }
-    }, [drawLiveWaveform]);
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, [setupCanvas])
 
     // Animation loop for live recording visualization
     const visualizeDuringRecording = useCallback(() => {
@@ -207,12 +185,6 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
             audioContextRef.current.close();
         }
 
-        // Clean up ResizeObserver
-        if (waveformContainer.current?._resizeObserver) {
-            waveformContainer.current._resizeObserver.disconnect();
-            delete waveformContainer.current._resizeObserver;
-        }
-
         setRecordingState('inactive');
         setFinalAudioBlob(null);
         setOutputAudioURL('');
@@ -242,8 +214,7 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
             recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
 
             recorder.onstop = () => {
-                const type = audioChunksRef.current[0]?.type || 'audio/wav'
-                const audioBlob = new Blob(audioChunksRef.current, { type });
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
                 setFinalAudioBlob(audioBlob);
                 stream.getTracks().forEach(track => track.stop());
             };
@@ -284,28 +255,23 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
         setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
     }, []);
 
-    // Setup canvas on mount - use useLayoutEffect for synchronous DOM updates
+    // Setup canvas on mount and resize - use useLayoutEffect for synchronous DOM updates
     useLayoutEffect(() => {
-        // Add a small delay to ensure the DOM is fully rendered
-        const timeoutId = setTimeout(() => {
-            setupCanvas();
-        }, 100);
+        if (!waveformContainer?.current) return
+        setupCanvas();
+    }, [setupCanvas, waveformContainer]);
 
-        // Also set up canvas when window is resized
+    // Handle window resize
+    useEffect(() => {
         const handleResize = () => {
-            setupCanvas();
+            // Use a small delay to ensure layout has settled
+            setTimeout(() => {
+                setupCanvas();
+            }, 0);
         };
-        window.addEventListener('resize', handleResize);
 
-        // Cleanup function
-        return () => {
-            clearTimeout(timeoutId);
-            window.removeEventListener('resize', handleResize);
-            if (waveformContainer.current?._resizeObserver) {
-                waveformContainer.current._resizeObserver.disconnect();
-                delete waveformContainer.current._resizeObserver;
-            }
-        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, [setupCanvas]);
 
     // Timer update effect
@@ -342,6 +308,8 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
 
     const isAudioPaused = recordingState === 'paused';
 
+    console.log('container --->', waveformContainer.current?.getBoundingClientRect());
+
     return (
         <div
             className={cn('flex items-center justify-start h-auto gap-2.5 w-full px-1 relative')}
@@ -350,7 +318,7 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
                 <PlayRecordAudio audioBlob={finalAudioBlob} waveformData={waveformDataRef.current} />
             </div>
             }
-            <div ref={waveformContainer} className="flex items-center justify-start h-6 cursor-pointer relative flex-1">
+            <div ref={waveformContainer} className="flex items-center justify-start h-6 cursor-pointer relative flex-1 border-red-500">
                 <canvas ref={canvasRef} id="waveform" className="w-full h-full"></canvas>
             </div>
             <span
