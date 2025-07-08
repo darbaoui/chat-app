@@ -11,8 +11,11 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
     const canvasRef = useRef(null);
     const waveformContainer = useRef(null);
     const audioPlayerRef = useRef(null);
-    const [scaledData, setScaledData] = useState([]);
     const playbackAnimationIdRef = useRef(null);
+    const wasPlayingBeforeDragRef = useRef(false);
+
+
+    const [scaledData, setScaledData] = useState([]);
     const [timer, setTimer] = useState('00:00');
     const [recordingState, setRecordingState] = useState('pause');
     const [isPlaying, setIsPlaying] = useState(false);
@@ -64,7 +67,8 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         handleWaveformClick(e);
 
         // Store if audio was playing before drag
-        e.currentTarget.dataset.wasPlaying = wasPlaying;
+        // e.currentTarget.dataset.wasPlaying = wasPlaying;
+        wasPlayingBeforeDragRef.current = wasPlaying;
     };
 
 
@@ -92,7 +96,7 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         setIsDragging(false);
 
         // Resume playing if it was playing before drag
-        const wasPlaying = e.currentTarget?.dataset?.wasPlaying === 'true';
+        const wasPlaying = wasPlayingBeforeDragRef.current;
         if (wasPlaying && audioPlayerRef.current) {
             audioPlayerRef.current.play();
         }
