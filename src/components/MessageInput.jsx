@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Pause, Plus, SendHorizonal, Trash } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,23 +22,17 @@ const editorVariants = {
   exit: { opacity: 0 },
 };
 
-
 const MessageInput = () => {
-
   const [recordingState, setRecordingState] = useState('inactive');
-  const audioRecorderRef = useRef(null)
+  const audioRecorderRef = useRef(null);
 
   const [content, setContent] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [hasNoText, setHasNoText] = useState(true)
+  const [hasNoText, setHasNoText] = useState(true);
 
-  // --- CHANGE 1: Create a ref for the entire component wrapper ---
   const wrapperRef = useRef(null);
 
-
-
-  // --- CHANGE 2: useOnClickOutside now watches the entire wrapper ---
   useOnClickOutside(wrapperRef, () => {
     if (isRecording) return;
     setIsExpanded(false);
@@ -55,53 +49,71 @@ const MessageInput = () => {
     }
   };
 
+  const handlePauseRecord = useCallback(() => {
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.pauseRecord();
+    }
+  }, []);
 
-  const handlePauseRecord = () => {
-    audioRecorderRef.current.pauseRecord();
-  }
-  const handleResumeRecord = () => {
-    audioRecorderRef.current.resumeRecord();
-  }
+  const handleResumeRecord = useCallback(() => {
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.resumeRecord();
+    }
+  }, []);
 
   const handleStartRecording = (e) => {
-    // e.stopPropagation();
-    setIsExpanded(false);
     setIsRecording(true);
   };
 
-
-  const handleStopRecording = () => {
-    audioRecorderRef.current.removeRecord();
-    setTimeout(() => {
-      setIsRecording(false);
-    })
-  };
+  const handleStopRecording = useCallback(() => {
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.removeRecord();
+    }
+    setIsRecording(false);
+    // Decide whether to stay expanded based on text content
+    if (hasNoText) {
+      setIsExpanded(false);
+    }
+  }, [hasNoText]);
 
   const sendTextContent = () => {
     // TODO: add logic how send json content from tiptap editor to server
-    // content state that store the text writing by the user
-  }
+    console.log('Sending text content:', content);
+    // Reset states after sending
+    setContent(null);
+    setHasNoText(true);
+    setIsExpanded(false);
+  };
 
-  const sendAudioContent = () => {
+  const sendAudioContent = useCallback(() => {
     // TODO: add logic how send audio recording to server
-  }
-
-  useEffect(() => {
-    if (isRecording && audioRecorderRef.current) {
-      audioRecorderRef.current.startRecord();
+    if (audioRecorderRef.current) {
+      // Get the audio data before stopping
+      const audioData = audioRecorderRef.current.getAudioData?.();
+      console.log('Sending audio content:', audioData);
+      audioRecorderRef.current.stopRecord?.();
     }
-  }, [isRecording]);
+    // Reset states after sending
+    setIsRecording(false);
+    setIsExpanded(false);
+  }, []);
 
+
+
+  // Calculate container width based on state
+  const getContainerWidth = () => {
+    if (isExpanded && !isRecording) return '400px';
+    if (isRecording) return '300px';
+    return '254px';
+  };
 
   const isAudioPaused = recordingState === 'paused';
 
-
   return (
     <div className="w-full flex min-h-16 items-center justify-center mx-auto border-t p-4">
-      {/* --- CHANGE 3: Attach the ref to this parent div --- */}
-      <div ref={wrapperRef} className="flex items-center gap-2.5">
+      <div ref={wrapperRef} className="flex items-center justify-center gap-2.5">
 
-        {/* --- Left Button Group (Plus / Trash swap) --- */}
+        {/* Left Button Group (Plus / Trash swap) */}
         <AnimatePresence mode="wait">
           {isRecording ? (
             <motion.div
@@ -134,105 +146,145 @@ const MessageInput = () => {
           )}
         </AnimatePresence>
 
-        {/* --- Main Input Container --- */}
+        {/* Main Input Container */}
         <motion.div
           className="flex-1 flex items-center justify-center min-h-8 rounded-full bg-chat text-meta-icon cursor-text"
           animate={{
-            width: isExpanded ? '400px' : (isRecording ? '300px' : '254px'),
+            width: getContainerWidth(),
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           onClick={handleExpand}
         >
-          {/* <AnimatePresence mode="wait"> */}
-          {isRecording ? (
-            <motion.div
-              key="recording-indicator"
-              className="text-xs text-meta-icon w-full"
-              variants={editorVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <RecordAudio ref={audioRecorderRef} isRecording={isRecording} updateRecordingState={setRecordingState} />
-            </motion.div>
-          ) : !isExpanded ? (
-            <motion.span
-              key="placeholder"
-              className="text-xs"
-              variants={editorVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              Add a comment
-            </motion.span>
-          ) : (
-            <motion.div
-              key="editor"
-              className="w-full px-2.5"
-              variants={editorVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <TiptapEditorWrite
-                setNoText={setHasNoText}
-                onChange={(data) => setNewMessage(data)}
-                placeholder="Type your message..."
-                className="w-full"
-              />
-            </motion.div>
-          )}
-          {/* </AnimatePresence> */}
+          <AnimatePresence mode="wait">
+            {isRecording ? (
+              <motion.div
+                key="recording-indicator"
+                className="text-xs text-meta-icon w-full"
+                variants={editorVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <RecordAudio
+                  ref={audioRecorderRef}
+                  isRecording={isRecording}
+                  updateRecordingState={setRecordingState}
+                  autoStart={true}
+                />
+              </motion.div>
+            ) : !isExpanded ? (
+              <motion.span
+                key="placeholder"
+                className="text-xs"
+                variants={editorVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                Add a comment
+              </motion.span>
+            ) : (
+              <motion.div
+                key="editor"
+                className="w-full px-2.5"
+                variants={editorVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <TiptapEditorWrite
+                  setNoText={setHasNoText}
+                  onChange={(data) => setNewMessage(data)}
+                  placeholder="Type your message..."
+                  className="w-full"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
-        {/* --- Right-side Buttons --- */}
+        {/* Right-side Buttons */}
         <div className="flex items-center gap-2.5">
-
-          {/* This single AnimatePresence handles all button swaps to prevent jumps */}
           <AnimatePresence mode="wait">
-            {isRecording && !isAudioPaused ? (
-              // If recording. ana not paused, show the Pause button
-              <motion.div key="pause" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={() => handlePauseRecord()}>
-                  <Pause className="text-meta-icon w-4" />
-                </Button>
-              </motion.div>
-            ) : isRecording && isAudioPaused ? (
-              // If recording and  paused, show the resume button
-              <motion.div key="resume" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={() => handleResumeRecord()}>
-                  <Mic className="text-meta-icon w-4" />
-                </Button>
-              </motion.div>
-            ) : hasNoText ? (
-              // If not recording and no text, show the Mic button
-              <motion.div key="mic" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="outline" size="icon" className="w-8 h-8 rounded-full bg-chat border-none" onClick={handleStartRecording}>
-                  <Mic className="text-meta-icon w-4" />
-                </Button>
-              </motion.div>
+            {isRecording ? (
+              // Recording state buttons
+              <>
+                {!isAudioPaused ? (
+                  <motion.div key="pause" variants={itemVariants} initial="initial" animate="animate" exit="exit">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 rounded-full bg-chat border-none"
+                      onClick={handlePauseRecord}
+                    >
+                      <Pause className="text-meta-icon w-4" />
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div key="resume" variants={itemVariants} initial="initial" animate="animate" exit="exit">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 rounded-full bg-chat border-none"
+                      onClick={handleResumeRecord}
+                    >
+                      <Mic className="text-meta-icon w-4" />
+                    </Button>
+                  </motion.div>
+                )}
+              </>
             ) : (
-              // If not recording and HAS text, show the Send button
-              <motion.div key="send" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="default" size="icon" className="w-8 h-8 rounded-full" onClick={sendTextContent}>
-                  <SendHorizonal className="text-background w-4" />
-                </Button>
-              </motion.div>
+              // Non-recording state buttons
+              <>
+                {hasNoText ? (
+                  <motion.div key="mic" variants={itemVariants} initial="initial" animate="animate" exit="exit">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 rounded-full bg-chat border-none"
+                      onClick={handleStartRecording}
+                    >
+                      <Mic className="text-meta-icon w-4" />
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div key="send" variants={itemVariants} initial="initial" animate="animate" exit="exit">
+                    <Button
+                      variant="default"
+                      size="icon"
+                      className="w-8 h-8 rounded-full"
+                      onClick={sendTextContent}
+                    >
+                      <SendHorizonal className="text-background w-4" />
+                    </Button>
+                  </motion.div>
+                )}
+              </>
             )}
           </AnimatePresence>
 
-          {/* This AnimatePresence block is ONLY for adding the Send button during recording */}
+          {/* Send button during recording */}
           <AnimatePresence>
             {isRecording && (
-              <motion.div key="send-record" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                <Button variant="default" size="icon" className="w-8 h-8 rounded-full" onClick={sendAudioContent}>
+              <motion.div
+                key="send-record"
+                variants={itemVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                style={{ position: 'relative' }}
+              >
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="w-8 h-8 rounded-full"
+                  onClick={sendAudioContent}
+                >
                   <SendHorizonal className="text-background w-4" />
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
       </div>
     </div>

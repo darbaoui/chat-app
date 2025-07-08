@@ -8,7 +8,11 @@ import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
 const PUSH_INTERVAL = 50;
 
-const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
+const RecordAudio = forwardRef(({ updateRecordingState, autoStart }, ref) => {
+
+
+
+
     // State for managing recording status, audio data, and UI
     const [recordingState, setRecordingState] = useState('inactive');
     const [timer, setTimer] = useState('00:00');
@@ -32,6 +36,8 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
     const totalPausedTimeRef = useRef(0);
     const pauseStartTimeRef = useRef(0);
     const lastPushTimeRef = useRef(0);
+
+
 
 
 
@@ -246,6 +252,14 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
         totalPausedTimeRef.current += Date.now() - pauseStartTimeRef.current;
         visualizeDuringRecording();
     }, [visualizeDuringRecording]);
+
+
+
+    useEffect(() => {
+        if (autoStart) {
+            startRecording();
+        }
+    }, [autoStart, startRecording]);
 
     const updateTimer = useCallback(() => {
         if (startTimeRef.current === 0) return;
