@@ -1,4 +1,4 @@
-// Media/PlayRecordAudio.jsx
+// Media/RecordAudio.jsx
 
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -30,8 +30,6 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
     const totalPausedTimeRef = useRef(0);
     const pauseStartTimeRef = useRef(0);
     const lastPushTimeRef = useRef(0);
-
-
 
     // Fixed drawRoundedRect function
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
@@ -79,44 +77,75 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
         });
     }, [drawRoundedRect]);
 
-
-    // Fixed canvas setup with proper DPR handling
+    // Fixed canvas setup with proper DPR handling and accurate dimension measurement
     const setupCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         const container = waveformContainer.current;
         if (!canvas || !container) return;
 
-        // Use ResizeObserver to get the most accurate dimensions
-        const resizeObserver = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-                const { width, height } = entry.contentRect;
+        // Function to update canvas dimensions
+        const updateCanvasDimensions = () => {
+            // Force layout recalculation
+            container.style.display = 'none';
+            container.offsetHeight; // Trigger reflow
+            container.style.display = '';
 
-                console.log('ResizeObserver dimensions:', { width, height });
+            // Get computed styles to ensure all CSS is applied
+            const computedStyle = window.getComputedStyle(container);
+            const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+            const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
 
-                if (width <= 0 || height <= 0) return;
+            // Use getBoundingClientRect for most accurate dimensions
+            const rect = container.getBoundingClientRect();
+            const width = rect.width - paddingLeft - paddingRight;
+            const height = rect.height;
 
-                const dpr = window.devicePixelRatio || 1;
+            console.log('Container dimensions:', {
+                width,
+                height,
+                rectWidth: rect.width,
+                paddingLeft,
+                paddingRight,
+                computedWidth: computedStyle.width
+            });
 
-                // Check if canvas already has the correct dimensions
-                if (canvas.width === width * dpr && canvas.height === height * dpr) {
-                    return;
-                }
-
-                // Set canvas size accounting for device pixel ratio
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-
-                // Scale canvas back down using CSS
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-
-                // Scale the context to match device pixel ratio
-                const context = canvas.getContext('2d');
-                context.scale(dpr, dpr);
-
-                // Redraw the waveform after canvas resize
-                drawLiveWaveform();
+            if (width <= 0 || height <= 0) {
+                console.warn('Invalid container dimensions, retrying...');
+                // Retry after a frame if dimensions are invalid
+                requestAnimationFrame(updateCanvasDimensions);
+                return;
             }
+
+            const dpr = window.devicePixelRatio || 1;
+
+            // Set canvas size accounting for device pixel ratio
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            // Scale canvas back down using CSS
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+
+            // Scale the context to match device pixel ratio
+            const context = canvas.getContext('2d');
+            context.setTransform(1, 0, 0, 1, 0, 0); // Reset any existing transforms
+            context.scale(dpr, dpr);
+
+            // Redraw the waveform after canvas resize
+            drawLiveWaveform();
+        };
+
+        // Initial setup with delay to ensure layout is complete
+        setTimeout(updateCanvasDimensions, 0);
+
+        // Use ResizeObserver for responsive updates
+        const resizeObserver = new ResizeObserver((entries) => {
+            // Use requestAnimationFrame to ensure we're not in the middle of a layout
+            requestAnimationFrame(() => {
+                for (const entry of entries) {
+                    updateCanvasDimensions();
+                }
+            });
         });
 
         resizeObserver.observe(container);
@@ -124,24 +153,12 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
         // Store the observer for cleanup
         container._resizeObserver = resizeObserver;
 
-        // Fallback: try to set up immediately with current dimensions
-        const rect = container.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-
-        if (width > 0 && height > 0) {
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-
-            const context = canvas.getContext('2d');
-            context.scale(dpr, dpr);
-            drawLiveWaveform();
+        // Also observe the parent element in case it affects the container size
+        const parentElement = container.parentElement;
+        if (parentElement) {
+            resizeObserver.observe(parentElement);
         }
     }, [drawLiveWaveform]);
-
 
     // Animation loop for live recording visualization
     const visualizeDuringRecording = useCallback(() => {
@@ -269,10 +286,21 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
 
     // Setup canvas on mount - use useLayoutEffect for synchronous DOM updates
     useLayoutEffect(() => {
-        setupCanvas();
+        // Add a small delay to ensure the DOM is fully rendered
+        const timeoutId = setTimeout(() => {
+            setupCanvas();
+        }, 100);
+
+        // Also set up canvas when window is resized
+        const handleResize = () => {
+            setupCanvas();
+        };
+        window.addEventListener('resize', handleResize);
 
         // Cleanup function
         return () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener('resize', handleResize);
             if (waveformContainer.current?._resizeObserver) {
                 waveformContainer.current._resizeObserver.disconnect();
                 delete waveformContainer.current._resizeObserver;

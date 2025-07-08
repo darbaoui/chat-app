@@ -64,7 +64,6 @@ const MessageInput = () => {
   }
 
   const handleStartRecording = (e) => {
-    console.log("1. handleStartRecording called. Setting isRecording to true."); //
     // e.stopPropagation();
     setIsExpanded(false);
     setIsRecording(true);
@@ -94,15 +93,7 @@ const MessageInput = () => {
   }, [isRecording]);
 
 
-
-
-  const isAudioRecording = recordingState === 'recording';
   const isAudioPaused = recordingState === 'paused';
-  const isAudioStopped = recordingState === 'stopped';
-  const isAudioInactive = recordingState === 'inactive';
-
-
-  console.log('recordingState --->', recordingState)
 
 
   return (
