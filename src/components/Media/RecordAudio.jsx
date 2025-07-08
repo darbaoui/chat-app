@@ -1,8 +1,6 @@
 // Media/PlayRecordAudio.jsx
 
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
-import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
