@@ -199,6 +199,32 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         return scaled;
     }, []);
 
+
+    const drawCursor = useCallback((context, cursorX, canvasHeight) => {
+
+        const { height: cursorHeight, waveColor: cursorColor } = AUDIO_WAVEFORM_OPRIONS;
+        const cursorY = (canvasHeight - cursorHeight) / 2;
+        context.fillStyle = cursorColor;
+        const cursorWidth = 2;
+        const cursorRadius = 1;
+
+        // Ensure cursor is within canvas bounds
+        const adjustedCursorX = Math.max(cursorWidth / 2, Math.min(cursorX, context.canvas.clientWidth - cursorWidth / 2));
+
+        // Draw rounded rectangle cursor
+        context.beginPath();
+        context.moveTo(adjustedCursorX - cursorWidth / 2 + cursorRadius, cursorY);
+        context.arcTo(adjustedCursorX + cursorWidth / 2, cursorY, adjustedCursorX + cursorWidth / 2, cursorY + cursorHeight, cursorRadius);
+        context.arcTo(adjustedCursorX + cursorWidth / 2, cursorY + cursorHeight, adjustedCursorX - cursorWidth / 2, cursorY + cursorHeight, cursorRadius);
+        context.arcTo(adjustedCursorX - cursorWidth / 2, cursorY + cursorHeight, adjustedCursorX - cursorWidth / 2, cursorY, cursorRadius);
+        context.arcTo(adjustedCursorX - cursorWidth / 2, cursorY, adjustedCursorX + cursorWidth / 2, cursorY, cursorRadius);
+        context.closePath();
+        context.fill();
+
+
+    }, []);
+
+
     // Fixed drawStaticBars function
     const drawStaticBars = useCallback((data, progress = 0) => {
         const canvas = canvasRef.current;
@@ -214,11 +240,6 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         if (!data || data.length === 0) return;
 
         const progressIndex = Math.floor(data.length * progress);
-
-
-        // const audioDuration = audioPlayer?.duration || (numBars * 120 / 1000);
-        // const currentBarIndex = audioDuration > 0 ? Math.floor((currentTime / audioDuration) * numBars) : 0;
-
 
         const { barWidth, barGap, progressColor, waveColor } = AUDIO_WAVEFORM_OPRIONS;
         const BAR_TOTAL_WIDTH = barWidth + barGap;
@@ -251,15 +272,11 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         });
 
 
+        const waveWidth = data.length * BAR_TOTAL_WIDTH
         // Draw cursor line
-        const cursorX = progress * canvasWidth;
-        context.strokeStyle = '#ff0000'; // Red cursor
-        context.lineWidth = 2;
-        context.beginPath();
-        context.moveTo(cursorX, 0);
-        context.lineTo(cursorX, canvasHeight);
-        context.stroke();
-    }, [drawRoundedRect]);
+        const cursorX = progress * waveWidth;
+        drawCursor(context, cursorX, canvasHeight);
+    }, [drawRoundedRect, drawCursor]);
 
     // Fixed drawFinalWaveform function
     const drawFinalWaveform = useCallback((progress = 0) => {
@@ -283,7 +300,7 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         const handleResize = () => {
             setupCanvas();
             // Redraw waveform after resize
-            setTimeout(() => drawFinalWaveform(), 100);
+            setTimeout(() => drawFinalWaveform(cursorPosition), 100);
         };
 
         window.addEventListener('resize', handleResize);
@@ -352,13 +369,11 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         };
     }, [drawStaticBars, scaledData]);
 
-
-
     return (
-        <div className="flex items-center justify-start h-auto gap-2.5 w-full px-1">
+        <div className="flex items-center justify-start h-auto gap-2.5 w-full">
             {isPlaying ? (
                 <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-blue-600 border-none flex items-center justify-center"
+                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none flex items-center justify-center"
                     onClick={playPauseAudio}
                 >
                     <Pause className="w-[14px]" size={14} />
@@ -366,7 +381,7 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
             ) : (
 
                 <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-blue-600 border-none flex items-center justify-center"
+                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none flex items-center justify-center"
                     onClick={playPauseAudio}
                 >
                     <Play className="w-[14px]" size={14} />
@@ -376,14 +391,14 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
             <div
                 ref={waveformContainer}
-                className="flex items-center justify-start h-6 cursor-pointer rounded-lg relative w-[224px] border border-gray-300 bg-white"
+                className="flex items-center justify-start h-6 cursor-pointer relative flex-1"
                 onMouseDown={handleMouseDown}
                 style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
             >
                 <canvas
                     ref={canvasRef}
                     id="waveform"
-                    className="w-full h-full rounded-lg"
+                    className="w-full h-full"
                     style={{
                         imageRendering: 'pixelated',
                         imageRendering: '-moz-crisp-edges',
@@ -392,7 +407,7 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
                 />
             </div>
 
-            <span className="relative w-10 text-center text-gray-700">
+            <span className="relative w-10 text-center text-chatBoxMe-foreground">
                 {timer}
             </span>
 
