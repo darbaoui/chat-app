@@ -225,7 +225,8 @@ const RecordAudio = forwardRef(({ updateRecordingState }, ref) => {
             recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
 
             recorder.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                const type = audioChunksRef.current[0]?.type || 'audio/wav'
+                const audioBlob = new Blob(audioChunksRef.current, { type });
                 setFinalAudioBlob(audioBlob);
                 stream.getTracks().forEach(track => track.stop());
             };

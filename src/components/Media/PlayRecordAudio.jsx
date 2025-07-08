@@ -155,9 +155,15 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
 
     useEffect(() => {
+        if (!audioBlob) return;
+
         const audioUrl = URL.createObjectURL(audioBlob);
         if (audioPlayerRef.current) audioPlayerRef.current.src = audioUrl;
-    }, [audioBlob])
+
+        return () => {
+            URL.revokeObjectURL(audioUrl);
+        };
+    }, [audioBlob]);
 
     // Fixed bar count calculation
     const getBarCount = useCallback(() => {
