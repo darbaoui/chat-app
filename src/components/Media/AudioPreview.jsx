@@ -24,7 +24,7 @@ const AudioPreview = ({
     const [isPlaying, setIsPlaying] = useState(false);
     const [showRemaining, setShowRemaining] = useState(false);
     const [time, setTime] = useState(0);
-    const [speed, setSpeed] = useState(1);
+    const [speed, setSpeed] = useState(1); // 1->1.2->1.5->2
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {

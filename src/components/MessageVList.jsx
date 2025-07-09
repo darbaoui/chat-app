@@ -64,7 +64,7 @@ const MessageVList = () => {
       shouldRetryOnError: true,
     });
 
-  const { messages, setMessages } = useMessageStore();
+  const { messages, setMessages, shouldScrollToBottom } = useMessageStore();
 
   useEffect(() => {
     if (data) {
@@ -73,6 +73,13 @@ const MessageVList = () => {
 
     }
   }, [data])
+
+
+  useEffect(() => {
+    if (shouldScrollToBottom) {
+      shouldStickToBottom.current = shouldStickToBottom
+    }
+  }, [shouldScrollToBottom])
 
   const isLoadingMore =
     isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");

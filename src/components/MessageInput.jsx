@@ -9,6 +9,9 @@ import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "./Media/RecordAudio";
 import axios from "@/lib/axios";
+import { CURRENT_USER } from "@/constants";
+import { faker } from "@faker-js/faker";
+import useMessageStore from "@/stores/MessageStore";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -24,6 +27,10 @@ const editorVariants = {
 };
 
 const MessageInput = () => {
+
+  const { addMessage, setShouldScrollToBottom } = useMessageStore();
+
+
   const [recordingState, setRecordingState] = useState('inactive');
   const audioRecorderRef = useRef(null);
 
@@ -135,9 +142,59 @@ const MessageInput = () => {
     }
   }, []);
 
+  const getDuration = async (audioBlob) => {
 
-  const sendAudioMessage = (audioBlob) => {
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const audioContext = new (window?.AudioContext || window?.webkitAudioContext)();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBuffer.duration;
+  };
+
+
+  const sendAudioMessage = async (audioBlob) => {
     console.log('sendAudioMessage--->', audioBlob)
+
+
+    const mime_type = audioBlob.type;
+
+    // 2. Generate a file_name
+    const extension = mime_type.split('/')[1] || 'wav';
+    const file_name = `recording-${Date.now()}.${extension}`;
+
+    const duration = await getDuration(audioBlob);
+
+    console.log('duration --->', duration)
+
+    const message = {
+      id: faker.string.uuid(),
+      tempId: faker.string.uuid(),
+      isUploading: true,
+      created_at: new Date(Date.now()),
+      media: [
+        {
+          id: faker.string.uuid(),
+          tempId: faker.string.uuid(),
+          duration: duration,
+          file_name: file_name,
+          file: audioBlob,
+          mime_type: mime_type,
+          name: file_name
+        }
+      ],
+      text: null,
+      user: {
+        id: CURRENT_USER,
+        name: "John Doe",
+        avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
+      }
+    }
+
+    console.log('message --->', message)
+    setShouldScrollToBottom(true)
+    addMessage(message);
+
+    // TODO generate a temp message with audio file
+
     // Reset states after sending
     setIsRecording(false);
     setIsExpanded(false);

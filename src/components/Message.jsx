@@ -16,21 +16,24 @@ const Message = ({ message, prevMessage = {} }) => {
     <div
       key={message.id}
       className={cn(
-        "flex items-start mb-1 px-2.5",
-        isMe ? "flex-row-reverse" : "",
+        "flex items-start mb-1",
+        isMe ? "flex-row-reverse pe-4 ps-4 md:ps-5 md:pe-5" : " ps-4 pe-4 md:ps-5 md:pe-5",
         showAvatarAndName ? "mt-4" : ""
       )}
     >
-      <div className={cn("w-6.5 h-6.5", isMe ? "ms-3" : "me-3")}>
-        {showAvatarAndName && (
-          <Avatar>
-            <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
-            <AvatarFallback>{user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-        )}
+      <div className={cn("w-6.5 h-full sticky top-[30px]", isMe ? "ms-3" : "me-3")}>
+
+        <div className={cn("min-w-6.5 !w-6.5 !h-6.5 ")}>
+          {showAvatarAndName && (
+            <Avatar>
+              <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
+              <AvatarFallback>{user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          )}
+        </div>
       </div>
 
-      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-col ${isMe ? "items-end content-end justify-self-end" : "items-start"}`}>
         {/* Sender Name and Time */}
         {showAvatarAndName && (
           <div className={cn("flex items-baseline text-meta-icon gap-2.5 mb-1", isMe ? "flex-row-reverse pe-4" : "ps-4")}>
@@ -41,7 +44,7 @@ const Message = ({ message, prevMessage = {} }) => {
 
         {/* Message Bubble */}
         <div
-          className={cn('relative')}
+          className={cn('relative flex', isMe ? 'justify-end' : '')}
         >
           {showAvatarAndName && (
             <BoxCorner

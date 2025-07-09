@@ -328,7 +328,7 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         stopRecord() {
             stopRecording();
         }
-    }), [startRecording, resetRecorder, pauseRecording, resumeRecording]);
+    }), [startRecording, resetRecorder, pauseRecording, resumeRecording, stopRecording]);
 
     const isAudioPaused = recordingState === 'paused';
 
@@ -340,7 +340,7 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
                 <PlayRecordAudio audioBlob={finalAudioBlob} waveformData={waveformDataRef.current} />
             </div>
             }
-            <div ref={waveformContainer} className="flex items-center justify-start h-6 cursor-pointer relative flex-1 border-red-500">
+            <div ref={waveformContainer} className="flex items-center justify-start h-6 cursor-pointer relative flex-1">
                 <canvas ref={canvasRef} id="waveform" className="w-full h-full"></canvas>
             </div>
             <span
