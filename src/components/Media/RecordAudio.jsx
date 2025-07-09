@@ -8,7 +8,7 @@ import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
 const PUSH_INTERVAL = 50;
 
-const RecordAudio = forwardRef(({ updateRecordingState, autoStart }, ref) => {
+const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudioBlob }, ref) => {
 
 
 
@@ -222,6 +222,7 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart }, ref) => {
             recorder.onstop = () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
                 setFinalAudioBlob(audioBlob);
+                sendFinalAudioBlob(audioBlob);
                 stream.getTracks().forEach(track => track.stop());
             };
 
@@ -252,6 +253,12 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart }, ref) => {
         totalPausedTimeRef.current += Date.now() - pauseStartTimeRef.current;
         visualizeDuringRecording();
     }, [visualizeDuringRecording]);
+
+
+    const stopRecording = useCallback(() => {
+        mediaRecorderRef.current?.stop();
+        setRecordingState('stopped');
+    }, [])
 
 
 
@@ -317,12 +324,13 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart }, ref) => {
         },
         resumeRecord() {
             resumeRecording();
+        },
+        stopRecord() {
+            stopRecording();
         }
     }), [startRecording, resetRecorder, pauseRecording, resumeRecording]);
 
     const isAudioPaused = recordingState === 'paused';
-
-    console.log('container --->', waveformContainer.current?.getBoundingClientRect());
 
     return (
         <div

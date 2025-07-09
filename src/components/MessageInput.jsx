@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "./Media/RecordAudio";
+import axios from "@/lib/axios";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -65,6 +66,49 @@ const MessageInput = () => {
     setIsRecording(true);
   };
 
+
+
+
+  const sendMessage = () => {
+    setLoading(true);
+    let data = new FormData();
+    // data.append('files', files);
+
+    files.forEach((file, index) => {
+      data.append(`files[${index}]`, file); // Adjust key format as needed by your backend
+    });
+    if (audioRecord) {
+      data.append('audio', audioRecord);
+    }
+    data.append('content', JSON.stringify(content));
+    axios
+      .post(`/messages`, data, {
+        onUploadProgress: function (progressEvent) {
+          var percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+
+          setProgressUpload(percentCompleted);
+        },
+      })
+      .then(({ data }) => {
+        removeRecording();
+        addMessage(data);
+        setContent(null);
+        setFilePreviews([]);
+        setFiles([]);
+      })
+      .catch((error) => {
+        catchValidationErrors(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+
+
+
   const handleStopRecording = useCallback(() => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.removeRecord();
@@ -86,18 +130,18 @@ const MessageInput = () => {
   };
 
   const sendAudioContent = useCallback(() => {
-    // TODO: add logic how send audio recording to server
     if (audioRecorderRef.current) {
-      // Get the audio data before stopping
-      const audioData = audioRecorderRef.current.getAudioData?.();
-      console.log('Sending audio content:', audioData);
       audioRecorderRef.current.stopRecord?.();
     }
+  }, []);
+
+
+  const sendAudioMessage = (audioBlob) => {
+    console.log('sendAudioMessage--->', audioBlob)
     // Reset states after sending
     setIsRecording(false);
     setIsExpanded(false);
-  }, []);
-
+  }
 
 
   // Calculate container width based on state
@@ -168,6 +212,7 @@ const MessageInput = () => {
                 <RecordAudio
                   ref={audioRecorderRef}
                   isRecording={isRecording}
+                  sendFinalAudioBlob={sendAudioMessage}
                   updateRecordingState={setRecordingState}
                   autoStart={true}
                 />
