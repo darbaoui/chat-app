@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 const useMessageStore = create((set) => ({
-  messages: [],
+  messages: null,
   unReadMessages: 0,
   incrementUnreadMessages: () =>
     set((state) => ({ unReadMessages: state.unReadMessages + 1 })),

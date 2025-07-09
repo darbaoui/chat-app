@@ -4,18 +4,20 @@ import { Loader } from "lucide-react";
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
-import { formatDateSeparator} from "./helper";
+import { formatDateSeparator } from "./helper";
 import DateSeparator from "./DateSeparator";
 // import { VList } from "virtua";
 import { VList } from "@/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
+import axios from "@/lib/axios";
+import useMessageStore from "@/stores/MessageStore";
 const LIMIT = 50;
 
 
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = (url) => axios.get(url).then(({ data }) => data);
 
 const getKey = (pageIndex, previousPageData) => {
   if (previousPageData && !previousPageData.hasMore) return null;
@@ -62,7 +64,16 @@ const MessageVList = () => {
       shouldRetryOnError: true,
     });
 
-  const messages = data ? data.flatMap((page) => page.messages).reverse() : [];
+  const { messages, setMessages } = useMessageStore();
+
+  useEffect(() => {
+    if (data) {
+      const messages = data ? data.flatMap((page) => page.messages).reverse() : [];
+      setMessages(messages);
+
+    }
+  }, [data])
+
   const isLoadingMore =
     isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
   const isEmpty = data?.[0]?.length === 0;
@@ -78,7 +89,7 @@ const MessageVList = () => {
     const items = [];
     const dateIndexesSet = new Set();
     let currentDate = null;
-
+    if (!messages) return { items, dateIndexes: [], dateIndexesSet };
     messages.forEach((message, index) => {
 
       const messageDate = new Date(message.created_at);
@@ -125,14 +136,10 @@ const MessageVList = () => {
     if (!ref.current) return;
 
     const start = ref.current.findStartIndex();
-    
+
     const activeStickyIndex = dateIndexes.findLast((index) => start >= index);
 
     setActiveIndex(activeStickyIndex);
-
-
-
-
 
     shouldStickToBottom.current =
       offset - ref.current.scrollSize + ref.current.viewportSize >=
@@ -148,7 +155,7 @@ const MessageVList = () => {
   }
 
 
-  if (isLoading)
+  if (isLoading || !messages)
     return (
       <div className="absolute inset-0 w-full  flex items-center justify-center">
         <Loader className="animate-spin" />
@@ -162,12 +169,12 @@ const MessageVList = () => {
 
         <div className="flex flex-col h-full w-full relative">
           {isLoadingMore && (
-              <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
-                <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
-                  <Loader className="animate-spin w-3 text-white" />
-                </div>
+            <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
+              <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
+                <Loader className="animate-spin w-3 text-white" />
               </div>
-            )}
+            </div>
+          )}
           <VList
             ref={ref}
             style={{
@@ -180,12 +187,12 @@ const MessageVList = () => {
             shift={isPrepend.current}
             onScroll={handleScroll}
           >
-            
+
 
 
             {items.map((item, index) => {
               if (item.type === 'date') {
-                return <DateSeparator dateString={item.date} index={index}  key={item.id} />
+                return <DateSeparator dateString={item.date} index={index} key={item.id} />
               }
               return (
 
