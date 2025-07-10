@@ -125,6 +125,9 @@ const MessageVList = () => {
 
   }, [messages]);
 
+  console.log('messages --->', messages)
+  console.log('items --->', items)
+
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;

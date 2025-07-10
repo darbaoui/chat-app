@@ -23,7 +23,7 @@ const useMessageStore = create((set) => ({
 
       if (messageExists) return state;
 
-      return { messages: [newMessage, ...state.messages] };
+      return { messages: [...state.messages, newMessage] };
     }),
   removeMessage: (messageId) =>
       set((state) => ({

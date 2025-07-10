@@ -169,7 +169,7 @@ const MessageInput = () => {
       id: faker.string.uuid(),
       tempId: faker.string.uuid(),
       isUploading: true,
-      created_at: new Date(Date.now()),
+      created_at: new Date(Date.now()).toISOString(),
       media: [
         {
           id: faker.string.uuid(),
