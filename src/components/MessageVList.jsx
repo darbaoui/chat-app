@@ -11,13 +11,14 @@ import { VList } from "@/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
-import axios from "@/lib/axios";
+import { axios } from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
 const LIMIT = 50;
 
 
 
-const fetcher = (url) => axios.get(url).then(({ data }) => data);
+// const fetcher = (url) => axios.get(url).then(({ data }) => data);
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const getKey = (pageIndex, previousPageData) => {
   if (previousPageData && !previousPageData.hasMore) return null;

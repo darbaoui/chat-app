@@ -8,10 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "./Media/RecordAudio";
-import axios from "@/lib/axios";
+import { axios } from "@/lib/axios";
 import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import useMessageStore from "@/stores/MessageStore";
+import { scaleDataToFit } from "./helper";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -77,40 +78,7 @@ const MessageInput = () => {
 
 
   const sendMessage = () => {
-    setLoading(true);
-    let data = new FormData();
-    // data.append('files', files);
 
-    files.forEach((file, index) => {
-      data.append(`files[${index}]`, file); // Adjust key format as needed by your backend
-    });
-    if (audioRecord) {
-      data.append('audio', audioRecord);
-    }
-    data.append('content', JSON.stringify(content));
-    axios
-      .post(`/messages`, data, {
-        onUploadProgress: function (progressEvent) {
-          var percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
-          );
-
-          setProgressUpload(percentCompleted);
-        },
-      })
-      .then(({ data }) => {
-        removeRecording();
-        addMessage(data);
-        setContent(null);
-        setFilePreviews([]);
-        setFiles([]);
-      })
-      .catch((error) => {
-        catchValidationErrors(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   };
 
 
@@ -142,18 +110,12 @@ const MessageInput = () => {
     }
   }, []);
 
-  const getDuration = async (audioBlob) => {
-
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const audioContext = new (window?.AudioContext || window?.webkitAudioContext)();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    return audioBuffer.duration;
-  };
 
 
-  const sendAudioMessage = async (audioBlob) => {
+  const sendAudioMessage = async ({ audioBlob, duration, waveData }) => {
     console.log('sendAudioMessage--->', audioBlob)
 
+    const wave_samples = scaleDataToFit(waveData)
 
     const mime_type = audioBlob.type;
 
@@ -161,24 +123,24 @@ const MessageInput = () => {
     const extension = mime_type.split('/')[1] || 'wav';
     const file_name = `recording-${Date.now()}.${extension}`;
 
-    const duration = await getDuration(audioBlob);
-
-    console.log('duration --->', duration)
-
+    const message_id = faker.string.uuid();
     const message = {
-      id: faker.string.uuid(),
-      tempId: faker.string.uuid(),
+      id: message_id,
+      tempId: message_id,
       isUploading: true,
       created_at: new Date(Date.now()).toISOString(),
       media: [
         {
+          message_id,
           id: faker.string.uuid(),
           tempId: faker.string.uuid(),
-          duration: duration,
-          file_name: file_name,
+          isUploading: true,
+          duration,
+          file_name,
           file: audioBlob,
-          mime_type: mime_type,
-          name: file_name
+          mime_type,
+          name: file_name,
+          wave_samples,
         }
       ],
       text: null,

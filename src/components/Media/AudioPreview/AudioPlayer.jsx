@@ -9,7 +9,7 @@ import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
 import { LoaderCircle, Pause, Play } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-const AudioPreview = ({
+const AudioPlayer = ({
     audioUrl,// required
     audioDuration,// required
     className,
@@ -286,13 +286,13 @@ const AudioPreview = ({
     );
 };
 
-AudioPreview.displayName = 'AudioPreview';
+AudioPlayer.displayName = 'AudioPlayer';
 
-AudioPreview.propTypes = {
+AudioPlayer.propTypes = {
     audioUrl: PropTypes.string.isRequired,
     audioDuration: PropTypes.number.isRequired,
     className: PropTypes.string,
 }
 
-export default AudioPreview;
+export default AudioPlayer;
 
