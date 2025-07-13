@@ -4,7 +4,7 @@ import { Loader } from "lucide-react";
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
-import { formatDateSeparator } from "./helper";
+import { formatDateSeparator, generateTiptapJson } from "./helper";
 import DateSeparator from "./DateSeparator";
 // import { VList } from "virtua";
 import { VList } from "@/virtua/VList";
@@ -13,12 +13,14 @@ import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
 import { axios } from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
+import { faker } from "@faker-js/faker";
+import { CURRENT_USER } from "@/constants";
 const LIMIT = 50;
 
 
 
-// const fetcher = (url) => axios.get(url).then(({ data }) => data);
-const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = (url) => axios.get(url).then(({ data }) => data);
+// const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const getKey = (pageIndex, previousPageData) => {
   if (previousPageData && !previousPageData.hasMore) return null;
@@ -65,11 +67,12 @@ const MessageVList = () => {
       shouldRetryOnError: true,
     });
 
-  const { messages, setMessages, shouldScrollToBottom } = useMessageStore();
+
+  const { addMessage, messages, setMessages, shouldScrollToBottom } = useMessageStore();
 
   useEffect(() => {
     if (data) {
-      const messages = data ? data.flatMap((page) => page.messages).reverse() : [];
+      const messages = data ? data.flatMap((page) => page.data).reverse() : [];
       setMessages(messages);
 
     }
@@ -83,9 +86,10 @@ const MessageVList = () => {
   }, [shouldScrollToBottom])
 
   const isLoadingMore =
-    isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
-  const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < LIMIT);
+    isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.length >= LIMIT);
+
+  const isEmpty = messages && messages.length === 0;
+  const isReachingEnd = isEmpty || (data && data?.data?.[data.length - 1]?.length < LIMIT);
 
   const ref = useRef(null);
   const isPrepend = useRef(false);
@@ -99,7 +103,6 @@ const MessageVList = () => {
     let currentDate = null;
     if (!messages) return { items, dateIndexes: [], dateIndexesSet };
     messages.forEach((message, index) => {
-
       const messageDate = new Date(message.created_at);
 
       const messageDateString = formatDateSeparator(messageDate);
@@ -125,9 +128,6 @@ const MessageVList = () => {
     return { items, dateIndexes: Array.from(dateIndexesSet), dateIndexesSet };
 
   }, [messages]);
-
-  console.log('messages --->', messages)
-  console.log('items --->', items)
 
   useEffect(() => {
     if (!ref.current) return;
@@ -166,6 +166,61 @@ const MessageVList = () => {
   }
 
 
+  // useEffect hook to run side effects, in this case, a timer
+  // useEffect(() => {
+  //   // Set up an interval to run a function every 1000ms (1 second)
+  //   const intervalId = setInterval(() => {
+  //     // The function to run every second
+  //     const createNewItem = () => {
+
+  //       const message_id = faker.string.uuid();
+  //       const message = {
+  //         id: message_id,
+  //         tempId: message_id,
+  //         isUploading: true,
+  //         created_at: new Date(Date.now()).toISOString(),
+  //         // media: [
+  //         //   {
+  //         //     message_id,
+  //         //     id: faker.string.uuid(),
+  //         //     tempId: faker.string.uuid(),
+  //         //     isUploading: true,
+  //         //     duration,
+  //         //     file_name,
+  //         //     file: audioBlob,
+  //         //     mime_type,
+  //         //     name: file_name,
+  //         //     wave_samples,
+  //         //   }
+  //         // ],
+  //         media: [],
+  //         content: generateTiptapJson(1),
+  //         user: {
+  //           id: CURRENT_USER,
+  //           avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+  //           email: "faye59@example.net",
+  //           name: "Alexzander Wiza"
+  //         }
+  //       }
+
+
+  //       shouldStickToBottom.current = true
+  //       addMessage(message);
+
+  //     };
+
+  //     createNewItem();
+  //   }, 10000);
+
+  //   // Cleanup function: This is crucial to prevent memory leaks.
+  //   // React will run this function when the component unmounts.
+  //   return () => {
+  //     clearInterval(intervalId); // Stop the interval
+  //   };
+  // }, []);
+
+
+
   if (isLoading || !messages)
     return (
       <div className="absolute inset-0 w-full  flex items-center justify-center">
@@ -179,43 +234,51 @@ const MessageVList = () => {
 
 
         <div className="flex flex-col h-full w-full relative">
-          {isLoadingMore && (
-            <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
-              <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
-                <Loader className="animate-spin w-3 text-white" />
+          {
+            isEmpty ? <div className="flex-1" /> : (
+
+              <div className="flex flex-1 w-full relative">
+                {isLoadingMore && (
+                  <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
+                    <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
+                      <Loader className="animate-spin w-3 text-white" />
+                    </div>
+                  </div>
+                )}
+                <VList
+                  ref={ref}
+                  style={{
+                    flex: 1,
+                  }}
+                  overscan={items.length >= 50 ? 50 : 0}
+                  item={StickyItem}
+                  keepMounted={[activeIndex]}
+                  reverse
+                  shift={isPrepend.current}
+                  onScroll={handleScroll}
+                >
+
+
+                  {items.map((item, index) => {
+                    if (item.type === 'date') {
+                      return <DateSeparator dateString={item.date} index={index} key={item.id} />
+                    }
+                    return (
+
+                      <Message
+                        key={item.id}
+                        message={item}
+                        prevMessage={index > 0 ? items[index - 1] : {}}
+                      />
+                    )
+
+                  })}
+                </VList>
+
               </div>
-            </div>
-          )}
-          <VList
-            ref={ref}
-            style={{
-              flex: 1,
-            }}
-            overscan={20}
-            item={StickyItem}
-            keepMounted={[activeIndex]}
-            reverse
-            shift={isPrepend.current}
-            onScroll={handleScroll}
-          >
+            )
+          }
 
-
-
-            {items.map((item, index) => {
-              if (item.type === 'date') {
-                return <DateSeparator dateString={item.date} index={index} key={item.id} />
-              }
-              return (
-
-                <Message
-                  key={item.id}
-                  message={item}
-                  prevMessage={index > 0 ? items[index - 1] : {}}
-                />
-              )
-
-            })}
-          </VList>
           <MessageInput />
         </div>
       </StickyIndexContext.Provider>

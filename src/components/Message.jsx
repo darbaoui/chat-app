@@ -3,9 +3,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, fromNow } from "@/lib/utils";
 import { CURRENT_USER } from "@/constants";
 import MessageContent from "./MessageContent";
+import { memo } from "react";
 
 
-const Message = ({ message, prevMessage = {} }) => {
+const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
   const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
@@ -66,6 +67,6 @@ const Message = ({ message, prevMessage = {} }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Message;

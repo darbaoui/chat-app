@@ -1,4 +1,4 @@
-import {  forwardRef, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import { Virtualizer } from "@/virtua/Virtualizer";
 
 
@@ -25,7 +25,7 @@ export const VList = forwardRef(
   ) => {
     const scrollRef = useRef(null);
     const shouldReverse = reverse && !horizontal;
-    
+
     let element = (
       <Virtualizer
         ref={ref}
@@ -48,40 +48,58 @@ export const VList = forwardRef(
 
     if (shouldReverse) {
       element = (
+        // 
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
+            alignItems: 'stretch',
+            position: 'relative',
             // Flip the container
-            transform: "scaleY(-1)",
+            // transform: "scaleY(-1)",
             // Ensure proper rendering
-            transformOrigin: "center",
+            // transformOrigin: "center",
             // Prevent text selection issues
-            userSelect: "none",
+            userSelect: "text",
           }}
         >
-           <div 
-            style={{ 
-                  // Flip content back to normal
-                  transform: "scaleY(-1)",
-                  // Re-enable text selection
-                  userSelect: "auto",
-                }}
-              >
-            {element}
-          </div>
+          {/* <div
+            style={{
+              // Flip content back to normal
+              transform: "scaleY(-1)",
+              // Re-enable text selection
+              userSelect: "auto",
+            }}
+          > */}
+          {element}
+          {/* </div> */}
         </div>
       );
     }
 
     return (
+      // <div
+      //   ref={scrollRef}
+      //   {...attrs}
+      //   style={{
+      //     display: horizontal ? "inline-block" : "block",
+      //     [horizontal ? "overflowX" : "overflowY"]: "auto",
+      //     contain: "strict",
+      //     width: "100%",
+      //     height: "100%",
+      //     ...style,
+      //   }}
+      // >
+      //   {element}
+      // </div>
+
       <div
         ref={scrollRef}
         {...attrs}
         style={{
-           minHeight: 0,
+          minHeight: 0,
           overflowY: "auto",
           ...style,
         }}

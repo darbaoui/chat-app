@@ -32,7 +32,7 @@ function generateMessage(index: number, message_count: number) {
     const messageText = hasAudio ? null : generateTiptapJson(index + 1);
     return {
      id: faker.string.uuid(),
-     text: messageText,
+     content: messageText,
      created_at: createdAt,
      user,
      media ,
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    messages,
+    data:messages,
     page,
     limit,
     total: TOTAL_MESSAGES,

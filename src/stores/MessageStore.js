@@ -12,17 +12,11 @@ const useMessageStore = create((set) => ({
   updateMessage: (messageId, updatedMessage) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg,
+        msg.id === messageId ? updatedMessage  : msg,
       ),
     })),
   addMessage: (newMessage) =>
     set((state) => {
-      const messageExists = state.messages.some(
-        (msg) => msg.id === newMessage.id,
-      );
-
-      if (messageExists) return state;
-
       return { messages: [...state.messages, newMessage] };
     }),
   removeMessage: (messageId) =>

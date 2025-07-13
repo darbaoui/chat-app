@@ -12,7 +12,7 @@ import { axios } from "@/lib/axios";
 import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import useMessageStore from "@/stores/MessageStore";
-import { scaleDataToFit } from "./helper";
+import { generateTiptapJson, scaleDataToFit } from "./helper";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -113,7 +113,6 @@ const MessageInput = () => {
 
 
   const sendAudioMessage = async ({ audioBlob, duration, waveData }) => {
-    console.log('sendAudioMessage--->', audioBlob)
 
     const wave_samples = scaleDataToFit(waveData)
 
@@ -143,15 +142,16 @@ const MessageInput = () => {
           wave_samples,
         }
       ],
-      text: null,
+      content: null, // generateTiptapJson(1),
       user: {
         id: CURRENT_USER,
-        name: "John Doe",
-        avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
+        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+        email: "faye59@example.net",
+        name: "Alexzander Wiza"
       }
     }
 
-    console.log('message --->', message)
+
     setShouldScrollToBottom(true)
     addMessage(message);
 

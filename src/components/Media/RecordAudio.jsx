@@ -202,19 +202,11 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         startTimeRef.current = 0;
     }, []);
 
-    const getDuration = async (audioBlob) => {
-
-        const arrayBuffer = await audioBlob.arrayBuffer();
-        const audioContext = new (window?.AudioContext || window?.webkitAudioContext)();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        return audioBuffer.duration;
-    };
-
 
     const startRecording = useCallback(async () => {
         try {
             resetRecorder();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, noiseSuppression: true, });
 
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
             analyserRef.current = audioContextRef.current.createAnalyser();
@@ -228,14 +220,14 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
 
             recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
 
-            recorder.onstop = () => {
+            recorder.onstop = async () => {
                 const elapsedMilliseconds = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
                 const durationInSeconds = elapsedMilliseconds / 1000;
                 const type = 'audio/wav';
                 const audioBlob = new Blob(audioChunksRef.current, { type });
                 setFinalAudioBlob(audioBlob);
 
-                sendFinalAudioBlob({
+                await sendFinalAudioBlob({
                     audioBlob,
                     duration: durationInSeconds,
                     waveData: waveformDataRef.current

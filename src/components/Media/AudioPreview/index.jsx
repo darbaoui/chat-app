@@ -1,7 +1,7 @@
 import AudioPlayer from "./AudioPlayer"
 import UploadAudio from "./UploadAudio"
 
-const AudioPreview = ({ mediaFile }) => {
+const AudioPreview = ({ mediaFile, className }) => {
 
     const isUploading = mediaFile?.isUploading
 
@@ -9,9 +9,11 @@ const AudioPreview = ({ mediaFile }) => {
         return <UploadAudio mediaFile={mediaFile} />
     }
 
-    const { url, duration, className } = mediaFile
+    const { original_url } = mediaFile
+    const { duration, wave_samples } = mediaFile.attributes
 
-    return <AudioPlayer audioUrl={url} audioDuration={duration} className={className} />
+    return <AudioPlayer audioUrl={original_url} audioDuration={duration} waveformData={wave_samples} className={className} />
+    // return <AudioPlayer audioUrl={url} audioDuration={duration} className={className} />
 }
 
 export default AudioPreview

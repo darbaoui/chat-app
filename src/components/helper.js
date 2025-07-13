@@ -143,17 +143,18 @@ export function autoFormatSize(bytes) {
 
 // Fixed bar count calculation
 export const getBarCount = () => {
-  const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS;
-  const availableWidth = 215; // Use clientWidth for actual display width
+  const { barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
+  const availableWidth = waveMaxWidth; // Use clientWidth for actual display width
   return Math.floor(availableWidth / (barWidth + barGap));
 };
 
 
 // Fixed data scaling
 export const scaleDataToFit = (data) => {
-
+  // const {  barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
   const count = getBarCount()
   if (!data || data.length === 0) return [];
+
   if (data.length <= count) return [...data];
 
   const scaled = [];

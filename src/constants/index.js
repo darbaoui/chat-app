@@ -10,7 +10,7 @@ export const IMAGE_MIME_TYPES = [
 
 export const MAX_IMAGE_SIZE = 450;
 
-export const CURRENT_USER = 'current_user'
+export const CURRENT_USER = '9f5da511-f5ff-4a92-a27a-47a27fc697e8' //'current_user'
 
 export const MESSAGE_VARIANTS = {
     viewport:{ once: true },
@@ -52,6 +52,7 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   normalize: true,
   // cursorWidth: 2,
   barMinHeight: 2,
+  waveMaxWidth: 113,
 };
 
 

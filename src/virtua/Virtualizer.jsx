@@ -58,12 +58,12 @@ export const Virtualizer = forwardRef(
     ref
   ) => {
     // Element = Element;
-
     const [getElement, count] = useChildren(children, renderCountProp);
 
     const containerRef = useRef(null);
 
     const isSSR = useRef(!!ssrCount);
+
 
     const onScroll = useLatestRef(onScrollProp);
     const onScrollEnd = useLatestRef(onScrollEndProp);
@@ -86,7 +86,6 @@ export const Virtualizer = forwardRef(
       ];
     });
 
-   
     // The elements length and cached items length are different just after element is added/removed.
     if (count !== store.$getItemsLength()) {
       store.$update(ACTION_ITEMS_LENGTH_CHANGE, [count, shift]);
@@ -103,6 +102,7 @@ export const Virtualizer = forwardRef(
 
 
     let [startIndex, endIndex] = store.$getRange();
+
 
     /**
      * 
@@ -129,7 +129,6 @@ export const Virtualizer = forwardRef(
      * const customEnd = Math.min(count - 1, endIndex + overscan);
      * 
      */
-    
 
     const customStart = Math.max(0, startIndex - overscan);
     const customEnd = Math.min(count - 1, endIndex + overscan);
@@ -252,7 +251,6 @@ export const Virtualizer = forwardRef(
       items.push(...endItems);
     }
 
-  
 
     return (
       <Element

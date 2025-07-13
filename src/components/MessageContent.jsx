@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 const MessageContent = ({ message, className }) => {
     const { media } = message;
     const singleMediaFile = message?.media.length === 1 ? message?.media[0] : null;
-    const text = message?.text;
+    const text = message?.content;
     const isAudioMedia = singleMediaFile
-        ? singleMediaFile.mime_type.startsWith('audio') && !text
+        ? (singleMediaFile.mime_type.startsWith('audio') || singleMediaFile.mime_type.startsWith('video')) && !text
         : null;
 
     return isAudioMedia ?
