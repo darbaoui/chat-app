@@ -118,13 +118,10 @@ const AudioPlayer = ({
 
     // Helper function to get position from mouse event
     const getPositionFromEvent = (e) => {
-
-        // console.log('e --->', e)
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
 
-        console.log('clickX -->', clickX, rect.width)
         return clickX / rect.width;
     };
 
@@ -210,7 +207,6 @@ const AudioPlayer = ({
         if (audioPlayerRef.current) {
             if (audioPlayerRef.current.paused) {
                 setRecordingState('play');
-                console.log('im here play!!!!!')
                 audioPlayerRef.current.play();
             } else {
                 setRecordingState('pause');
