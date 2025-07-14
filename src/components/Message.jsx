@@ -27,7 +27,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
         <div className={cn("min-w-6.5 !w-6.5 !h-6.5 ")}>
           {showAvatarAndName && (
             <Avatar>
-              <AvatarImage src={user.avatar_url} alt={`${user.name}'s avatar`} />
+              <AvatarImage src={user.avatar} alt={`${user.name}'s avatar`} />
               <AvatarFallback>{user.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
           )}

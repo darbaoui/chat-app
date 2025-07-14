@@ -27,7 +27,7 @@ import Message from '@/components/Message';
   user: {
     id: string;
     name: string;
-    avatar_url: string;
+    avatar: string;
   }
 }
 ```

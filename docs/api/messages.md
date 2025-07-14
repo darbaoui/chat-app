@@ -33,7 +33,7 @@ Fetches a paginated list of messages for a specific chat room.
           "user": {
             "id": "user_abc",
             "name": "Alice",
-            "avatar_url": "https://.../avatar.png"
+            "avatar": "https://.../avatar.png"
           }
         }
       ],

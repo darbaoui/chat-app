@@ -58,7 +58,7 @@ const UploadAudio = ({ mediaFile }) => {
     }, [mediaFile?.id]);
 
     return (
-        <div className="flex items-center bg-red overflow-hidden" >
+        <div className="flex items-center overflow-hidden" >
             <div className="flex items-center justify-center text-background rounded-full !w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
             >
                 <Play className="w-[14px]" size={14} />

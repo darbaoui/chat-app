@@ -8,17 +8,17 @@ const USERS = [
   {
     id: CURRENT_USER,
     name: "John Doe",
-    avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
   },
   {
     id: "user_2",
     name: "Jane Smith",
-    avatar_url: "https://randomuser.me/api/portraits/women/2.jpg",
+    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
   },
   {
     id: "user_3",
     name: "Alex Lee",
-    avatar_url: "https://randomuser.me/api/portraits/men/3.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
   },
 ];
 
