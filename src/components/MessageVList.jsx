@@ -86,10 +86,11 @@ const MessageVList = () => {
   }, [shouldScrollToBottom])
 
   const isLoadingMore =
-    isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.length >= LIMIT);
+    isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.next_page_url);// We use laravel pagination response
 
   const isEmpty = messages && messages.length === 0;
-  const isReachingEnd = isEmpty || (data && data?.data?.[data.length - 1]?.length < LIMIT);
+  const isReachingEnd = isEmpty || (data && !data?.data?.[data.length - 1]?.next_page_url); // We use laravel pagination response
+
 
   const ref = useRef(null);
   const isPrepend = useRef(false);
