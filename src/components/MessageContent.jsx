@@ -8,7 +8,7 @@ const MessageContent = ({ message, className }) => {
     const singleMediaFile = message?.media.length === 1 ? message?.media[0] : null;
     const text = message?.content;
     const isAudioMedia = singleMediaFile
-        ? (singleMediaFile.mime_type.startsWith('audio') || singleMediaFile.mime_type.startsWith('video')) && !text
+        ? ['audio', 'video'].some(type => singleMediaFile.mime_type.startsWith(type)) && !text
         : null;
 
     return isAudioMedia ?

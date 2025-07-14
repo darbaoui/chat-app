@@ -109,13 +109,19 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         const MIN_BAR_HEIGHT = AUDIO_WAVEFORM_OPRIONS.barMinHeight;
         const MAX_BAR_HEIGHT = AUDIO_WAVEFORM_OPRIONS.barHeight;
 
+        // This multiplier is used to scale the RMS value of the audio signal.
+        // The RMS value is typically a small float between 0 and 1, and this factor
+        // amplifies it to create a more visually dynamic and responsive bar height.
+        // The value was likely determined through experimentation to achieve the desired visual effect.
+        const RMS_AMPLITUDE_SCALAR = 5;
+
         analyserRef.current.getFloatTimeDomainData(analyserRef.current.timeDomainDataArray);
         let sumOfSquares = 0;
         for (const amplitude of analyserRef.current.timeDomainDataArray) {
             sumOfSquares += amplitude * amplitude;
         }
         const rms = Math.sqrt(sumOfSquares / analyserRef.current.timeDomainDataArray.length);
-        const normalized = rms * 5;
+        const normalized = rms * RMS_AMPLITUDE_SCALAR;
         const barHeight = MIN_BAR_HEIGHT + (normalized * (MAX_BAR_HEIGHT - MIN_BAR_HEIGHT));
 
         waveformDataRef.current.push(Math.min(barHeight, MAX_BAR_HEIGHT));
