@@ -1,8 +1,6 @@
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
-import { axios, initializeCsrf } from "@/lib/axios";
+import { axios } from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
-import Axios from "axios";
-import { progressPercentage } from "framer-motion";
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react"
 const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10
@@ -33,15 +31,12 @@ const UploadAudio = ({ mediaFile }) => {
             data.append('wave_samples[]', sample);
         });
         data.append('content', null);
-        // axios
+        setProgressUpload(0)
         axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/messages/audio`, data, {
             onUploadProgress: function (progressEvent) {
                 var percentCompleted = Math.round(
                     (progressEvent.loaded * 100) / progressEvent.total,
                 );
-
-                console.log('percentCompleted --->', percentCompleted)
-
                 setProgressUpload(percentCompleted);
             },
         })
@@ -62,15 +57,13 @@ const UploadAudio = ({ mediaFile }) => {
         }
     }, [mediaFile?.id]);
 
-    console.log('width ---->', width)
-
     return (
         <div className="flex items-center bg-red overflow-hidden" >
             <div className="flex items-center justify-center text-background rounded-full !w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
             >
                 <Play className="w-[14px]" size={14} />
             </div>
-            <div className="flex-grow flex iems-center ps-2.5" >
+            <div className="flex-grow flex items-center ps-2.5" >
                 <div className="h-1 w-full relative bg-background rounded-full overflow-hidden" style={{ width }} >
                     <div className="h-1 absolute left-0 bg-primary" style={{ width: `${progress}%` }} />
                 </div>

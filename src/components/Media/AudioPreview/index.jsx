@@ -13,7 +13,6 @@ const AudioPreview = ({ mediaFile, className }) => {
     const { duration, wave_samples } = mediaFile.attributes
 
     return <AudioPlayer audioUrl={original_url} audioDuration={duration} waveformData={wave_samples} className={className} />
-    // return <AudioPlayer audioUrl={url} audioDuration={duration} className={className} />
 }
 
 export default AudioPreview

@@ -43,44 +43,18 @@ const AudioPlayer = ({
         return Math.min(width, AUDIO_WAVEFORM_OPRIONS.waveMaxWidth); // Use constant for max width
     }, [waveformData, barWidth, barGap]);
 
-    // Fixed data scaling
-    const scaleDataToFit = useCallback((data, count) => {
-        if (!data || data.length === 0) return [];
-        if (data.length <= count) return [...data];
-
-        const scaled = [];
-        const scale = data.length / count;
-
-        for (let i = 0; i < count; i++) {
-            const startIndex = Math.floor(i * scale);
-            const endIndex = Math.floor((i + 1) * scale);
-            const chunk = data.slice(startIndex, endIndex);
-            scaled.push(chunk.length ? Math.max(...chunk) : 0);
-        }
-
-        return scaled;
-    }, []);
-
     // Fixed drawFinalWaveform function
     const drawFinalWaveform = useCallback((progress = 0) => {
 
         if (!waveformData || waveformData.length === 0) return;
 
-        // const barCount = getBarCount();
         const barCount = waveformData.length;
 
         if (barCount === 0) return;
 
-        // const scaledData = scaleDataToFit(waveformData, barCount);
-        // const scaledData = waveformData;
-
-        // setScaledData(scaledData);
-
         drawStaticBars(waveformData, progress);
 
-    }, [waveformData, scaleDataToFit, drawStaticBars]);
-
-
+    }, [waveformData, drawStaticBars]);
 
 
     useEffect(() => {

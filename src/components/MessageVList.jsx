@@ -160,66 +160,8 @@ const MessageVList = () => {
     if (offset < 100 && !isPrepend.current && !isValidating) {
       isPrepend.current = true;
       setSize((p) => p + 1);
-      // setItems(p => [...Array.from({
-      //   length: 100
-      // }, () => createItem()), ...p]);
     }
   }
-
-
-  // useEffect hook to run side effects, in this case, a timer
-  // useEffect(() => {
-  //   // Set up an interval to run a function every 1000ms (1 second)
-  //   const intervalId = setInterval(() => {
-  //     // The function to run every second
-  //     const createNewItem = () => {
-
-  //       const message_id = faker.string.uuid();
-  //       const message = {
-  //         id: message_id,
-  //         tempId: message_id,
-  //         isUploading: true,
-  //         created_at: new Date(Date.now()).toISOString(),
-  //         // media: [
-  //         //   {
-  //         //     message_id,
-  //         //     id: faker.string.uuid(),
-  //         //     tempId: faker.string.uuid(),
-  //         //     isUploading: true,
-  //         //     duration,
-  //         //     file_name,
-  //         //     file: audioBlob,
-  //         //     mime_type,
-  //         //     name: file_name,
-  //         //     wave_samples,
-  //         //   }
-  //         // ],
-  //         media: [],
-  //         content: generateTiptapJson(1),
-  //         user: {
-  //           id: CURRENT_USER,
-  //           avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-  //           email: "faye59@example.net",
-  //           name: "Alexzander Wiza"
-  //         }
-  //       }
-
-
-  //       shouldStickToBottom.current = true
-  //       addMessage(message);
-
-  //     };
-
-  //     createNewItem();
-  //   }, 10000);
-
-  //   // Cleanup function: This is crucial to prevent memory leaks.
-  //   // React will run this function when the component unmounts.
-  //   return () => {
-  //     clearInterval(intervalId); // Stop the interval
-  //   };
-  // }, []);
-
 
 
   if (isLoading || !messages)
