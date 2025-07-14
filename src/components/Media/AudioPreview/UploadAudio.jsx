@@ -45,6 +45,7 @@ const UploadAudio = ({ mediaFile }) => {
 
             })
             .catch((error) => {
+                console.error("Audio upload failed:", error);
             })
             .finally(() => {
                 setLoading(false);

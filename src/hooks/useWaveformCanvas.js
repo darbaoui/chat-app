@@ -26,6 +26,35 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
     }, [canvasRef, waveformContainerRef])
 
 
+        // Fixed bar count calculation
+        const getBarCount = useCallback(() => {
+            const canvas = canvasRef.current;
+            if (!canvas) return 0;
+    
+            const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS;
+            const availableWidth = canvas.clientWidth; // Use clientWidth for actual display width
+            return Math.floor(availableWidth / (barWidth + barGap));
+        }, []);
+    
+    
+        // Fixed data scaling
+        const scaleDataToFit = useCallback((data, count) => {
+            if (!data || data.length === 0) return [];
+            if (data.length <= count) return [...data];
+    
+            const scaled = [];
+            const scale = data.length / count;
+    
+            for (let i = 0; i < count; i++) {
+                const startIndex = Math.floor(i * scale);
+                const endIndex = Math.floor((i + 1) * scale);
+                const chunk = data.slice(startIndex, endIndex);
+                scaled.push(chunk.length ? Math.max(...chunk) : 0);
+            }
+    
+            return scaled;
+        }, []);
+
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
@@ -110,7 +139,7 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
 
 
 
-    return { setupCanvas, drawRoundedRect, drawCursor, drawStaticBars }
+    return { setupCanvas, getBarCount, scaleDataToFit, drawRoundedRect, drawCursor, drawStaticBars }
 }
 
 

@@ -34,8 +34,6 @@ const AudioPlayer = ({
         formatTime,
     } = useAudioPlaybackAndWaveform(audioPlayerRef, canvasRef, audioDuration, waveformData, drawStaticBars);
 
-
-
     const { barWidth, barGap, height: waveformHeight } = AUDIO_WAVEFORM_OPRIONS;
     const calculatedWaveformWidth = useMemo(() => {
         if (!waveformData) return 0;
@@ -109,21 +107,12 @@ const AudioPlayer = ({
             )}
         >
 
-            {isPlaying ? (
-                <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
-                    onClick={() => playPauseAudio()}
-                >
-                    <Pause className="w-[14px]" size={14} />
-                </Button>
-            ) : (
-                <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
-                    onClick={() => playPauseAudio()}
-                >
-                    <Play className="w-[14px]" size={14} />
-                </Button>
-            )}
+            <Button
+                className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
+                onClick={() => playPauseAudio()}
+            >
+                {isPlaying ? <Pause className="w-[14px]" size={14} /> : <Play className="w-[14px]" size={14} />}
+            </Button>
 
             <div
                 ref={waveformContainerRef}
@@ -206,51 +195,21 @@ const AudioPlayer = ({
                     <div className="absolute inset-0 border rounded-md border-chatBoxMe-foreground"></div>
                     <span className="w-full flex items-center justify-center text-center relative">
                         <AnimatePresence mode="popLayout" initial={false}>
-                            {speed === 1 ? (
-                                <motion.span
-                                    key={speed}
-                                    initial={{ y: 15, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1, type: 'spring' }}
-                                    exit={{ y: -15, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                    className="relative w-9 text-center text-chatBoxMe-foreground"
-                                >
-                                    <span className="w-9">{speed} x</span>
-                                </motion.span>
-                            ) : speed === 1.2 ? (
-                                <motion.span
-                                    key={speed}
-                                    initial={{ y: 15, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1, type: 'spring' }}
-                                    exit={{ y: -15, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                    className="relative px-1 w-full text-center text-chatBoxMe bg-chatBoxMe-foreground"
-                                >
-                                    <span className="w-full">{speed} x</span>
-                                </motion.span>
-                            ) : speed === 1.5 ? (
-                                <motion.span
-                                    key={speed}
-                                    initial={{ y: 15, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1, type: 'spring' }}
-                                    exit={{ y: -15, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                    className="relative px-1 w-full text-center text-chatBoxMe bg-chatBoxMe-foreground"
-                                >
-                                    <span className="w-full">{speed} x</span>
-                                </motion.span>
-                            ) : (
-                                <motion.span
-                                    key={speed}
-                                    initial={{ y: 15, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1, type: 'spring' }}
-                                    exit={{ y: -15, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                    className="relative w-full px-1 text-center text-chatBoxMe bg-chatBoxMe-foreground"
-                                >
-                                    <span className="w-full">{speed} x</span>
-                                </motion.span>
-                            )}
+                            <motion.span
+                                key={speed}
+                                initial={{ y: 15, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1, type: 'spring' }}
+                                exit={{ y: -15, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className={cn(
+                                    "relative text-center",
+                                    speed === 1
+                                        ? "w-9 text-chatBoxMe-foreground"
+                                        : "px-1 w-full text-chatBoxMe bg-chatBoxMe-foreground"
+                                )}
+                            >
+                                <span className={cn(speed === 1 ? "w-9" : "w-full")}>{speed} x</span>
+                            </motion.span>
                         </AnimatePresence>
                     </span>
                 </div>

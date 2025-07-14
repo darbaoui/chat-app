@@ -17,7 +17,7 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
     const [scaledData, setScaledData] = useState([]);
 
-    const { setupCanvas, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainer)
+    const { setupCanvas, getBarCount, scaleDataToFit, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainer)
 
     const {
         isPlaying,
@@ -39,35 +39,8 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
         };
     }, [audioBlob]);
 
-    // Fixed bar count calculation
-    const getBarCount = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return 0;
-
-        const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS;
-        const availableWidth = canvas.clientWidth; // Use clientWidth for actual display width
-        return Math.floor(availableWidth / (barWidth + barGap));
-    }, []);
 
 
-
-    // Fixed data scaling
-    const scaleDataToFit = useCallback((data, count) => {
-        if (!data || data.length === 0) return [];
-        if (data.length <= count) return [...data];
-
-        const scaled = [];
-        const scale = data.length / count;
-
-        for (let i = 0; i < count; i++) {
-            const startIndex = Math.floor(i * scale);
-            const endIndex = Math.floor((i + 1) * scale);
-            const chunk = data.slice(startIndex, endIndex);
-            scaled.push(chunk.length ? Math.max(...chunk) : 0);
-        }
-
-        return scaled;
-    }, []);
 
     // Fixed drawFinalWaveform function
     const drawFinalWaveform = useCallback((progress = 0) => {
