@@ -111,17 +111,14 @@ const MessageInput = () => {
   }, []);
 
 
-
   const sendAudioMessage = async ({ audioBlob, duration, waveData }) => {
 
     const wave_samples = scaleDataToFit(waveData)
 
     const mime_type = audioBlob.type;
-
     // 2. Generate a file_name
     const extension = mime_type.split('/')[1] || 'wav';
     const file_name = `recording-${Date.now()}.${extension}`;
-
     const message_id = faker.string.uuid();
     const message = {
       id: message_id,

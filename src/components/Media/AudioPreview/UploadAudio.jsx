@@ -17,7 +17,7 @@ const UploadAudio = ({ mediaFile }) => {
     const [loading, setLoading] = useState(false)
     const [progress, setProgressUpload] = useState(0);
     const uploadInProgress = useRef(false);
-    const width = mediaFile.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION + GAP_BETWEEN_WAVE_SPEED_AND_DURATION - WIDTH_PROGRESS - PROGRESS_PADDING_LEFT + PADDING_BTW_WAVE_PLAY_BTN
+    const width = mediaFile.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
     const uploadAudioFile = () => {
 
         if (uploadInProgress.current) return
@@ -47,7 +47,6 @@ const UploadAudio = ({ mediaFile }) => {
             },
         })
             .then(({ data }) => {
-                console.log('data-->', data)
                 updateMessage(mediaFile.message_id, data)
 
             })
@@ -67,13 +66,13 @@ const UploadAudio = ({ mediaFile }) => {
     console.log('width ---->', width)
 
     return (
-        <div className="flex items-center bg-red overflow-hidden">
-            <div className="flex items-center justify-center text-background rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
+        <div className="flex items-center bg-red overflow-hidden" >
+            <div className="flex items-center justify-center text-background rounded-full !w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
             >
                 <Play className="w-[14px]" size={14} />
             </div>
-            <div className="flex-grow flex iems-center ps-2.5" style={{ width }}>
-                <div className="h-1 w-full relative bg-background rounded-full overflow-hidden">
+            <div className="flex-grow flex iems-center ps-2.5" >
+                <div className="h-1 w-full relative bg-background rounded-full overflow-hidden" style={{ width }} >
                     <div className="h-1 absolute left-0 bg-primary" style={{ width: `${progress}%` }} />
                 </div>
             </div>

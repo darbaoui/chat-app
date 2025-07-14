@@ -303,7 +303,17 @@ function AudioRecorder() {
             // Start Recording
             try {
                 resetRecorder();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia(
+                    {
+                        audio: {
+                            noiseSuppression: true,
+                            echoCancellation: true,
+                            autoGainControl: true, // Optional: automatically adjusts volume 
+                            sampleRate: 44100, // Optional: sample rate 
+                            sampleSize: 16 // Optional: bit depth 
+                        },
+                        video: false // or true if you need video}
+                    });
 
                 audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
                 analyserRef.current = audioContextRef.current.createAnalyser();
@@ -313,6 +323,7 @@ function AudioRecorder() {
                 sourceRef.current.connect(analyserRef.current);
 
                 const recorder = new MediaRecorder(stream);
+
                 mediaRecorderRef.current = recorder;
 
                 recorder.ondataavailable = event => audioChunksRef.current.push(event.data);

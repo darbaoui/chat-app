@@ -158,8 +158,6 @@ const AudioPlayer = ({
         // const barCount = getBarCount();
         const barCount = waveformData.length;
 
-        console.log('----barCount----', barCount)
-
         if (barCount === 0) return;
 
         // const scaledData = scaleDataToFit(waveformData, barCount);
@@ -284,7 +282,6 @@ const AudioPlayer = ({
         const percentage = getPositionFromEvent(e);
         const newTime = audioDuration * percentage;
 
-        console.log('new_time', Math.min(newTime, audioDuration - 0.001), newTime)
         // Update audio position
         audioPlayerRef.current.currentTime = newTime;
 
@@ -396,13 +393,6 @@ const AudioPlayer = ({
             setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
         };
 
-        // const handleLoadedMetadata = () => {
-        //     // Initial draw when metadata is loaded
-        //     if (getDuration() > 0) {
-        //         drawStaticBars(waveformData, 0);
-        //     }
-        // };
-
         player.addEventListener('play', handlePlay);
         player.addEventListener('pause', handlePause);
         player.addEventListener('ended', handleEnded);
@@ -418,7 +408,6 @@ const AudioPlayer = ({
         };
     }, [drawStaticBars, waveformData, audioDuration]);
 
-    console.log('cursor--', cursorPosition, audioPlayerRef.current)
     return (
 
         <div

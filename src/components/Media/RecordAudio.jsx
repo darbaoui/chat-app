@@ -204,18 +204,35 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
 
 
     const startRecording = useCallback(async () => {
+
+
+
+
+
         try {
             resetRecorder();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, noiseSuppression: true, });
-
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // {
+            // }
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
+
             analyserRef.current = audioContextRef.current.createAnalyser();
             analyserRef.current.fftSize = 2048;
-            analyserRef.current.timeDomainDataArray = new Float32Array(analyserRef.current.fftSize);
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            const dataArray = new Float32Array(bufferLength);
+
+
+
+            analyserRef.current.timeDomainDataArray = dataArray;
             sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
             sourceRef.current.connect(analyserRef.current);
 
-            const recorder = new MediaRecorder(stream);
+            const recorder = new MediaRecorder(stream, {
+                noiseSuppression: true,
+                echoCancellation: true,
+            });
+
             mediaRecorderRef.current = recorder;
 
             recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
@@ -223,10 +240,10 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
             recorder.onstop = async () => {
                 const elapsedMilliseconds = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
                 const durationInSeconds = elapsedMilliseconds / 1000;
-                const type = 'audio/wav';
+                const type = audioChunksRef.current[0].type || 'audio/webm';
                 const audioBlob = new Blob(audioChunksRef.current, { type });
                 setFinalAudioBlob(audioBlob);
-
+                console.log(audioChunksRef.current)
                 await sendFinalAudioBlob({
                     audioBlob,
                     duration: durationInSeconds,
@@ -236,7 +253,7 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
                 stream.getTracks().forEach(track => track.stop());
             };
 
-            recorder.start(100);
+            recorder.start();
             setRecordingState('recording');
             startTimeRef.current = Date.now();
             visualizeDuringRecording();
