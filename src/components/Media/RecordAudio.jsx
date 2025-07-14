@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
+import useWaveformCanvas from "@/hooks/useWaveformCanvas";
 const PUSH_INTERVAL = 50;
 
 const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudioBlob }, ref) => {
@@ -31,29 +32,16 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
     const canvasRef = useRef(null);
     const playbackAnimationIdRef = useRef(null);
 
+    const isPausingRef = useRef(false);
+
     // Refs for timer logic
     const startTimeRef = useRef(0);
     const totalPausedTimeRef = useRef(0);
     const pauseStartTimeRef = useRef(0);
     const lastPushTimeRef = useRef(0);
 
+    const { setupCanvas, drawRoundedRect } = useWaveformCanvas(canvasRef, waveformContainer)
 
-
-
-
-    // Fixed drawRoundedRect function
-    const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
-        if (width < 2 * radius) radius = width / 2;
-        if (height < 2 * radius) radius = height / 2;
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.arcTo(x + width, y, x + width, y + height, radius);
-        ctx.arcTo(x + width, y + height, x, y + height, radius);
-        ctx.arcTo(x, y + height, x, y, radius);
-        ctx.arcTo(x, y, x + width, y, radius);
-        ctx.closePath();
-        ctx.fill();
-    }, []);
 
     // Fixed live waveform drawing
     const drawLiveWaveform = useCallback(() => {
@@ -86,47 +74,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
             }
         });
     }, [drawRoundedRect]);
-
-
-
-    // Fixed canvas setup with proper DPR handling
-    const setupCanvas = useCallback(() => {
-        const canvas = canvasRef.current;
-        const container = waveformContainer.current;
-        if (!canvas || !container) return;
-
-        // Force a reflow to ensure we get the latest dimensions
-        container.offsetHeight;
-
-        const dpr = window.devicePixelRatio || 1;
-        const rect = container.getBoundingClientRect();
-
-        // Use actual container dimensions
-        const width = rect.width;
-        const height = rect.height;
-
-        // Only update if dimensions are valid
-        if (width <= 0 || height <= 0) return;
-
-        // IMPORTANT: Always update canvas dimensions, don't check if they're the same
-        // This ensures the canvas resizes when the container changes size
-
-        // Set canvas size accounting for device pixel ratio
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-
-        // Scale canvas back down using CSS
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-
-        // Scale the context to match device pixel ratio
-        const context = canvas.getContext('2d');
-        context.save(); // Save the current state
-        context.scale(dpr, dpr);
-
-        // Redraw the waveform after canvas resize
-        drawLiveWaveform();
-    }, [drawLiveWaveform]);
 
 
     useEffect(() => {
@@ -195,6 +142,7 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         setFinalAudioBlob(null);
         setOutputAudioURL('');
         setTimer('00:00');
+        isPausingRef.current = false
 
         audioChunksRef.current = [];
         waveformDataRef.current = [];
@@ -205,17 +153,10 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
 
     const startRecording = useCallback(async () => {
 
-
-
-
-
         try {
             resetRecorder();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            // {
-            // }
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-
 
             analyserRef.current = audioContextRef.current.createAnalyser();
             analyserRef.current.fftSize = 2048;
@@ -235,7 +176,18 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
 
             mediaRecorderRef.current = recorder;
 
-            recorder.ondataavailable = event => audioChunksRef.current.push(event.data);
+            recorder.ondataavailable = event => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                    // If paused, create interim blob
+                    if (isPausingRef.current) {
+                        const type = event.data.type || 'audio/webm';
+                        const audioBlob = new Blob(audioChunksRef.current, { type });
+                        setFinalAudioBlob(audioBlob);
+                        isPausingRef.current = false
+                    }
+                }
+            };
 
             recorder.onstop = async () => {
                 const elapsedMilliseconds = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
@@ -259,19 +211,22 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
             visualizeDuringRecording();
         } catch (error) {
             console.error('Error accessing microphone:', error);
-            alert("Could not access the microphone. Please grant permission and try again.");
             resetRecorder();
         }
     }, [resetRecorder, visualizeDuringRecording]);
 
     const pauseRecording = useCallback(() => {
+        isPausingRef.current = true;
+        mediaRecorderRef.current.requestData();
         mediaRecorderRef.current?.pause();
         setRecordingState('paused');
         pauseStartTimeRef.current = Date.now();
         if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
 
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        setFinalAudioBlob(audioBlob);
+        // console.log('audioChunksRef.current --->', audioChunksRef.current)
+        // const type = audioChunksRef.current[0].type || 'audio/webm';
+        // const audioBlob = new Blob(audioChunksRef.current, { type });
+        // setFinalAudioBlob(audioBlob);
     }, []);
 
     const resumeRecording = useCallback(() => {
