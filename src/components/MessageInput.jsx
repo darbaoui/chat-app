@@ -119,7 +119,7 @@ const MessageInput = () => {
     // 2. Generate a file_name
     const extension = mime_type.split('/')[1] || 'wav';
     const file_name = `recording-${Date.now()}.${extension}`;
-    const message_id = faker.string.uuid();
+    const message_id = crypto.randomUUID();
     const message = {
       id: message_id,
       tempId: message_id,
@@ -128,8 +128,8 @@ const MessageInput = () => {
       media: [
         {
           message_id,
-          id: faker.string.uuid(),
-          tempId: faker.string.uuid(),
+          id: crypto.randomUUID(),
+          tempId: crypto.randomUUID(),
           isUploading: true,
           duration,
           file_name,
@@ -139,7 +139,7 @@ const MessageInput = () => {
           wave_samples,
         }
       ],
-      content: null, // generateTiptapJson(1),
+      content: null,
       user: {
         id: CURRENT_USER,
         avatar: "https://randomuser.me/api/portraits/men/1.jpg",
@@ -151,8 +151,6 @@ const MessageInput = () => {
 
     setShouldScrollToBottom(true)
     addMessage(message);
-
-    // TODO generate a temp message with audio file
 
     // Reset states after sending
     setIsRecording(false);

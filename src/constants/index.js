@@ -53,6 +53,11 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   // cursorWidth: 2,
   barMinHeight: 2,
   waveMaxWidth: 113,
+
+  // waveMaxWidth: {
+  //   sm: this.defaultWaveMaxWidth,
+  //   md: this.defaultWaveMaxWidth*2
+  // }
 };
 
 

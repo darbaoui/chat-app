@@ -195,7 +195,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
                 const type = audioChunksRef.current[0].type || 'audio/webm';
                 const audioBlob = new Blob(audioChunksRef.current, { type });
                 setFinalAudioBlob(audioBlob);
-                console.log(audioChunksRef.current)
                 await sendFinalAudioBlob({
                     audioBlob,
                     duration: durationInSeconds,
@@ -222,11 +221,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         setRecordingState('paused');
         pauseStartTimeRef.current = Date.now();
         if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
-
-        // console.log('audioChunksRef.current --->', audioChunksRef.current)
-        // const type = audioChunksRef.current[0].type || 'audio/webm';
-        // const audioBlob = new Blob(audioChunksRef.current, { type });
-        // setFinalAudioBlob(audioBlob);
     }, []);
 
     const resumeRecording = useCallback(() => {

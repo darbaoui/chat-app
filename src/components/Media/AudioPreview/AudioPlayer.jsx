@@ -220,7 +220,12 @@ const AudioPlayer = ({
     );
 };
 
-
+AudioPlayer.propTypes = {
+    audioUrl: PropTypes.string.isRequired,
+    audioDuration: PropTypes.number.isRequired,
+    waveformData: PropTypes.array.isRequired,
+    className: PropTypes.string,
+};
 
 export default AudioPlayer;
 

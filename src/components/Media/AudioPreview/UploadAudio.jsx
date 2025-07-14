@@ -25,8 +25,6 @@ const UploadAudio = ({ mediaFile }) => {
         let data = new FormData();
         data.append('audio', mediaFile.file);
         data.append('duration', mediaFile.duration);
-        // data.append('wave_samples', mediaFile.wave_samples);
-
         mediaFile.wave_samples.forEach(sample => {
             data.append('wave_samples[]', sample);
         });

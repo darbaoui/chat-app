@@ -151,7 +151,7 @@ export const getBarCount = () => {
 
 // Fixed data scaling
 export const scaleDataToFit = (data) => {
-  // const {  barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
+  
   const count = getBarCount()
   if (!data || data.length === 0) return [];
 
