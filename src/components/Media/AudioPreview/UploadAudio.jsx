@@ -23,7 +23,6 @@ const UploadAudio = ({ mediaFile }) => {
         if (uploadInProgress.current) return
 
         uploadInProgress.current = true;
-        // initializeCsrf()
         setLoading(true);
         let data = new FormData();
         data.append('audio', mediaFile.file);

@@ -1,12 +1,13 @@
 'use client'
 
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
 import { LoaderCircle, Pause, Play } from 'lucide-react';
 import PropTypes from 'prop-types';
+import useWaveformCanvas from '@/hooks/useWaveformCanvas';
 
 const AudioPlayer = ({
     audioUrl,// required
@@ -15,6 +16,7 @@ const AudioPlayer = ({
     className,
 }) => {
     const canvasRef = useRef(null)
+    const waveformContainerRef = useRef(null);
     const audioPlayerRef = useRef(null);
     const playbackAnimationIdRef = useRef(null);
     const wasPlayingBeforeDragRef = useRef(false);
@@ -29,6 +31,8 @@ const AudioPlayer = ({
     const [isDragging, setIsDragging] = useState(false);
     const [cursorPosition, setCursorPosition] = useState(0);
 
+    const { setupCanvas, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainerRef);
+
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const secondsRemainder = Math.round(seconds) % 60;
@@ -37,18 +41,12 @@ const AudioPlayer = ({
     };
 
 
-    // Fixed drawRoundedRect function
-    const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.arcTo(x + width, y, x + width, y + height, radius);
-        ctx.arcTo(x + width, y + height, x, y + height, radius);
-        ctx.arcTo(x, y + height, x, y, radius);
-        ctx.arcTo(x, y, x + width, y, radius);
-        ctx.closePath();
-        ctx.fill();
-    }, []);
-
+    const { barWidth, barGap, height: waveformHeight } = AUDIO_WAVEFORM_OPRIONS;
+    const calculatedWaveformWidth = useMemo(() => {
+        if (!waveformData) return 0;
+        const width = waveformData.length * (barWidth + barGap);
+        return Math.min(width, AUDIO_WAVEFORM_OPRIONS.waveMaxWidth); // Use constant for max width
+    }, [waveformData, barWidth, barGap]);
 
     // Fixed data scaling
     const scaleDataToFit = useCallback((data, count) => {
@@ -67,88 +65,6 @@ const AudioPlayer = ({
 
         return scaled;
     }, []);
-
-
-
-    const drawCursor = useCallback((context, cursorX, canvasHeight) => {
-
-        const { height: cursorHeight, waveColor: cursorColor } = AUDIO_WAVEFORM_OPRIONS;
-        const cursorY = (canvasHeight - cursorHeight) / 2;
-        context.fillStyle = cursorColor;
-        const cursorWidth = 2;
-        const cursorRadius = 1;
-
-        // Ensure cursor is within canvas bounds
-        const adjustedCursorX = Math.max(cursorWidth / 2, Math.min(cursorX, context.canvas.clientWidth - cursorWidth / 2));
-
-        // Draw rounded rectangle cursor
-        context.beginPath();
-        context.moveTo(adjustedCursorX - cursorWidth / 2 + cursorRadius, cursorY);
-        context.arcTo(adjustedCursorX + cursorWidth / 2, cursorY, adjustedCursorX + cursorWidth / 2, cursorY + cursorHeight, cursorRadius);
-        context.arcTo(adjustedCursorX + cursorWidth / 2, cursorY + cursorHeight, adjustedCursorX - cursorWidth / 2, cursorY + cursorHeight, cursorRadius);
-        context.arcTo(adjustedCursorX - cursorWidth / 2, cursorY + cursorHeight, adjustedCursorX - cursorWidth / 2, cursorY, cursorRadius);
-        context.arcTo(adjustedCursorX - cursorWidth / 2, cursorY, adjustedCursorX + cursorWidth / 2, cursorY, cursorRadius);
-        context.closePath();
-        context.fill();
-
-
-    }, []);
-
-
-    // Fixed drawStaticBars function
-    const drawStaticBars = useCallback((data, progress = 0) => {
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const context = canvas.getContext('2d');
-        const canvasWidth = canvas.clientWidth;
-        const canvasHeight = canvas.clientHeight;
-
-        // Clear canvas
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
-
-        if (!data || data.length === 0) return;
-
-        const progressIndex = Math.floor(data.length * progress);
-
-        const { barWidth, barGap, progressColor, waveColor } = AUDIO_WAVEFORM_OPRIONS;
-        const BAR_TOTAL_WIDTH = barWidth + barGap;
-
-        // Find max value for normalization
-        const maxValue = Math.max(...data);
-        if (maxValue === 0) return;
-
-        data.forEach((value, i) => {
-            const x = i * BAR_TOTAL_WIDTH;
-
-            // Normalize the bar height to canvas height
-            const normalizedHeight = (value / maxValue) * canvasHeight * 0.85; // 85% of canvas height
-            const barHeight = Math.max(1, normalizedHeight); // Minimum height of 1px
-
-            // Center the bar vertically
-            const y = (canvasHeight - barHeight) / 2;
-
-            // Set color based on progress
-            context.fillStyle = i < progressIndex ? progressColor : waveColor;
-
-            // For 1px width bars, use simple rectangle for better visibility
-            if (barWidth === 1) {
-                context.fillRect(x, y, barWidth, barHeight);
-            } else {
-                // Use rounded rectangle for wider bars
-                const radius = Math.min(AUDIO_WAVEFORM_OPRIONS.barRadius, barWidth / 2, barHeight / 2);
-                drawRoundedRect(context, x, y, barWidth, barHeight, radius);
-            }
-        });
-
-
-        const waveWidth = data.length * BAR_TOTAL_WIDTH
-        // Draw cursor line
-        const cursorX = progress * waveWidth;
-        drawCursor(context, cursorX, canvasHeight);
-    }, [drawRoundedRect, drawCursor]);
-
 
     // Fixed drawFinalWaveform function
     const drawFinalWaveform = useCallback((progress = 0) => {
@@ -178,35 +94,6 @@ const AudioPlayer = ({
         if (audioPlayerRef.current) audioPlayerRef.current.src = audioUrl;
 
     }, [audioUrl]);
-
-    // Fixed canvas setup
-    const setupCanvas = useCallback(() => {
-        const { barWidth, barGap, height } = AUDIO_WAVEFORM_OPRIONS;
-        const canvas = canvasRef.current;
-        const width = waveformData.length * (barWidth + barGap) > 113 ? 113 : waveformData.length * (barWidth + barGap)
-        if (!canvas) return;
-
-        // console.log('width --->', width, height, waveformData.length);
-
-        const dpr = window.devicePixelRatio || 1;
-        // // const rect = container.getBoundingClientRect();
-
-        // // Use actual container dimensions
-
-        // Set canvas size accounting for device pixel ratio
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-
-        // Scale canvas back down using CSS
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-
-        // // Scale the context to match device pixel ratio
-        const context = canvas.getContext('2d');
-        context.scale(dpr, dpr);
-    }, []);
-
-
 
     // Setup canvas on mount and resize
     useEffect(() => {
@@ -332,6 +219,19 @@ const AudioPlayer = ({
         }
     };
 
+    const updateSpeed = () => {
+        const speeds = [1, 1.2, 1.5, 2];
+        setSpeed((prevSpeed) => {
+            const currentIndex = speeds.indexOf(prevSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            const newSpeed = speeds[nextIndex];
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.playbackRate = newSpeed;
+            }
+            return newSpeed;
+        });
+    };
+
     // Audio player event listeners - FIXED VERSION
     useEffect(() => {
         const player = audioPlayerRef.current;
@@ -435,9 +335,14 @@ const AudioPlayer = ({
             )}
 
             <div
+                ref={waveformContainerRef}
                 className="flex items-center justify-start h-full cursor-pointer relative"
                 onMouseDown={handleMouseDown}
-                style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
+                style={{
+                    cursor: isDragging ? 'grabbing' : 'pointer',
+                    width: `${calculatedWaveformWidth}px`, // Apply dynamic width
+                    height: waveformHeight
+                }}
             >
                 <canvas
                     ref={canvasRef}
@@ -520,6 +425,17 @@ const AudioPlayer = ({
                                     className="relative w-9 text-center text-chatBoxMe-foreground"
                                 >
                                     <span className="w-9">{speed} x</span>
+                                </motion.span>
+                            ) : speed === 1.2 ? (
+                                <motion.span
+                                    key={speed}
+                                    initial={{ y: 15, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1, type: 'spring' }}
+                                    exit={{ y: -15, opacity: 0 }}
+                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                    className="relative px-1 w-full text-center text-chatBoxMe bg-chatBoxMe-foreground"
+                                >
+                                    <span className="w-full">{speed} x</span>
                                 </motion.span>
                             ) : speed === 1.5 ? (
                                 <motion.span
