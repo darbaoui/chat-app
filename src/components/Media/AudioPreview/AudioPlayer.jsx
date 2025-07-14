@@ -8,6 +8,7 @@ import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
 import { LoaderCircle, Pause, Play } from 'lucide-react';
 import PropTypes from 'prop-types';
 import useWaveformCanvas from '@/hooks/useWaveformCanvas';
+import useAudioPlaybackAndWaveform from '@/hooks/useAudioPlaybackAndWaveform';
 
 const AudioPlayer = ({
     audioUrl,// required
@@ -18,27 +19,21 @@ const AudioPlayer = ({
     const canvasRef = useRef(null)
     const waveformContainerRef = useRef(null);
     const audioPlayerRef = useRef(null);
-    const playbackAnimationIdRef = useRef(null);
-    const wasPlayingBeforeDragRef = useRef(false);
 
     const [showRemaining, setShowRemaining] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [speed, setSpeed] = useState(1); // 1->1.2->1.5->2
-    const [timer, setTimer] = useState('00:00');
-    const [recordingState, setRecordingState] = useState('pause');
-
-    // New cursor state
-    const [isDragging, setIsDragging] = useState(false);
-    const [cursorPosition, setCursorPosition] = useState(0);
 
     const { setupCanvas, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainerRef);
+    const {
+        isPlaying,
+        timer,
+        isDragging,
+        cursorPosition,
+        playPauseAudio,
+        handleMouseDown,
+        formatTime,
+    } = useAudioPlaybackAndWaveform(audioPlayerRef, canvasRef, audioDuration, waveformData, drawStaticBars);
 
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const secondsRemainder = Math.round(seconds) % 60;
-        const paddedSeconds = `0${secondsRemainder}`.slice(-2);
-        return `${minutes}:${paddedSeconds}`;
-    };
 
 
     const { barWidth, barGap, height: waveformHeight } = AUDIO_WAVEFORM_OPRIONS;
@@ -116,105 +111,6 @@ const AudioPlayer = ({
     }, [waveformData, drawFinalWaveform]);
 
 
-    // Helper function to get position from mouse event
-    const getPositionFromEvent = (e) => {
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-
-        return clickX / rect.width;
-    };
-
-    // Enhanced handleWaveformClick with cursor support
-    const handleWaveformClick = (e) => {
-
-        const percentage = getPositionFromEvent(e);
-        const newTime = audioDuration * percentage;
-
-        // Update audio position
-        audioPlayerRef.current.currentTime = newTime;
-
-        // Update cursor position
-        setCursorPosition(percentage);
-
-        // Update waveform visual
-        drawStaticBars(waveformData, percentage);
-    };
-
-
-
-    const handleMouseDown = (e) => {
-        if (!audioPlayerRef.current) return;
-        setIsDragging(true);
-
-        // Pause audio while dragging
-        const wasPlaying = !audioPlayerRef.current.paused;
-        if (wasPlaying) {
-            audioPlayerRef.current.pause();
-        }
-
-        // Handle initial position
-        handleWaveformClick(e);
-        wasPlayingBeforeDragRef.current = wasPlaying;
-    };
-
-
-    // Mouse move handler - update cursor while dragging
-    const handleMouseMove = useCallback((e) => {
-        if (!isDragging || !audioDuration || !audioPlayerRef.current) return;
-
-        const percentage = getPositionFromEvent(e);
-        const newTime = audioDuration * percentage;
-
-        // Update audio position
-        audioPlayerRef.current.currentTime = newTime;
-
-        // Update cursor position
-        setCursorPosition(percentage);
-
-        // Update waveform visual
-        drawStaticBars(waveformData, percentage);
-    }, [isDragging, waveformData, audioDuration, drawStaticBars]);
-
-    // Mouse up handler - end dragging
-    const handleMouseUp = useCallback((e) => {
-        if (!isDragging) return;
-
-        setIsDragging(false);
-
-        // Resume playing if it was playing before drag
-        const wasPlaying = wasPlayingBeforeDragRef.current;
-        if (wasPlaying && audioPlayerRef.current) {
-            audioPlayerRef.current.play();
-        }
-    }, [isDragging]);
-
-    // Add global mouse event listeners for dragging
-    useEffect(() => {
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-
-            return () => {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-            };
-        }
-    }, [isDragging, handleMouseMove, handleMouseUp]);
-
-
-    const playPauseAudio = () => {
-        if (audioPlayerRef.current) {
-            if (audioPlayerRef.current.paused) {
-                setRecordingState('play');
-                audioPlayerRef.current.play();
-            } else {
-                setRecordingState('pause');
-                audioPlayerRef.current.pause();
-            }
-        }
-    };
-
     const updateSpeed = () => {
         const speeds = [1, 1.2, 1.5, 2];
         setSpeed((prevSpeed) => {
@@ -228,81 +124,6 @@ const AudioPlayer = ({
         });
     };
 
-    // Audio player event listeners - FIXED VERSION
-    useEffect(() => {
-        const player = audioPlayerRef.current;
-        if (!player) return;
-
-        // Helper function to get reliable duration
-        const getDuration = () => {
-            return audioDuration;
-        };
-
-        const handlePlay = () => {
-            setIsPlaying(true);
-            // const visualize = () => {
-
-            //     if (player.paused) return;
-
-            //     console.log('player.currentTime --->', player.currentTime)
-            //     const duration = getDuration();
-            //     if (duration > 0) {
-            //         const progress = player.currentTime / duration;
-            //         setCursorPosition(progress);
-            //         drawStaticBars(waveformData, progress);
-            //     }
-            //     playbackAnimationIdRef.current = requestAnimationFrame(visualize);
-            // };
-            // visualize();
-        };
-
-        const handlePause = () => {
-            setIsPlaying(false);
-            if (playbackAnimationIdRef.current) {
-                cancelAnimationFrame(playbackAnimationIdRef.current);
-            }
-        };
-
-        const handleEnded = () => {
-            player.pause();
-            player.currentTime = 0;
-            setIsPlaying(false);
-            setCursorPosition(0);
-            drawStaticBars(waveformData, 0);
-            setTimer('00:00');
-        };
-
-        const handleTimeUpdate = () => {
-            if (player.paused) return
-            const duration = getDuration();
-
-            if (duration > 0) {
-                const progress = player.currentTime / duration;
-                setCursorPosition(progress);
-                drawStaticBars(waveformData, progress);
-            }
-
-            // Update timer regardless of duration
-            const elapsed = player.currentTime;
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = Math.floor(elapsed % 60);
-            setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-        };
-
-        player.addEventListener('play', handlePlay);
-        player.addEventListener('pause', handlePause);
-        player.addEventListener('ended', handleEnded);
-        player.addEventListener('timeupdate', handleTimeUpdate);
-        // player.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-        return () => {
-            player.removeEventListener('play', handlePlay);
-            player.removeEventListener('pause', handlePause);
-            player.removeEventListener('ended', handleEnded);
-            player.removeEventListener('timeupdate', handleTimeUpdate);
-            // player.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        };
-    }, [drawStaticBars, waveformData, audioDuration]);
 
     return (
 

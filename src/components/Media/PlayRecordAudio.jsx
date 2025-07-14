@@ -5,6 +5,7 @@ import { Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import useWaveformCanvas from "@/hooks/useWaveformCanvas";
+import useAudioPlaybackAndWaveform from "@/hooks/useAudioPlaybackAndWaveform";
 
 const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
@@ -12,158 +13,24 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
     const canvasRef = useRef(null);
     const waveformContainer = useRef(null);
     const audioPlayerRef = useRef(null);
-    const playbackAnimationIdRef = useRef(null);
-    const wasPlayingBeforeDragRef = useRef(false);
 
 
     const [scaledData, setScaledData] = useState([]);
-    const [timer, setTimer] = useState('00:00');
-    const [recordingState, setRecordingState] = useState('pause');
-    const [isPlaying, setIsPlaying] = useState(false);
 
-    // New cursor state
-    const [isDragging, setIsDragging] = useState(false);
-    const [cursorPosition, setCursorPosition] = useState(0);
+    const { setupCanvas, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainer)
 
-
-    // Helper function to get position from mouse event
-    const getPositionFromEvent = (e) => {
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        return Math.max(0, Math.min(1, clickX / rect.width));
-    };
-
-    // Enhanced handleWaveformClick with cursor support
-    const handleWaveformClick = (e) => {
-        if (!audioPlayerRef.current?.duration) return;
-
-        const percentage = getPositionFromEvent(e);
-        const newTime = audioPlayerRef.current.duration * percentage;
-
-        // Update audio position
-        audioPlayerRef.current.currentTime = newTime;
-
-        // Update cursor position
-        setCursorPosition(percentage);
-
-        // Update waveform visual
-        drawStaticBars(scaledData, percentage);
-    };
-
-
-    // Mouse down handler - start dragging
-    const handleMouseDown = (e) => {
-        if (!audioPlayerRef.current?.duration) return;
-
-        setIsDragging(true);
-
-        // Pause audio while dragging
-        const wasPlaying = !audioPlayerRef.current.paused;
-        if (wasPlaying) {
-            audioPlayerRef.current.pause();
-        }
-
-        // Handle initial position
-        handleWaveformClick(e);
-
-        // Store if audio was playing before drag
-        // e.currentTarget.dataset.wasPlaying = wasPlaying;
-        wasPlayingBeforeDragRef.current = wasPlaying;
-    };
-
-
-    // Mouse move handler - update cursor while dragging
-    const handleMouseMove = useCallback((e) => {
-        if (!isDragging || !audioPlayerRef.current?.duration) return;
-
-        const percentage = getPositionFromEvent(e);
-        const newTime = audioPlayerRef.current.duration * percentage;
-
-        // Update audio position
-        audioPlayerRef.current.currentTime = newTime;
-
-        // Update cursor position
-        setCursorPosition(percentage);
-
-        // Update waveform visual
-        drawStaticBars(scaledData, percentage);
-    }, [isDragging, scaledData]);
-
-    // Mouse up handler - end dragging
-    const handleMouseUp = useCallback((e) => {
-        if (!isDragging) return;
-
-        setIsDragging(false);
-
-        // Resume playing if it was playing before drag
-        const wasPlaying = wasPlayingBeforeDragRef.current;
-        if (wasPlaying && audioPlayerRef.current) {
-            audioPlayerRef.current.play();
-        }
-    }, [isDragging]);
-
-    // Add global mouse event listeners for dragging
-    useEffect(() => {
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-
-            return () => {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-            };
-        }
-    }, [isDragging, handleMouseMove, handleMouseUp]);
-
-    const playPauseAudio = () => {
-        if (audioPlayerRef.current) {
-            if (audioPlayerRef.current.paused) {
-                setRecordingState('play');
-                audioPlayerRef.current.play();
-            } else {
-                setRecordingState('pause');
-                audioPlayerRef.current.pause();
-            }
-        }
-    };
-
-    const { setupCanvas, drawRoundedRect, drawCursor, drawStaticBars } = useWaveformCanvas(canvasRef, waveformContainer)
-
-
-    // // Fixed canvas setup
-    // const setupCanvas = useCallback(() => {
-    //     const canvas = canvasRef.current;
-    //     const container = waveformContainer.current;
-    //     if (!canvas || !container) return;
-
-    //     const dpr = window.devicePixelRatio || 1;
-    //     const rect = container.getBoundingClientRect();
-
-    //     // Use actual container dimensions
-    //     const width = rect.width;
-    //     const height = rect.height;
-
-    //     // Set canvas size accounting for device pixel ratio
-    //     canvas.width = width * dpr;
-    //     canvas.height = height * dpr;
-
-    //     // Scale canvas back down using CSS
-    //     canvas.style.width = `${width}px`;
-    //     canvas.style.height = `${height}px`;
-
-    //     // Scale the context to match device pixel ratio
-    //     const context = canvas.getContext('2d');
-    //     context.scale(dpr, dpr);
-    // }, []);
-
-
+    const {
+        isPlaying,
+        timer,
+        isDragging,
+        cursorPosition,
+        playPauseAudio,
+        handleMouseDown,
+        // You might still use this for display
+    } = useAudioPlaybackAndWaveform(audioPlayerRef, canvasRef, audioPlayerRef.current?.duration, scaledData, drawStaticBars)
 
     useEffect(() => {
         if (!audioBlob) return;
-
-
-        console.log('audioBlob ----', audioBlob)
         const audioUrl = URL.createObjectURL(audioBlob);
         if (audioPlayerRef.current) audioPlayerRef.current.src = audioUrl;
 
@@ -240,58 +107,6 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
     }, [waveformData, drawFinalWaveform]);
 
 
-
-
-    // Audio player event listeners
-    useEffect(() => {
-        const player = audioPlayerRef.current;
-        if (!player) return;
-
-        const handlePlay = () => {
-            setIsPlaying(true);
-            const visualize = () => {
-                if (player.paused) return;
-                const progress = player.currentTime / player.duration;
-                setCursorPosition(progress);
-                drawStaticBars(scaledData, progress);
-                playbackAnimationIdRef.current = requestAnimationFrame(visualize);
-            };
-            visualize();
-        };
-        const handlePause = () => {
-            setIsPlaying(false);
-            if (playbackAnimationIdRef.current) cancelAnimationFrame(playbackAnimationIdRef.current);
-        };
-        const handleEnded = () => {
-            setIsPlaying(false);
-            setCursorPosition(0);
-            drawStaticBars(scaledData, 0);
-        };
-        const handleTimeUpdate = () => {
-            if (player.paused) {
-                const progress = player.currentTime / player.duration;
-                setCursorPosition(progress);
-                drawStaticBars(scaledData, progress);
-            } else {
-                const elapsed = player.currentTime; // This is already in seconds
-                const minutes = Math.floor(elapsed / 60); // Divide by 60, not 60000
-                const seconds = Math.floor(elapsed % 60); // Modulo 60, not % 60000 / 1000
-                setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            }
-        };
-
-        player.addEventListener('play', handlePlay);
-        player.addEventListener('pause', handlePause);
-        player.addEventListener('ended', handleEnded);
-        player.addEventListener('timeupdate', handleTimeUpdate);
-
-        return () => {
-            player.removeEventListener('play', handlePlay);
-            player.removeEventListener('pause', handlePause);
-            player.removeEventListener('ended', handleEnded);
-            player.removeEventListener('timeupdate', handleTimeUpdate);
-        };
-    }, [drawStaticBars, scaledData]);
 
     return (
         <div className="flex items-center justify-start h-auto gap-2.5 w-full">
