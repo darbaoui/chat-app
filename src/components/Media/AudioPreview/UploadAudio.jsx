@@ -2,7 +2,7 @@ import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import { axios } from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
 import { Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10;
 const WIDTH_SPEED_AND_DURATION = 74;
 const WIDTH_PROGRESS = 32;
