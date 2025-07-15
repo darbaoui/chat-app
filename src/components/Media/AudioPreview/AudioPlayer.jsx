@@ -79,7 +79,8 @@ const AudioPlayer = ({
 
     useLayoutEffect(() => {
         if (waveformData && waveformData.length > 0) {
-            setTimeout(() => drawFinalWaveform(), 50)
+            const animationFrameId = requestAnimationFrame(() => drawFinalWaveform());
+            return () => cancelAnimationFrame(animationFrameId);
         }
     }, [waveformData, drawFinalWaveform, setupCanvas]);
 

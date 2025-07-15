@@ -16,7 +16,6 @@ const UploadAudio = ({ mediaFile }) => {
     const [loading, setLoading] = useState(false)
     const [progress, setProgressUpload] = useState(0);
     const uploadInProgress = useRef(false);
-    console.log('mediaFile --->', mediaFile)
     const width = mediaFile.attributes.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
     const uploadAudioFile = () => {
 
@@ -31,7 +30,7 @@ const UploadAudio = ({ mediaFile }) => {
         data.append('wave_samples', JSON.stringify(wave_samples));
         data.append('content', null);
         setProgressUpload(0)
-        axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/messages/audio`, data, {
+        axios.post('/api/messages/audio', data, {
             onUploadProgress: function (progressEvent) {
                 const percentCompleted = Math.round(
                     (progressEvent.loaded * 100) / progressEvent.total,

@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
 import useWaveformCanvas from "@/hooks/useWaveformCanvas";
 import useAudioPlaybackAndWaveform from "@/hooks/useAudioPlaybackAndWaveform";
 
@@ -74,8 +73,8 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
     // Draw waveform when data changes
     useEffect(() => {
         if (waveformData && waveformData.length > 0) {
-            // Small delay to ensure canvas is properly set up
-            setTimeout(() => drawFinalWaveform(), 50);
+            const animationFrameId = requestAnimationFrame(() => drawFinalWaveform());
+            return () => cancelAnimationFrame(animationFrameId);
         }
     }, [waveformData, drawFinalWaveform]);
 

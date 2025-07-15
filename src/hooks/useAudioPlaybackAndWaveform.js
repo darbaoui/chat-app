@@ -15,7 +15,7 @@ const useAudioPlaybackAndWaveform = (audioRef, canvasRef, audioDuration, wavefor
     const wasPlayingBeforeDragRef = useRef(false);
 
     const [isPlaying, setIsPlaying] = useState(false);
-    const [timer, setTimer] = useState('00:00');
+    const [timer, setTimer] = useState('0:00');
     const [isDragging, setIsDragging] = useState(false);
     const [cursorPosition, setCursorPosition] = useState(0);
 
@@ -142,7 +142,7 @@ const useAudioPlaybackAndWaveform = (audioRef, canvasRef, audioDuration, wavefor
             setIsPlaying(false);
             setCursorPosition(0);
             drawStaticBars(waveformData, 0);
-            setTimer('00:00');
+            setTimer('0:00');
         };
 
         const handleTimeUpdate = () => {
@@ -156,7 +156,7 @@ const useAudioPlaybackAndWaveform = (audioRef, canvasRef, audioDuration, wavefor
             const elapsed = player.currentTime;
             const minutes = Math.floor(elapsed / 60);
             const seconds = Math.floor(elapsed % 60);
-            setTimer(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+            setTimer(`${String(minutes).padStart(1, '0')}:${String(seconds).padStart(2, '0')}`);
         };
 
         player.addEventListener('play', handlePlay);
