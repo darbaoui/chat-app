@@ -18,8 +18,7 @@ const UploadAudio = ({ mediaFile }) => {
     const uploadInProgress = useRef(false);
 
     // We decide to use small width for now, because we don't have how we can works with big width
-    const wave_form_width = (mediaFile.attributes.wave_samples.length * (barWidth + barGap)) > smScreenWidth ? smScreenWidth : (mediaFile.attributes.wave_samples.length * (barWidth + barGap))
-
+    const wave_form_width = Math.min(mediaFile.attributes.wave_samples.length * (barWidth + barGap), smScreenWidth);
     const width = wave_form_width + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
 
     const uploadAudioFile = useCallback(() => {
