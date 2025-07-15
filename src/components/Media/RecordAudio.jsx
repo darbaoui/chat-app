@@ -4,7 +4,7 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayo
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
+import { AUDIO_WAVEFORM_OPRIONS, RMS_AMPLITUDE_SCALAR } from "@/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
 import useWaveformCanvas from "@/hooks/useWaveformCanvas";
 const PUSH_INTERVAL = 50;
@@ -106,12 +106,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
 
         const MIN_BAR_HEIGHT = AUDIO_WAVEFORM_OPRIONS.barMinHeight;
         const MAX_BAR_HEIGHT = AUDIO_WAVEFORM_OPRIONS.barHeight;
-
-        // This multiplier is used to scale the RMS value of the audio signal.
-        // The RMS value is typically a small float between 0 and 1, and this factor
-        // amplifies it to create a more visually dynamic and responsive bar height.
-        // The value was likely determined through experimentation to achieve the desired visual effect.
-        const RMS_AMPLITUDE_SCALAR = 5;
 
         analyserRef.current.getFloatTimeDomainData(analyserRef.current.timeDomainDataArray);
         let sumOfSquares = 0;

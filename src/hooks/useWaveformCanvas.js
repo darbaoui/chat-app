@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
-import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
+import { AUDIO_WAVEFORM_OPRIONS, WAVEFORM_HEIGHT_SCALE_FACTOR } from '@/constants';
 import { scaleDataToFit } from '@/components/helper';
 
-const WAVEFORM_HEIGHT_SCALE_FACTOR = 0.85
+
 
 const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
     

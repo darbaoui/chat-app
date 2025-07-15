@@ -1,3 +1,8 @@
+// The RMS value is typically a small float between 0 and 1, and this factor
+// amplifies it to create a more visually dynamic and responsive bar height.
+// The value was likely determined through experimentation to achieve the desired visual effect.
+export const RMS_AMPLITUDE_SCALAR = 5;
+export const WAVEFORM_HEIGHT_SCALE_FACTOR = 0.85
 export const BUFFER_MULTIPLIER = 1.5;
 export const IMAGE_MIME_TYPES = [
   'image/jpeg',

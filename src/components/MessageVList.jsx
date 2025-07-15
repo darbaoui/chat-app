@@ -81,7 +81,7 @@ const MessageVList = () => {
 
   useEffect(() => {
     if (shouldScrollToBottom) {
-      shouldStickToBottom.current = shouldStickToBottom
+      shouldStickToBottom.current = shouldScrollToBottom
     }
   }, [shouldScrollToBottom])
 
