@@ -10,13 +10,18 @@ const PROGRESS_PADDING_LEFT = 4;
 const PADDING_BTW_WAVE_PLAY_BTN = 10;
 
 const UploadAudio = ({ mediaFile }) => {
-    const { barWidth, barGap, height } = AUDIO_WAVEFORM_OPRIONS;
+    const { barWidth, barGap, smScreenWidth } = AUDIO_WAVEFORM_OPRIONS;
     const [mediaFileId, setMediaFileId] = useState(null)
     const { updateMessage } = useMessageStore()
     const [loading, setLoading] = useState(false)
     const [progress, setProgressUpload] = useState(0);
     const uploadInProgress = useRef(false);
-    const width = mediaFile.attributes.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
+
+    // We decide to use small width for now, because we don't have how we can works with big width
+    const wave_form_width = (mediaFile.attributes.wave_samples.length * (barWidth + barGap)) > smScreenWidth ? smScreenWidth : (mediaFile.attributes.wave_samples.length * (barWidth + barGap))
+
+    const width = wave_form_width + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
+
     const uploadAudioFile = () => {
 
         if (uploadInProgress.current) return
@@ -58,7 +63,7 @@ const UploadAudio = ({ mediaFile }) => {
     }, [mediaFile?.id]);
 
     return (
-        <div className="flex items-center overflow-hidden" >
+        <div className="max-w-[254px] flex items-center overflow-hidden" >
             <div className="flex items-center justify-center text-background rounded-full !w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none"
             >
                 <Play className="w-[14px]" size={14} />

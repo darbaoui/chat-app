@@ -36,6 +36,8 @@ export const MESSAGE_VARIANTS = {
     }
 };
 
+const smScreenWidth = 113;
+
 export const AUDIO_WAVEFORM_OPRIONS = {
   waveColor: '#0c4a6e',
   progressColor: '#88aec4',
@@ -52,12 +54,9 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   normalize: true,
   // cursorWidth: 2,
   barMinHeight: 2,
-  waveMaxWidth: 113,
-
-  // waveMaxWidth: {
-  //   sm: this.defaultWaveMaxWidth,
-  //   md: this.defaultWaveMaxWidth*2
-  // }
+  smScreenWidth: smScreenWidth,
+  mdScreenWidth: smScreenWidth * 2,
+  waveMaxWidth: smScreenWidth * 2,
 };
 
 
