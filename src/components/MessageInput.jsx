@@ -8,11 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TiptapEditorWrite from "./Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "./Media/RecordAudio";
-import { axios } from "@/lib/axios";
 import { CURRENT_USER } from "@/constants";
-import { faker } from "@faker-js/faker";
 import useMessageStore from "@/stores/MessageStore";
-import { generateTiptapJson, scaleDataToFit } from "./helper";
+import { getBarCount, scaleDataToFit } from "./helper";
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.8 },
@@ -113,7 +111,7 @@ const MessageInput = () => {
 
   const sendAudioMessage = async ({ audioBlob, duration, waveData }) => {
 
-    const wave_samples = scaleDataToFit(waveData)
+    const wave_samples = scaleDataToFit(waveData, getBarCount())
 
     const mime_type = audioBlob.type;
     // 2. Generate a file_name

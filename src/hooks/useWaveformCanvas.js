@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
-
+import { scaleDataToFit } from '@/components/helper';
 
 const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
     
@@ -37,23 +37,23 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
         }, []);
     
     
-        // Fixed data scaling
-        const scaleDataToFit = useCallback((data, count) => {
-            if (!data || data.length === 0) return [];
-            if (data.length <= count) return [...data];
+        // // Fixed data scaling
+        // const scaleDataToFit = useCallback((data, count) => {
+        //     if (!data || data.length === 0) return [];
+        //     if (data.length <= count) return [...data];
     
-            const scaled = [];
-            const scale = data.length / count;
+        //     const scaled = [];
+        //     const scale = data.length / count;
     
-            for (let i = 0; i < count; i++) {
-                const startIndex = Math.floor(i * scale);
-                const endIndex = Math.floor((i + 1) * scale);
-                const chunk = data.slice(startIndex, endIndex);
-                scaled.push(chunk.length ? Math.max(...chunk) : 0);
-            }
+        //     for (let i = 0; i < count; i++) {
+        //         const startIndex = Math.floor(i * scale);
+        //         const endIndex = Math.floor((i + 1) * scale);
+        //         const chunk = data.slice(startIndex, endIndex);
+        //         scaled.push(chunk.length ? Math.max(...chunk) : 0);
+        //     }
     
-            return scaled;
-        }, []);
+        //     return scaled;
+        // }, []);
 
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
         ctx.beginPath();

@@ -141,7 +141,7 @@ export function autoFormatSize(bytes) {
 }
 
 
-// Fixed bar count calculation
+// // Fixed bar count calculation
 export const getBarCount = () => {
   const { barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
   const availableWidth = waveMaxWidth; // Use clientWidth for actual display width
@@ -150,22 +150,17 @@ export const getBarCount = () => {
 
 
 // Fixed data scaling
-export const scaleDataToFit = (data) => {
-  
-  const count = getBarCount()
+export const scaleDataToFit = (data, targetCount) => {
   if (!data || data.length === 0) return [];
-
+  const count = targetCount;
   if (data.length <= count) return [...data];
-
   const scaled = [];
   const scale = data.length / count;
-
   for (let i = 0; i < count; i++) {
     const startIndex = Math.floor(i * scale);
     const endIndex = Math.floor((i + 1) * scale);
     const chunk = data.slice(startIndex, endIndex);
     scaled.push(chunk.length ? Math.max(...chunk) : 0);
   }
-
   return scaled;
 };

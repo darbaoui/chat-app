@@ -3,11 +3,12 @@ import { axios } from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react"
-const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10
+const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10;
 const WIDTH_SPEED_AND_DURATION = 74;
-const WIDTH_PROGRESS = 32
-const PROGRESS_PADDING_LEFT = 4
-const PADDING_BTW_WAVE_PLAY_BTN = 10
+const WIDTH_PROGRESS = 32;
+const PROGRESS_PADDING_LEFT = 4;
+const PADDING_BTW_WAVE_PLAY_BTN = 10;
+
 const UploadAudio = ({ mediaFile }) => {
     const { barWidth, barGap, height } = AUDIO_WAVEFORM_OPRIONS;
     const [mediaFileId, setMediaFileId] = useState(null)

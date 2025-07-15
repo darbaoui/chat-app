@@ -192,6 +192,10 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
             };
 
             recorder.onstop = async () => {
+                if (audioChunksRef.current.length === 0) {
+                    console.warn("Recording stopped with no data.");
+                    return;
+                }
                 const elapsedMilliseconds = Date.now() - startTimeRef.current - totalPausedTimeRef.current;
                 const durationInSeconds = elapsedMilliseconds / 1000;
                 const type = audioChunksRef.current[0].type || 'audio/webm';
