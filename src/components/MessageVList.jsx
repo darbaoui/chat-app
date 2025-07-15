@@ -193,7 +193,7 @@ const MessageVList = () => {
                   style={{
                     flex: 1,
                   }}
-                  overscan={items.length >= 50 ? 50 : 0}
+                  overscan={items.length >= 20 ? 20 : 0}
                   item={StickyItem}
                   keepMounted={[activeIndex]}
                   reverse

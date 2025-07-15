@@ -100,7 +100,7 @@ const MessageInput = () => {
   }, []);
 
 
-  const sendAudioMessage = async ({ audioBlob, duration, waveData }) => {
+  const sendAudioMessage = ({ audioBlob, duration, waveData }) => {
 
     const wave_samples = scaleDataToFit(waveData, getBarCount())
 

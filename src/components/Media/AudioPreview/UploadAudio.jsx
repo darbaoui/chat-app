@@ -60,7 +60,7 @@ const UploadAudio = ({ mediaFile }) => {
             setMediaFileId(mediaFile.id);
             uploadAudioFile();
         }
-    }, [mediaFile?.id]);
+    }, [mediaFile?.id, uploadAudioFile]);
 
     return (
         <div className="max-w-[254px] flex items-center overflow-hidden" >
