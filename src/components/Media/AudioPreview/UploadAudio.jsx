@@ -22,7 +22,7 @@ const UploadAudio = ({ mediaFile }) => {
 
     const width = wave_form_width + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
 
-    const uploadAudioFile = () => {
+    const uploadAudioFile = useCallback(() => {
 
         if (uploadInProgress.current) return
 
@@ -54,7 +54,9 @@ const UploadAudio = ({ mediaFile }) => {
                 uploadInProgress.current = false
                 setLoading(false);
             });
-    }
+    }, [mediaFile, updateMessage]);
+
+
     useEffect(() => {
         if (mediaFile?.id && mediaFile.id !== mediaFileId) {
             setMediaFileId(mediaFile.id);
