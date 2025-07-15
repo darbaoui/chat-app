@@ -18,7 +18,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
     const [recordingState, setRecordingState] = useState('inactive');
     const [timer, setTimer] = useState('00:00');
     const [finalAudioBlob, setFinalAudioBlob] = useState(null);
-    const [outputAudioURL, setOutputAudioURL] = useState('');
 
     // Refs for DOM elements and audio processing objects
     const mediaRecorderRef = useRef(null);
@@ -30,7 +29,6 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
     const recordingAnimationIdRef = useRef(null);
     const waveformContainer = useRef(null);
     const canvasRef = useRef(null);
-    const playbackAnimationIdRef = useRef(null);
 
     const isPausingRef = useRef(false);
 
@@ -139,14 +137,12 @@ const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudi
         }
 
         if (recordingAnimationIdRef.current) cancelAnimationFrame(recordingAnimationIdRef.current);
-        if (playbackAnimationIdRef.current) cancelAnimationFrame(playbackAnimationIdRef.current);
         if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
             audioContextRef.current.close();
         }
 
         setRecordingState('inactive');
         setFinalAudioBlob(null);
-        setOutputAudioURL('');
         setTimer('00:00');
         isPausingRef.current = false
 

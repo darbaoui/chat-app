@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
@@ -75,12 +75,11 @@ const AudioPlayer = ({
         return () => window.removeEventListener('resize', handleResize);
     }, [setupCanvas, drawFinalWaveform]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (waveformData && waveformData.length > 0) {
-            // Small delay to ensure canvas is properly set up
-            setTimeout(() => drawFinalWaveform(), 50);
+            setTimeout(() => drawFinalWaveform(), 50)
         }
-    }, [waveformData, drawFinalWaveform]);
+    }, [waveformData, drawFinalWaveform, setupCanvas]);
 
 
     const updateSpeed = () => {

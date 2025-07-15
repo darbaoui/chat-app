@@ -32,7 +32,7 @@ const UploadAudio = ({ mediaFile }) => {
         setProgressUpload(0)
         axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/messages/audio`, data, {
             onUploadProgress: function (progressEvent) {
-                var percentCompleted = Math.round(
+                const percentCompleted = Math.round(
                     (progressEvent.loaded * 100) / progressEvent.total,
                 );
                 setProgressUpload(percentCompleted);

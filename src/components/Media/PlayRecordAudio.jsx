@@ -83,23 +83,12 @@ const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 
     return (
         <div className="flex items-center justify-start h-auto gap-2.5 w-full">
-            {isPlaying ? (
-                <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none flex items-center justify-center"
-                    onClick={playPauseAudio}
-                >
-                    <Pause className="w-[14px]" size={14} />
-                </Button>
-            ) : (
-
-                <Button
-                    className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none flex items-center justify-center"
-                    onClick={playPauseAudio}
-                >
-                    <Play className="w-[14px]" size={14} />
-                </Button>
-            )
-            }
+            <Button
+                className="rounded-full w-6.5 h-6.5 p-0 bg-chatBoxMe-foreground border-none flex items-center justify-center"
+                onClick={playPauseAudio}
+            >
+                {isPlaying ? <Pause className="w-[14px]" size={14} /> : <Play className="w-[14px]" size={14} />}
+            </Button>
 
             <div
                 ref={waveformContainer}

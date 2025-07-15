@@ -93,19 +93,19 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
         const context = canvas.getContext('2d');
         const canvasWidth = canvas.clientWidth;
         const canvasHeight = canvas.clientHeight;
-
+        
         context.clearRect(0, 0, canvasWidth, canvasHeight);
-
+        
         if (!data || data.length === 0) return;
-
+        
         const progressIndex = Math.floor(data.length * progress);
-
+        
         const { barWidth, barGap, progressColor, waveColor } = AUDIO_WAVEFORM_OPRIONS;
         const BAR_TOTAL_WIDTH = barWidth + barGap;
-
+        
         const maxValue = Math.max(...data);
         if (maxValue === 0) return;
-
+        
         data.forEach((value, i) => {
             const x = i * BAR_TOTAL_WIDTH;
             const normalizedHeight = (value / maxValue) * canvasHeight * 0.85;
