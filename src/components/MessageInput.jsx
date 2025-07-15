@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Pause, Plus, SendHorizonal, Trash } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,15 +73,6 @@ const MessageInput = () => {
   };
 
 
-
-
-  const sendMessage = () => {
-
-  };
-
-
-
-
   const handleStopRecording = useCallback(() => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.removeRecord();
@@ -129,12 +120,14 @@ const MessageInput = () => {
           id: crypto.randomUUID(),
           tempId: crypto.randomUUID(),
           isUploading: true,
-          duration,
           file_name,
           file: audioBlob,
           mime_type,
           name: file_name,
-          wave_samples,
+          attributes: {
+            duration,
+            wave_samples
+          }
         }
       ],
       content: null,

@@ -16,7 +16,8 @@ const UploadAudio = ({ mediaFile }) => {
     const [loading, setLoading] = useState(false)
     const [progress, setProgressUpload] = useState(0);
     const uploadInProgress = useRef(false);
-    const width = mediaFile.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
+    console.log('mediaFile --->', mediaFile)
+    const width = mediaFile.attributes.wave_samples.length * (barWidth + barGap) + WIDTH_SPEED_AND_DURATION - WIDTH_PROGRESS + PADDING_BTW_WAVE_PLAY_BTN
     const uploadAudioFile = () => {
 
         if (uploadInProgress.current) return
@@ -25,10 +26,9 @@ const UploadAudio = ({ mediaFile }) => {
         setLoading(true);
         let data = new FormData();
         data.append('audio', mediaFile.file);
-        data.append('duration', mediaFile.duration);
-        mediaFile.wave_samples.forEach(sample => {
-            data.append('wave_samples[]', sample);
-        });
+        const { duration, wave_samples } = mediaFile?.attributes
+        data.append('duration', duration);
+        data.append('wave_samples', JSON.stringify(wave_samples));
         data.append('content', null);
         setProgressUpload(0)
         axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/messages/audio`, data, {
