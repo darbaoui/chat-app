@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import useWaveformCanvas from '@/hooks/useWaveformCanvas';
 import useAudioPlaybackAndWaveform from '@/hooks/useAudioPlaybackAndWaveform';
 
+const RESIZE_REDRAW_DEBOUNCE_MS = 100;
+
 const AudioPlayer = ({
     audioUrl,// required
     audioDuration,// required
@@ -68,7 +70,7 @@ const AudioPlayer = ({
         const handleResize = () => {
             setupCanvas();
             // Redraw waveform after resize
-            setTimeout(() => drawFinalWaveform(cursorPosition), 100);
+            setTimeout(() => drawFinalWaveform(cursorPosition), RESIZE_REDRAW_DEBOUNCE_MS);
         };
 
         window.addEventListener('resize', handleResize);

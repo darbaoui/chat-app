@@ -2,6 +2,8 @@ import { useCallback, useEffect } from 'react';
 import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
 import { scaleDataToFit } from '@/components/helper';
 
+const WAVEFORM_HEIGHT_SCALE_FACTOR = 0.85
+
 const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
     
     const setupCanvas = useCallback(() => {
@@ -108,7 +110,7 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
         
         data.forEach((value, i) => {
             const x = i * BAR_TOTAL_WIDTH;
-            const normalizedHeight = (value / maxValue) * canvasHeight * 0.85;
+            const normalizedHeight = (value / maxValue) * canvasHeight * WAVEFORM_HEIGHT_SCALE_FACTOR;
             const barHeight = Math.max(1, normalizedHeight);
             const y = (canvasHeight - barHeight) / 2;
 
