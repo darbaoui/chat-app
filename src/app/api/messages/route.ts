@@ -8,17 +8,17 @@ const USERS = [
   {
     id: CURRENT_USER,
     name: "John Doe",
-    avatar_url: "https://randomuser.me/api/portraits/men/1.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
   },
   {
     id: "user_2",
     name: "Jane Smith",
-    avatar_url: "https://randomuser.me/api/portraits/women/2.jpg",
+    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
   },
   {
     id: "user_3",
     name: "Alex Lee",
-    avatar_url: "https://randomuser.me/api/portraits/men/3.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
   },
 ];
 
@@ -32,7 +32,7 @@ function generateMessage(index: number, message_count: number) {
     const messageText = hasAudio ? null : generateTiptapJson(index + 1);
     return {
      id: faker.string.uuid(),
-     text: messageText,
+     content: messageText,
      created_at: createdAt,
      user,
      media ,
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    messages,
+    data:messages,
     page,
     limit,
     total: TOTAL_MESSAGES,

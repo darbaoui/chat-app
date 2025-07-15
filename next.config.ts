@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn.discordapp.com',
+        hostname: 'randomuser.me',
       },
       {
         protocol: 'https',

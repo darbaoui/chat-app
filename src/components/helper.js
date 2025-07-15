@@ -1,7 +1,7 @@
-import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
+import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, AUDIO_WAVEFORM_OPRIONS, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
 import { faker } from "@faker-js/faker";
 
-export const generateTiptapJson = (messageNumber=0) => {
+export const generateTiptapJson = (messageNumber = 0) => {
   const formats = ['bold', 'italic', 'code'];
   const selectedFormat = formats[Math.floor(Math.random() * formats.length)];
 
@@ -22,7 +22,7 @@ export const generateTiptapJson = (messageNumber=0) => {
           },
           {
             type: 'text',
-            text: faker.lorem.paragraph({ min: 1, max: 5 }) ,
+            text: faker.lorem.paragraph({ min: 1, max: 5 }),
           },
         ],
       },
@@ -37,25 +37,25 @@ export const generateTiptapJson = (messageNumber=0) => {
  * @returns {string} - The formatted date string.
  */
 export const formatDateSeparator = (date) => {
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) {
-        return 'Today';
-    }
-    if (date.toDateString() === yesterday.toDateString()) {
-        return 'Yesterday';
-    }
-    return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    }).format(date);
+  if (date.toDateString() === today.toDateString()) {
+    return 'Today';
+  }
+  if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday';
+  }
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
 };
 
 
-export const  createMediaItem = (mediaDef, url) => {
+export const createMediaItem = (mediaDef, url) => {
   const fileName = url.substring(url.lastIndexOf('/') + 1);
   const mimeType = mediaDef.mime_prefix + (fileName.includes('.') ? fileName.split('.').pop() : 'octet-stream');
   const mediaItem = {
@@ -66,7 +66,7 @@ export const  createMediaItem = (mediaDef, url) => {
     url: url,
   };
 
-    // Add the exact duration for audio files based on the URL
+  // Add the exact duration for audio files based on the URL
   if (mediaDef.type === 'audio') {
     const exactAudioDef = AUDIO_DEFINITIONS.find(audio => audio.url === url);
     if (exactAudioDef) {
@@ -140,3 +140,27 @@ export function autoFormatSize(bytes) {
   }
 }
 
+
+// // Fixed bar count calculation
+export const getBarCount = () => {
+  const { barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
+  const availableWidth = waveMaxWidth; // Use clientWidth for actual display width
+  return Math.floor(availableWidth / (barWidth + barGap));
+};
+
+
+// Fixed data scaling
+export const scaleDataToFit = (data, targetCount) => {
+  if (!data || data.length === 0) return [];
+  const count = targetCount;
+  if (data.length <= count) return [...data];
+  const scaled = [];
+  const scale = data.length / count;
+  for (let i = 0; i < count; i++) {
+    const startIndex = Math.floor(i * scale);
+    const endIndex = Math.floor((i + 1) * scale);
+    const chunk = data.slice(startIndex, endIndex);
+    scaled.push(chunk.length ? Math.max(...chunk) : 0);
+  }
+  return scaled;
+};

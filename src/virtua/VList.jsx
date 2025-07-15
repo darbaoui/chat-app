@@ -1,6 +1,5 @@
-import {  forwardRef, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import { Virtualizer } from "@/virtua/Virtualizer";
-
 
 export const VList = forwardRef(
   (
@@ -25,7 +24,7 @@ export const VList = forwardRef(
   ) => {
     const scrollRef = useRef(null);
     const shouldReverse = reverse && !horizontal;
-    
+
     let element = (
       <Virtualizer
         ref={ref}
@@ -50,26 +49,19 @@ export const VList = forwardRef(
       element = (
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            minHeight: "100%",
-            // Flip the container
             transform: "scaleY(-1)",
-            // Ensure proper rendering
-            transformOrigin: "center",
-            // Prevent text selection issues
-            userSelect: "none",
+            height: "100%",
+            // Re-enable text selection
+            userSelect: "text",
           }}
         >
-           <div 
-            style={{ 
-                  // Flip content back to normal
-                  transform: "scaleY(-1)",
-                  // Re-enable text selection
-                  userSelect: "auto",
-                }}
-              >
+          <div
+            style={{
+              transform: "scaleY(-1)",
+              // // Re-enable text selection
+              userSelect: "text",
+            }}
+          >
             {element}
           </div>
         </div>
@@ -81,8 +73,17 @@ export const VList = forwardRef(
         ref={scrollRef}
         {...attrs}
         style={{
-           minHeight: 0,
+          minHeight: 0,
           overflowY: "auto",
+          width: "100%",
+          height: "100%",
+          contain: "strict",
+          // Add flex styles to the scroll container when reversed
+          ...(shouldReverse && {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+          }),
           ...style,
         }}
       >

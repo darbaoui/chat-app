@@ -4,18 +4,23 @@ import { Loader } from "lucide-react";
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
-import { formatDateSeparator} from "./helper";
+import { formatDateSeparator, generateTiptapJson } from "./helper";
 import DateSeparator from "./DateSeparator";
 // import { VList } from "virtua";
 import { VList } from "@/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
+import { axios } from "@/lib/axios";
+import useMessageStore from "@/stores/MessageStore";
+import { faker } from "@faker-js/faker";
+import { CURRENT_USER } from "@/constants";
 const LIMIT = 50;
 
 
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = (url) => axios.get(url).then(({ data }) => data);
+// const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const getKey = (pageIndex, previousPageData) => {
   if (previousPageData && !previousPageData.hasMore) return null;
@@ -62,11 +67,30 @@ const MessageVList = () => {
       shouldRetryOnError: true,
     });
 
-  const messages = data ? data.flatMap((page) => page.messages).reverse() : [];
+
+  const { addMessage, messages, setMessages, shouldScrollToBottom } = useMessageStore();
+
+  useEffect(() => {
+    if (data) {
+      const messages = data ? data.flatMap((page) => page.data).reverse() : [];
+      setMessages(messages);
+
+    }
+  }, [data])
+
+
+  useEffect(() => {
+    if (shouldScrollToBottom) {
+      shouldStickToBottom.current = shouldScrollToBottom
+    }
+  }, [shouldScrollToBottom])
+
   const isLoadingMore =
-    isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
-  const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < LIMIT);
+    isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.next_page_url);// We use laravel pagination response
+
+  const isEmpty = messages && messages.length === 0;
+  const isReachingEnd = isEmpty || (data && !data?.data?.[data.length - 1]?.next_page_url); // We use laravel pagination response
+
 
   const ref = useRef(null);
   const isPrepend = useRef(false);
@@ -78,9 +102,8 @@ const MessageVList = () => {
     const items = [];
     const dateIndexesSet = new Set();
     let currentDate = null;
-
+    if (!messages) return { items, dateIndexes: [], dateIndexesSet };
     messages.forEach((message, index) => {
-
       const messageDate = new Date(message.created_at);
 
       const messageDateString = formatDateSeparator(messageDate);
@@ -125,14 +148,10 @@ const MessageVList = () => {
     if (!ref.current) return;
 
     const start = ref.current.findStartIndex();
-    
+
     const activeStickyIndex = dateIndexes.findLast((index) => start >= index);
 
     setActiveIndex(activeStickyIndex);
-
-
-
-
 
     shouldStickToBottom.current =
       offset - ref.current.scrollSize + ref.current.viewportSize >=
@@ -141,14 +160,11 @@ const MessageVList = () => {
     if (offset < 100 && !isPrepend.current && !isValidating) {
       isPrepend.current = true;
       setSize((p) => p + 1);
-      // setItems(p => [...Array.from({
-      //   length: 100
-      // }, () => createItem()), ...p]);
     }
   }
 
 
-  if (isLoading)
+  if (isLoading || !messages)
     return (
       <div className="absolute inset-0 w-full  flex items-center justify-center">
         <Loader className="animate-spin" />
@@ -161,43 +177,51 @@ const MessageVList = () => {
 
 
         <div className="flex flex-col h-full w-full relative">
-          {isLoadingMore && (
-              <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
-                <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
-                  <Loader className="animate-spin w-3 text-white" />
-                </div>
+          {
+            isEmpty ? <div className="flex-1" /> : (
+
+              <div className="flex flex-1 w-full relative">
+                {isLoadingMore && (
+                  <div className={cn("absolute top-3 z-10 w-full bg-transparent flex items-center justify-center")}>
+                    <div className="w-16 rounded-3xl flex items-center justify-center bg-title px-3 h-7">
+                      <Loader className="animate-spin w-3 text-white" />
+                    </div>
+                  </div>
+                )}
+                <VList
+                  ref={ref}
+                  style={{
+                    flex: 1,
+                  }}
+                  overscan={items.length >= 20 ? 20 : 0}
+                  item={StickyItem}
+                  keepMounted={[activeIndex]}
+                  reverse
+                  shift={isPrepend.current}
+                  onScroll={handleScroll}
+                >
+
+
+                  {items.map((item, index) => {
+                    if (item.type === 'date') {
+                      return <DateSeparator dateString={item.date} index={index} key={item.id} />
+                    }
+                    return (
+
+                      <Message
+                        key={item.id}
+                        message={item}
+                        prevMessage={index > 0 ? items[index - 1] : {}}
+                      />
+                    )
+
+                  })}
+                </VList>
+
               </div>
-            )}
-          <VList
-            ref={ref}
-            style={{
-              flex: 1,
-            }}
-            overscan={20}
-            item={StickyItem}
-            keepMounted={[activeIndex]}
-            reverse
-            shift={isPrepend.current}
-            onScroll={handleScroll}
-          >
-            
+            )
+          }
 
-
-            {items.map((item, index) => {
-              if (item.type === 'date') {
-                return <DateSeparator dateString={item.date} index={index}  key={item.id} />
-              }
-              return (
-
-                <Message
-                  key={item.id}
-                  message={item}
-                  prevMessage={index > 0 ? items[index - 1] : {}}
-                />
-              )
-
-            })}
-          </VList>
           <MessageInput />
         </div>
       </StickyIndexContext.Provider>

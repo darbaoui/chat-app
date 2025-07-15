@@ -1,3 +1,8 @@
+// The RMS value is typically a small float between 0 and 1, and this factor
+// amplifies it to create a more visually dynamic and responsive bar height.
+// The value was likely determined through experimentation to achieve the desired visual effect.
+export const RMS_AMPLITUDE_SCALAR = 5;
+export const WAVEFORM_HEIGHT_SCALE_FACTOR = 0.85
 export const BUFFER_MULTIPLIER = 1.5;
 export const IMAGE_MIME_TYPES = [
   'image/jpeg',
@@ -10,7 +15,7 @@ export const IMAGE_MIME_TYPES = [
 
 export const MAX_IMAGE_SIZE = 450;
 
-export const CURRENT_USER = 'current_user'
+export const CURRENT_USER = '9f5da511-f5ff-4a92-a27a-47a27fc697e8' //'current_user'
 
 export const MESSAGE_VARIANTS = {
     viewport:{ once: true },
@@ -36,6 +41,8 @@ export const MESSAGE_VARIANTS = {
     }
 };
 
+const smScreenWidth = 113;
+
 export const AUDIO_WAVEFORM_OPRIONS = {
   waveColor: '#0c4a6e',
   progressColor: '#88aec4',
@@ -51,7 +58,10 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   fillParent: true,
   normalize: true,
   // cursorWidth: 2,
-  barMinHeight: 4,
+  barMinHeight: 2,
+  smScreenWidth: smScreenWidth,
+  mdScreenWidth: smScreenWidth * 2,
+  waveMaxWidth: smScreenWidth * 2,
 };
 
 

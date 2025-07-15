@@ -137,7 +137,8 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
                     onChange(contentJSON);
                 }
             },
-            content: jsonContent
+            content: jsonContent,
+            immediatelyRender: false,
         },
     );
 
