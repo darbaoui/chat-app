@@ -1,4 +1,4 @@
-import MessageVList from "@/components/MessageVList";
+import MessageVList from "@/components/Chat/MessageVList";
 
 export default function Home() {
   return (

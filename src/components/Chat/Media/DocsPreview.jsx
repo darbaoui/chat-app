@@ -1,9 +1,9 @@
 import { File } from "lucide-react";
 import mime from 'mime-types';
 import NextImage from 'next/image';
-import { autoFormatSize } from "../helper";
+import { autoFormatSize } from "@/components/Chat/helper";
 
-const DocsPreview = ({files}) => {
+const DocsPreview = ({ files }) => {
   return (
     files.length > 0 && (
       <div className="flex flex-wrap">

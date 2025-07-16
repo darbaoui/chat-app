@@ -1,13 +1,18 @@
+import { axios } from '@/lib/axios';
 import { create } from 'zustand';
 
-const useMessageStore = create((set) => ({
+const useMessageStore = create((set, get) => ({
   messages: null,
+  currentDraft: null,
+  error: null,
+  uploadingMessages: new Map(),
   unReadMessages: 0,
   shouldScrollToBottom: true,
   setShouldScrollToBottom: (shouldScrollToBottom) => set({ shouldScrollToBottom }),
-  incrementUnreadMessages: () =>
-    set((state) => ({ unReadMessages: state.unReadMessages + 1 })),
-  resetUnreadMessages: () => set({ unReadMessages: 0 }),
+  setCurrentDraft: (draft) => set({ currentDraft: draft }),
+  clearCurrentDraft: () => {
+    set({ currentDraft: null });
+  },
   setMessages: (messages) => set({ messages }),
   updateMessage: (messageId, updatedMessage) =>
     set((state) => ({
@@ -23,6 +28,180 @@ const useMessageStore = create((set) => ({
       set((state) => ({
         messages: state.messages.filter((msg) => msg.id !== messageId),
       })),
+  
+  updateMessageByTempId: (tempId, updates) => {
+        set((state) => ({
+          messages: state.messages.map((msg) =>
+            msg.temp_id === tempId ? { ...msg, ...updates } : msg
+          ),
+        }));
+  },
+  createUploadingMessage: (tempId, payload) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      newMap.set(tempId, payload);
+      return { uploadingMessages: newMap };
+    });
+  },
+
+  updateUploadingMessage: (tempId, updates) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(tempId);
+      if (existing) {
+        newMap.set(tempId, { ...existing, ...updates });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
+
+  addFileToUploadingMessage: (tempId, file) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(tempId);
+      if (existing) {
+        newMap.set(tempId, {
+          ...existing,
+          media: [...existing.media, file],
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
+
+  updateFileInUploadingMessage: (tempId, fileId, updates) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(tempId);
+      if (existing) {
+        newMap.set(tempId, {
+          ...existing,
+          media: existing.media.map((file) =>
+            file.temp_id === fileId ? { ...file, ...updates } : file
+          ),
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
+
+  removeUploadingMessage: (tempId) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      newMap.delete(tempId);
+      return { uploadingMessages: newMap };
+    });
+  },
+
+
+  
+  // The first function that used
+  uploadFile: async (file, filePreview, messageId) => {
+    const fileTempId = crypto.randomUUID();
+    console.log('messageId --->', messageId)
+    // Create file object for tracking
+    const fileObj = {
+      id: '',
+      name: file.name,
+      file_name: file.name,
+      mime_type: file.type,
+      size: file.size,
+      content: filePreview,
+      original_url: '',
+      preview_url: '',
+      upload_progress: 0,
+      upload_status: 'uploading',
+      temp_id: fileTempId,
+    };
+
+    // Add file to uploading message
+    get().addFileToUploadingMessage(messageId, fileObj);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('temp_id', fileTempId);
+      if (messageId) {
+        formData.append('message_id', messageId);
+      }
+
+      const response = await axios.post('/api/messages/text/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1)
+          );
+          get().updateFileInUploadingMessage(messageId, fileTempId, {
+            upload_progress: progress,
+          });
+        },
+      });
+
+      if (response.data.success) {
+        get().updateFileInUploadingMessage(messageId, fileTempId, {
+          ...response.data.media,
+          upload_status: 'completed',
+          upload_progress: 100,
+        });
+
+      }
+    } catch (error) {
+      get().updateFileInUploadingMessage(messageId, fileTempId, {
+        upload_status: 'failed',
+      });
+      set({ error: 'Failed to upload file' });
+    }
+  },
+
+  deleteFile: async (mediaId, messageId) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+      if (existing) {
+        newMap.set(messageId, { ...existing, media: existing.media.filter((file) => (file.id !== mediaId && file.temp_id !== mediaId)) });
+      }
+      return { uploadingMessages: newMap };
+    });
+
+    try {
+       await axios.delete('/api/messages/text/file', {
+        data: { media_id: mediaId },
+      });
+
+    } catch (error) {
+      set({ error: 'Failed to delete file' });
+    }
+  },
+
+
+  createDraft: async () => {
+    try {
+      const response = await axios.post('/api/messages/text/draft');
+      if (response.data) {
+        
+        const draft = {
+          id: response.data.id,
+          // temp_id: tempId,
+          content: null,
+          status: 'draft',
+          user: response.data.user,
+          media: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        get().createUploadingMessage(response.data.id, draft)
+        set({ currentDraft: draft });
+        return draft;
+      }
+    } catch (error) {
+      set({ error: 'Failed to create draft' });
+      return null;
+    }
+
+  },
   
   
 }));
