@@ -79,7 +79,9 @@ const MessageInput = () => {
   const [filePreviews, setFilePreviews] = useState([]);
   const [dragState, setDragState] = useState('idle');
   const [dragAndDropfiles, setDragAndDropFiles] = useState(null);
-  const [tempIdMsgText, setTempIdMsgText] = useState(crypto.randomUUID())
+  const [isOpenDropDown, setIsDropDownOpen] = useState(false);
+
+  
 
   const wrapperRef = useRef(null);
 
@@ -208,6 +210,7 @@ const MessageInput = () => {
 
 
   const handleFileChange = (e) => {
+    setIsDropDownOpen(false);
     handleExpand(e)
     const selectedFiles = Array.from(e.target.files);
     readAndPreviewFile(selectedFiles)
@@ -218,7 +221,6 @@ const MessageInput = () => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
     setFilePreviews((prev) => prev.filter((_, i) => i !== index));
     deleteFile(file?.id || file?.tempId, currentDraft?.id)
-    // TODO: remove file if uploaded from server
   };
 
 
@@ -335,11 +337,12 @@ const MessageInput = () => {
 
   const isAudioPaused = recordingState === 'paused';
 
-  console.log('currentDraft?.id --->', currentDraft?.id)
-  console.log('uploadingMessages --->', uploadingMessages)
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id);
 
-  console.log('currentUploadingMessage -->', currentUploadingMessage)
+  const hasMedia = currentUploadingMessage?.media.length > 0;
+
+
+  console.log('hasMedia ---->', hasMedia)
 
   return (
     <div className="w-full flex min-h-16 items-center justify-center mx-auto border-t p-4">
@@ -426,13 +429,13 @@ const MessageInput = () => {
               animate="animate"
               exit="exit"
             >
-              <DropdownMenu>
+              <DropdownMenu open={isOpenDropDown} onOpenChange={setIsDropDownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="!w-8 !h-8 rounded-full bg-chat border-none text-meta-icon">
                     <Plus />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="rounded-3xl p-4" align="start">
+                <DropdownMenuContent  className="rounded-3xl p-4" align="center">
                   <div className="w-full flex flex-col gap-2.5">
                     <div className="grid grid-cols-4">
                       <div className="w-10 h-7.5 bg-red-100"></div>
@@ -531,7 +534,7 @@ const MessageInput = () => {
                     <div className="flex flex-wrap gap-2 pt-2">
                       {currentUploadingMessage.media.map((file, index) => (
                         <div
-                          className={cn("w-12 h-12 rounded-md relative bg-accent border")}
+                          className={cn("w-12 h-auto rounded-md relative bg-accent border")}
                           key={index}
                         >
 
@@ -619,7 +622,7 @@ const MessageInput = () => {
             ) : (
               // Non-recording state buttons
               <>
-                {hasNoText ? (
+                {hasNoText && !hasMedia ? (
                   <motion.div key="mic" variants={itemVariants} initial="initial" animate="animate" exit="exit">
                     <Button
                       variant="outline"
