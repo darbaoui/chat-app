@@ -2,6 +2,7 @@ import AudioPreview from "@/components/Chat/Media/AudioPreview/index";
 import FilesPreview from "@/components/Chat/Media/FilesPreview";
 import TiptapEditorRead from "@/components/Editor/TiptapEditorRead";
 import { cn } from "@/lib/utils";
+import TiptapEditorReadWrapper from "./TiptapEditorReadWrapper";
 
 const MessageContent = ({ message, className }) => {
     const { media } = message;
@@ -18,11 +19,11 @@ const MessageContent = ({ message, className }) => {
         : (
             <div className={cn("flex flex-col w-full md:w-[70%]  gap-2.5 py-2.5 z-[2] relative", className)}>
                 <div className="px-5">
-                    <TiptapEditorRead jsonContent={text} />
+                    <TiptapEditorReadWrapper message={message} />
                 </div>
                 {
                     media.length > 0 ? (
-                        <div className={cn("w-full md:w-[70%] px-5")}>
+                        <div className={cn("w-full px-5")}>
                             <FilesPreview attachments={media} />
                         </div>
                     ) : null

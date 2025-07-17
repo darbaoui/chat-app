@@ -20,6 +20,12 @@ const useMessageStore = create((set, get) => ({
         msg.id === messageId ? updatedMessage  : msg,
       ),
     })),
+  updateMessageContent: (messageId, updates) =>
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.id === messageId ? {...msg, ...updates}  : msg,
+      ),
+    })),
   addMessage: (newMessage) =>
     set((state) => {
       return { messages: [...state.messages, newMessage] };
@@ -98,7 +104,6 @@ const useMessageStore = create((set, get) => ({
   // The first function that used
   uploadFile: async (file, filePreview, messageId) => {
     const fileTempId = crypto.randomUUID();
-    console.log('messageId --->', messageId)
     // Create file object for tracking
     const fileObj = {
       id: '',
@@ -106,11 +111,17 @@ const useMessageStore = create((set, get) => ({
       file_name: file.name,
       mime_type: file.type,
       size: file.size,
-      content: filePreview,
+      content: filePreview.content,
+      attributes: {
+        width: filePreview?.dimensions?.width,
+        height: filePreview?.dimensions?.height,
+      },
       original_url: '',
       preview_url: '',
       upload_progress: 0,
       upload_status: 'uploading',
+      isUploading: true,
+      message_id: messageId,
       temp_id: fileTempId,
     };
 
@@ -143,6 +154,7 @@ const useMessageStore = create((set, get) => ({
         get().updateFileInUploadingMessage(messageId, fileTempId, {
           ...response.data.media,
           upload_status: 'completed',
+          isUploading: false,
           upload_progress: 100,
         });
 
@@ -175,6 +187,20 @@ const useMessageStore = create((set, get) => ({
     }
   },
 
+  submitMessage: async (messageId, content) => {
+    set((state) => {
+     const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+      if (existing) {
+        const new_message = { ...existing, isUploading: true , content }
+        newMap.set(messageId, new_message);
+        get().addMessage(new_message)
+      }
+
+
+      return { uploadingMessages: newMap, currentDraft: null };
+    })
+  },
 
   createDraft: async () => {
     try {

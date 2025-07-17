@@ -7,8 +7,6 @@ import DocsPreview from "./DocsPreview";
 
 const FilesPreview = ({ attachments, ...props }) => {
 
-
-
     const { images, files } = useMemo(() => ({
         images: (attachments || []).filter((item) => IMAGE_MIME_TYPES.includes(item.mime_type)),
         files: (attachments || []).filter(

@@ -50,6 +50,7 @@ const editorVariants = {
 const MessageInput = () => {
 
   const {
+    messages,
     createDraft,
     currentDraft,
     uploadingMessages,
@@ -58,14 +59,12 @@ const MessageInput = () => {
     removeUploadingMessage,
     uploadFile,
     deleteFile,
-    sendMessage,
+    submitMessage,
+    // sendMessage,
     finalizeMessage,
     //DO NOT TOUCH THESE TWO FUNCTIONS
     addMessage, setShouldScrollToBottom
   } = useMessageStore();
-
-
-  console.log('uploadingMessages --->', uploadingMessages)
 
   const [recordingState, setRecordingState] = useState('inactive');
   const audioRecorderRef = useRef(null);
@@ -84,6 +83,7 @@ const MessageInput = () => {
   
 
   const wrapperRef = useRef(null);
+  const editorRef = useRef(null);
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
@@ -151,7 +151,8 @@ const MessageInput = () => {
     files.forEach((file) => {
       const filePreview = filePreviews.find(preview => preview.name === file.name);
       if (filePreview) {
-        uploadFile(file, filePreview.content, draft.id);
+
+        uploadFile(file, filePreview, draft.id);
       } else {
         console.error(`No preview found for file: ${file.name}`);
       }
@@ -163,44 +164,78 @@ const MessageInput = () => {
 
 
   const readAndPreviewFile = (selectedFiles) => {
+  // Convert FileList to an array if it's not already
+  const filesArray = Array.from(selectedFiles);
 
-    const previewPromises = selectedFiles.map((file) => {
+  const fileProcessingPromises = filesArray.map((file) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
-      return new Promise((resolve) => {
-        reader.onload = () => {
-          resolve({
-            file,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: reader.result, // File content or preview
-          });
+      // Handle successful file reading
+      reader.onload = () => {
+        const commonData = {
+          file,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: reader.result,
         };
 
-        // Read file content as text or data URL (for images)
+        // If it's an image, get its dimensions
         if (file.type.startsWith('image/')) {
-          reader.readAsDataURL(file);
-        } else if (file.type.startsWith('text/')) {
-          reader.readAsText(file);
+          const img = new Image();
+          img.onload = () => {
+            // Resolve with all data, including dimensions
+            resolve({
+              ...commonData,
+              dimensions: {
+                width: img.width,
+                height: img.height,
+              },
+            });
+          };
+          img.onerror = () => {
+            // If the image can't be loaded, resolve without dimensions
+            resolve({ ...commonData, dimensions: null });
+          };
+          img.src = reader.result; // This triggers img.onload or img.onerror
         } else {
-          resolve({
-            file,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: null, // Unsupported file type
-          });
+          // For non-image files, resolve immediately
+          resolve(commonData);
         }
-      });
-    });
+      };
 
-    Promise.all(previewPromises).then((previews) => {
-      setFilePreviews((prev) => [...prev, ...previews]);
-      setFiles((prev) => [...prev, ...selectedFiles]);
-      setDragAndDropFiles(null);
+      // Handle file reading errors
+      reader.onerror = (error) => reject(error);
+
+      // --- Start reading the file based on its type ---
+      if (file.type.startsWith('image/')) {
+        reader.readAsDataURL(file); // For images and previews
+      } else if (file.type.startsWith('text/')) {
+        reader.readAsText(file); // For text files
+      } else {
+        // For unsupported types, resolve with basic info and no content
+        resolve({
+          file,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: null, // No preview available
+          dimensions: null,
+        });
+      }
     });
-  };
+  });
+
+  // Wait for all files to be processed
+  Promise.all(fileProcessingPromises).then((processedFiles) => {
+    // Note: 'processedFiles' will be an array of objects.
+    // Image objects will have a 'dimensions' property.
+    setFilePreviews((prev) => [...prev, ...processedFiles]);
+    setFiles((prev) => [...prev, ...filesArray]); // Assuming you still want the raw file list
+    setDragAndDropFiles(null); // Or whatever this is intended to do
+  });
+};
 
   useEffect(() => {
     if (files.length) {
@@ -227,6 +262,15 @@ const MessageInput = () => {
   const setNewMessage = (messageContent) => {
     setContent(messageContent);
   };
+
+  const sendMessage = () => {
+
+    submitMessage(currentDraft?.id, {...content})
+    editorRef.current?.setContent(null)
+    setContent(null)
+    setFilePreviews([]);
+    setFiles([]);
+  }
 
   const handleExpand = () => {
     // e.stopPropagation();
@@ -263,14 +307,7 @@ const MessageInput = () => {
     }
   }, [hasNoText]);
 
-  const sendTextContent = () => {
-    // TODO: add logic how send json content from tiptap editor to server
-    console.log('Sending text content:', content);
-    // Reset states after sending
-    setContent(null);
-    setHasNoText(true);
-    setIsExpanded(false);
-  };
+
 
   const sendAudioContent = useCallback(() => {
     if (audioRecorderRef.current) {
@@ -342,6 +379,7 @@ const MessageInput = () => {
   const hasMedia = currentUploadingMessage?.media.length > 0;
 
 
+  console.log('messages ---->', messages)
   console.log('hasMedia ---->', hasMedia)
 
   return (
@@ -578,6 +616,7 @@ const MessageInput = () => {
                     </div>
                   )}
                   <TiptapEditorWrite
+                    ref={editorRef}
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}
                     placeholder="Type your message..."
@@ -639,7 +678,7 @@ const MessageInput = () => {
                       variant="default"
                       size="icon"
                       className="w-8 h-8 rounded-full"
-                      onClick={sendTextContent}
+                      onClick={() => sendMessage()}
                     >
                       <SendHorizonal className="text-background w-4" />
                     </Button>
