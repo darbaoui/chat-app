@@ -56,10 +56,7 @@ const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
   const { content, original_url, name, blur_placeholder } = image;
 
   const src = isUploading ? decodeURIComponent(content) : original_url;
-  if(!isUploading)
-  {
-    console.log('src --->', src)
-  }
+
   const alt = name || 'Image';
 
   return (
