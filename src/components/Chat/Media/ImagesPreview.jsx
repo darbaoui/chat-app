@@ -4,10 +4,95 @@ import { Loader } from "lucide-react";
 import Image from "next/image";
 import { useMemo } from "react";
 
+
+const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 350 }) => {
+
+  //TODO add uploadProgress UI
+  const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
+
+  const src = isUploading ? decodeURIComponent(content) : original_url;
+  const alt = name || 'Image';
+
+  // Calculate dimensions for single image view
+  const aspectRatio = width / height;
+  const displayHeight = Math.min(height, maxHeight);
+  const displayWidth = displayHeight * aspectRatio;
+
+  return (
+    <div
+      className={cn("rounded-[10px] overflow-hidden relative flex")}
+      style={{
+        maxHeight: `${maxHeight}px`,
+        width: 'fit-content'
+      }}
+    >
+      {isUploading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+          <Loader className="animate-spin" />
+        </div>
+      )}
+      <Image
+        src={src}
+        alt={alt}
+        width={displayWidth}
+        height={displayHeight}
+        style={{
+          objectFit: 'contain',
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        {...(!isUploading && { placeholder: "blur", blurDataURL: blur_placeholder })}
+      />
+    </div>
+  );
+};
+
+
+
+const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
+  
+  //TODO add uploadProgress UI
+
+  const { content, original_url, name, blur_placeholder } = image;
+
+  const src = isUploading ? decodeURIComponent(content) : original_url;
+  if(!isUploading)
+  {
+    console.log('src --->', src)
+  }
+  const alt = name || 'Image';
+
+  return (
+    <div
+      key={image.temp_id || image.id}
+      className={cn('relative h-36', {
+        'col-span-3': colSpan === 3,
+        'col-span-2': colSpan === 2,
+      })}
+    >
+      {isUploading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
+          <Loader className="animate-spin" />
+        </div>
+      )}
+      <Image
+        src={src}
+        alt={alt}
+        sizes="50vw"
+        fill
+        style={{
+          objectFit: 'cover',
+        }}
+        {...(!isUploading && { placeholder: "blur", blurDataURL: blur_placeholder })}
+      />
+    </div>
+  );
+};
+
+
 const ImagesPreview = ({ images }) => {
 
   const {uploadingMessages} = useMessageStore()
-  console.log('images ---', images)
 
   const gridConfig = useMemo(() => {
     const count = images.length;
@@ -25,185 +110,53 @@ const ImagesPreview = ({ images }) => {
   if (!images?.length) return null;
 
 
-
-  const renderUploadingImage = (image) => {
-
-
-    const { content, temp_id, message_id, name, attributes: { width, height } } = image
-
-    const message = uploadingMessages.get(message_id)
-
-    const media = message?.media
-
-    const imageUploading = media.find(file => file.temp_id === temp_id);
-
-
-    const isUploading =  imageUploading?.isUploading
-
-    const maxHeight = 350;
-    const aspectRatio = width / height;
-    const displayHeight = Math.min(height, maxHeight);
-    const displayWidth = displayHeight * aspectRatio;
-    return (<div
-      className={cn("rounded-[10px] overflow-hidden relative flex")}
-      style={{
-        maxHeight: `${maxHeight}px`,
-        width: 'fit-content'
-      }}
-    >
-      {
-        isUploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
-                <Loader className="animate-spin" />
-            </div>
-        )
-      }
-       <Image
-        src={decodeURIComponent(content)}
-        alt={name || 'Image'}
-        width={displayWidth}
-        height={displayHeight}
-        style={{
-          objectFit: 'contain',
-          maxWidth: '100%',
-          height: 'auto'
-        }}
-      />
-      </div>)
-  }
-
-  const renderUploadedImage = (image) => {
-
-    const { original_url,  name, blur_placeholder, attributes: { width, height } } = image
-    // Calculate the actual dimensions based on maxHeight constraint
-    const maxHeight = 350;
-    const aspectRatio = width / height;
-    const displayHeight = Math.min(height, maxHeight);
-    const displayWidth = displayHeight * aspectRatio;
-    return (<div
-      className={cn("rounded-[10px] overflow-hidden relative flex")}
-      style={{
-        maxHeight: `${maxHeight}px`,
-        width: 'fit-content'
-      }}
-    >
-      
-      <Image
-        src={original_url}
-        alt={name || 'Image'}
-         placeholder="blur"
-          blurDataURL={blur_placeholder}
-        width={displayWidth}
-        height={displayHeight}
-        style={{
-          objectFit: 'contain',
-          maxWidth: '100%',
-          height: 'auto'
-        }}
-      />
-    </div>
-    );
-  }
-
-
   const renderSingleImage = () => {
-    
+
     const imageData = images[0];
-    const {isUploading} = imageData
+    // The `isUploading` property on the image object itself should indicate its status.
+    const isUploading = imageData.isUploading;
+
+    let uploadProgress = 0;
 
     if(isUploading)
     {
-      return renderUploadingImage(imageData)
+      const { temp_id, message_id } = imageData
+
+      const message = uploadingMessages.get(message_id)
+
+      const media = message?.media
+
+      const imageUploading = media.find(file => file.temp_id === temp_id);
+
+      uploadProgress =  imageUploading?.isUploading
     }
 
-    return renderUploadedImage(imageData)
+    return <SingleImageDisplay image={imageData} isUploading={isUploading} uploadProgress={uploadProgress} />;
   }
 
 
-  const renderGridUploadingImage = (image, index) => {
-    
-    const { content, temp_id, message_id, name } = image
-
-    const message = uploadingMessages.get(message_id)
-
-    const media = message?.media
-
-    const imageUploading = media.find(file => file.temp_id === temp_id);
-
-
-    const isUploading =  imageUploading?.isUploading
-
-    console.log('isUploading', isUploading, temp_id)
-
-    const colSpan = gridConfig.spans[index] || 1;
-
-    return (
-      <div
-        key={temp_id || index}
-
-        className={cn('relative  h-36', {
-          'col-span-3': colSpan === 3,
-          'col-span-2': colSpan === 2,
-        })}
-      >
-        {
-        isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
-                <Loader className="animate-spin" />
-            </div>
-        )
-      }
-        <Image
-           src={decodeURIComponent(content)}
-          alt={name || 'Image'}
-          sizes="50vw"
-          fill
-          style={{
-            objectFit: 'cover',
-          }}
-        />
-
-      </div>
-    );
-  }
-  
-  const renderGridUploadedImage = (image, index) => {
-
-    const colSpan = gridConfig.spans[index] || 1;
-    const { id, original_url, name, blur_placeholder, attributes: { width, height } } = image
-    return (
-      <div
-        key={id || index}
-
-        className={cn('relative  h-36', {
-          'col-span-3': colSpan === 3,
-          'col-span-2': colSpan === 2,
-        })}
-      >
-        <Image
-          src={original_url}
-          alt={name || 'Image'}
-          sizes="50vw"
-          placeholder="blur"
-          blurDataURL={blur_placeholder}
-          fill
-          style={{
-            objectFit: 'cover',
-          }}
-        />
-
-      </div>
-    );
-  }
   const renderGridImage = (image, index) => {
 
-    const {isUploading} = image
+    const isUploading = image.isUploading;
+    const colSpan = gridConfig.spans[index] || 1;
+
+    let uploadProgress = 0;
+
     if(isUploading)
     {
-      return renderGridUploadingImage(image, index)
+      const { temp_id, message_id } = image
+
+      const message = uploadingMessages.get(message_id)
+
+      const media = message?.media
+
+      const imageUploading = media.find(file => file.temp_id === temp_id);
+
+      uploadProgress =  imageUploading?.isUploading
     }
-      return renderGridUploadedImage(image, index)
-    
+
+
+    return <GridImageDisplay image={image} isUploading={isUploading} uploadProgress={uploadProgress} colSpan={colSpan} key={image.temp_id || image.id} />
   };
 
   const renderGrid = () => (

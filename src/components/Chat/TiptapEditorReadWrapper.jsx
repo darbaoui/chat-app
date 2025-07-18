@@ -43,7 +43,7 @@ const TiptapEditorReadWrapper = ({message}) => {
             if (message?.id && isUploading) {
                 uploadMessage();
             }
-        }, [message, isUploading]);
+        }, [message, isUploading, uploadMessage]);
 
         return <div className="relative">
             <TiptapEditorRead jsonContent={text} className={cn(isUploading && 'text-description')} />

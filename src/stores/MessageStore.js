@@ -26,6 +26,26 @@ const useMessageStore = create((set, get) => ({
         msg.id === messageId ? {...msg, ...updates}  : msg,
       ),
     })),
+  updateMessageMediaContent: (message_id, temp_id, newMediaContent) =>
+    set((state) => ({
+      messages: state.messages.map((message) => {
+        if (message.id === message_id) {
+          return {
+            ...message,
+            media: message.media.map((mediaItem) => {
+              if (mediaItem.temp_id === temp_id) {
+                return {
+                  ...mediaItem,
+                  ...newMediaContent, // Merges the new content
+                };
+              }
+              return mediaItem;
+            }),
+          };
+        }
+        return message;
+      }),
+    })),
   addMessage: (newMessage) =>
     set((state) => {
       return { messages: [...state.messages, newMessage] };
@@ -157,6 +177,9 @@ const useMessageStore = create((set, get) => ({
           isUploading: false,
           upload_progress: 100,
         });
+
+        get().updateMessageMediaContent(messageId, fileTempId, {...response.data.media, isUploading: false})
+        
 
       }
     } catch (error) {
