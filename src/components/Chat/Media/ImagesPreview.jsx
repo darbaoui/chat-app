@@ -7,6 +7,7 @@ import { useMemo } from "react";
 const ImagesPreview = ({ images }) => {
 
   const {uploadingMessages} = useMessageStore()
+  console.log('images ---', images)
 
   const gridConfig = useMemo(() => {
     const count = images.length;
@@ -28,13 +29,13 @@ const ImagesPreview = ({ images }) => {
   const renderUploadingImage = (image) => {
 
 
-    const { content, tempId, message_id, name, attributes: { width, height } } = image
+    const { content, temp_id, message_id, name, attributes: { width, height } } = image
 
     const message = uploadingMessages.get(message_id)
 
     const media = message?.media
 
-    const imageUploading = media.find(file => file.tempId === tempId);
+    const imageUploading = media.find(file => file.temp_id === temp_id);
 
 
     const isUploading =  imageUploading?.isUploading
@@ -86,7 +87,7 @@ const ImagesPreview = ({ images }) => {
         width: 'fit-content'
       }}
     >
-  
+      
       <Image
         src={original_url}
         alt={name || 'Image'}
@@ -119,14 +120,62 @@ const ImagesPreview = ({ images }) => {
   }
 
 
-  const renderGridImage = (image, index) => {
+  const renderGridUploadingImage = (image, index) => {
+    
+    const { content, temp_id, message_id, name } = image
+
+    const message = uploadingMessages.get(message_id)
+
+    const media = message?.media
+
+    const imageUploading = media.find(file => file.temp_id === temp_id);
+
+
+    const isUploading =  imageUploading?.isUploading
+
+    console.log('isUploading', isUploading, temp_id)
+
+    const colSpan = gridConfig.spans[index] || 1;
+
+    return (
+      <div
+        key={temp_id || index}
+
+        className={cn('relative  h-36', {
+          'col-span-3': colSpan === 3,
+          'col-span-2': colSpan === 2,
+        })}
+      >
+        {
+        isUploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
+                <Loader className="animate-spin" />
+            </div>
+        )
+      }
+        <Image
+           src={decodeURIComponent(content)}
+          alt={name || 'Image'}
+          sizes="50vw"
+          fill
+          style={{
+            objectFit: 'cover',
+          }}
+        />
+
+      </div>
+    );
+  }
+  
+  const renderGridUploadedImage = (image, index) => {
+
     const colSpan = gridConfig.spans[index] || 1;
     const { id, original_url, name, blur_placeholder, attributes: { width, height } } = image
     return (
       <div
         key={id || index}
 
-        className={cn('relative h-36', {
+        className={cn('relative  h-36', {
           'col-span-3': colSpan === 3,
           'col-span-2': colSpan === 2,
         })}
@@ -145,6 +194,16 @@ const ImagesPreview = ({ images }) => {
 
       </div>
     );
+  }
+  const renderGridImage = (image, index) => {
+
+    const {isUploading} = image
+    if(isUploading)
+    {
+      return renderGridUploadingImage(image, index)
+    }
+      return renderGridUploadedImage(image, index)
+    
   };
 
   const renderGrid = () => (
