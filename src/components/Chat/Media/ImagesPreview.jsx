@@ -53,7 +53,7 @@ const ImagesPreview = ({ images }) => {
     >
       {
         isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
                 <Loader className="animate-spin" />
             </div>
         )

@@ -46,12 +46,7 @@ const TiptapEditorReadWrapper = ({message}) => {
         }, [message, isUploading]);
 
         return <div className="relative">
-            <TiptapEditorRead jsonContent={text} />
-            {loading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-                <Loader className="animate-spin" />
-            </div>
-            )}
+            <TiptapEditorRead jsonContent={text} className={cn(isUploading && 'text-description')} />
         </div>
 
 }

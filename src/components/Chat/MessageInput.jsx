@@ -79,6 +79,7 @@ const MessageInput = () => {
   const [dragState, setDragState] = useState('idle');
   const [dragAndDropfiles, setDragAndDropFiles] = useState(null);
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   
 
@@ -93,13 +94,21 @@ const MessageInput = () => {
   });
 
 
-  const ensureDraftExists = async () => {
-    if (!currentDraft) {
+   const ensureDraftExists = useCallback(async () => {
+    if (!currentDraft?.id) {
       return await createDraft();
     }
 
     return currentDraft;
-  };
+  }, [createDraft, currentDraft]);
+
+
+  useEffect(() => {
+    if (isSubmitting || hasNoText) return;
+    if (!hasNoText && !currentDraft?.id && content) {
+      ensureDraftExists();
+    }
+  }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
 
   useEffect(() => {
     if (dragAndDropfiles) {
@@ -263,14 +272,29 @@ const MessageInput = () => {
     setContent(messageContent);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
+    // Prevent sending if already submitting or no draft exists
+    if (isSubmitting || !currentDraft?.id) return;
 
-    submitMessage(currentDraft?.id, {...content})
-    editorRef.current?.setContent(null)
-    setContent(null)
-    setFilePreviews([]);
-    setFiles([]);
-  }
+    setIsSubmitting(true);
+
+    try {
+      // Await the submission to ensure the draft is processed before we
+      // clear the UI and change state. This prevents the race condition.
+      await submitMessage(currentDraft?.id, { ...content });
+    } catch (error) {
+      console.error("Failed to submit message:", error);
+      // Optionally handle submission errors here, e.g., show a toast
+    } finally {
+      // Clear local state after submission attempt
+      editorRef.current?.setContent(null);
+      setContent(null)
+      setFilePreviews([]);
+      setFiles([]);
+      // Finally, allow new submissions
+      setIsSubmitting(false);
+    }
+  };
 
   const handleExpand = () => {
     // e.stopPropagation();
