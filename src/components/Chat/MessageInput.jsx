@@ -11,17 +11,7 @@ import RecordAudio from "@/components/Chat/Media/RecordAudio";
 import { CURRENT_USER } from "@/constants";
 import useMessageStore from "@/stores/MessageStore";
 import { getBarCount, scaleDataToFit } from "./helper";
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import {
-  dropTargetForExternal,
-  monitorForExternal,
-} from '@atlaskit/pragmatic-drag-and-drop/external/adapter';
-import {
-  containsFiles,
-  getFiles,
-} from '@atlaskit/pragmatic-drag-and-drop/external/file';
-import invariant from 'tiny-invariant';
-import { preventUnhandled } from '@atlaskit/pragmatic-drag-and-drop/prevent-unhandled';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
-import FilesPreview from "./Media/FilesPreview";
 import CircularProgress from "@/icons/CircularProgress";
 import { useFileDrop } from "@/hooks/useFileDrop";
 
@@ -83,14 +72,6 @@ const MessageInput = () => {
   const { dragState, droppedFiles, clearDroppedFiles } = useFileDrop(wrapperRef);
 
 
-  useOnClickOutside(wrapperRef, () => {
-    if (!hasNoText) return;
-    // if (files.length) return;
-    if (isRecording) return;
-    setIsExpanded(false);
-  });
-
-
   const ensureDraftExists = useCallback(async () => {
     if (!currentDraft?.id) {
       return await createDraft();
@@ -108,31 +89,9 @@ const MessageInput = () => {
   }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
 
 
-  // const onDrop = useCallback(async (files) => {
-
-  //   const draft = await ensureDraftExists();
-
-  //   if (!draft) return;
-
-  //   // Upload each file
-  //   files.forEach((file) => {
-  //     const filePreview = filePreviews.find(preview => preview.name === file.name);
-  //     if (filePreview) {
-
-  //       uploadFile(file, filePreview, draft.id);
-  //     } else {
-  //       console.error(`No preview found for file: ${file.name}`);
-  //     }
-  //   });
-
-  // }, [ensureDraftExists, filePreviews, uploadFile]);
-
-
-
-
   const readAndPreviewFile = useCallback(async (selectedFiles) => {
-    
-     const filesArray = Array.from(selectedFiles);
+
+    const filesArray = Array.from(selectedFiles);
     const draft = await ensureDraftExists(); // Ensure a draft exists for file uploads
 
     if (!draft) {
@@ -201,12 +160,12 @@ const MessageInput = () => {
       });
     });
 
-   Promise.all(fileProcessingPromises).then((processedFilePreviews) => {
-    processedFilePreviews.forEach((filePreview) => {
-      uploadFile(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
+    Promise.all(fileProcessingPromises).then((processedFilePreviews) => {
+      processedFilePreviews.forEach((filePreview) => {
+        uploadFile(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
+      });
+      clearDroppedFiles(); // Clear the dropped files state if applicable
     });
-    clearDroppedFiles(); // Clear the dropped files state if applicable
-  });
   }, [ensureDraftExists, uploadFile, clearDroppedFiles]);
 
   // useEffect(() => {
@@ -216,7 +175,7 @@ const MessageInput = () => {
   // }, [files, onDrop])
 
 
-  const handleFileChange =async (e) => {
+  const handleFileChange = async (e) => {
     setIsDropDownOpen(false);
     handleExpand()
     const selectedFiles = Array.from(e.target.files);
@@ -369,6 +328,14 @@ const MessageInput = () => {
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id);
 
   const hasMedia = currentUploadingMessage?.media.length > 0;
+
+
+  useOnClickOutside(wrapperRef, () => {
+    if (!hasNoText) return;
+    if (currentUploadingMessage?.media?.length) return;
+    if (isRecording) return;
+    setIsExpanded(false);
+  });
 
 
   return (
