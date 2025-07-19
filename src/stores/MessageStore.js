@@ -8,7 +8,8 @@ const useMessageStore = create((set, get) => ({
   uploadingMessages: new Map(),
   unReadMessages: 0,
   shouldScrollToBottom: true,
-  setShouldScrollToBottom: (shouldScrollToBottom) => set({ shouldScrollToBottom }),
+  setShouldScrollToBottom: (shouldScrollToBottom) =>
+    set({ shouldScrollToBottom }),
   setCurrentDraft: (draft) => set({ currentDraft: draft }),
   clearCurrentDraft: () => {
     set({ currentDraft: null });
@@ -17,13 +18,13 @@ const useMessageStore = create((set, get) => ({
   updateMessage: (messageId, updatedMessage) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === messageId ? updatedMessage  : msg,
+        msg.id === messageId ? updatedMessage : msg
       ),
     })),
   updateMessageContent: (messageId, updates) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === messageId ? {...msg, ...updates}  : msg,
+        msg.id === messageId ? { ...msg, ...updates } : msg
       ),
     })),
   updateMessageMediaContent: (message_id, temp_id, newMediaContent) =>
@@ -51,16 +52,16 @@ const useMessageStore = create((set, get) => ({
       return { messages: [...state.messages, newMessage] };
     }),
   removeMessage: (messageId) =>
-      set((state) => ({
-        messages: state.messages.filter((msg) => msg.id !== messageId),
-      })),
-  
+    set((state) => ({
+      messages: state.messages.filter((msg) => msg.id !== messageId),
+    })),
+
   updateMessageByTempId: (tempId, updates) => {
-        set((state) => ({
-          messages: state.messages.map((msg) =>
-            msg.temp_id === tempId ? { ...msg, ...updates } : msg
-          ),
-        }));
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.temp_id === tempId ? { ...msg, ...updates } : msg
+      ),
+    }));
   },
   createUploadingMessage: (tempId, payload) => {
     set((state) => {
@@ -119,8 +120,6 @@ const useMessageStore = create((set, get) => ({
     });
   },
 
-
-  
   // The first function that used
   uploadFile: async (file, filePreview, messageId) => {
     const fileTempId = crypto.randomUUID();
@@ -178,9 +177,10 @@ const useMessageStore = create((set, get) => ({
           upload_progress: 100,
         });
 
-        get().updateMessageMediaContent(messageId, fileTempId, {...response.data.media, isUploading: false})
-        
-
+        get().updateMessageMediaContent(messageId, fileTempId, {
+          ...response.data.media,
+          isUploading: false,
+        });
       }
     } catch (error) {
       get().updateFileInUploadingMessage(messageId, fileTempId, {
@@ -195,16 +195,20 @@ const useMessageStore = create((set, get) => ({
       const newMap = new Map(state.uploadingMessages);
       const existing = newMap.get(messageId);
       if (existing) {
-        newMap.set(messageId, { ...existing, media: existing.media.filter((file) => (file.id !== mediaId && file.temp_id !== mediaId)) });
+        newMap.set(messageId, {
+          ...existing,
+          media: existing.media.filter(
+            (file) => file.id !== mediaId && file.temp_id !== mediaId
+          ),
+        });
       }
       return { uploadingMessages: newMap };
     });
 
     try {
-       await axios.delete('/api/messages/text/file', {
+      await axios.delete('/api/messages/text/file', {
         data: { media_id: mediaId },
       });
-
     } catch (error) {
       set({ error: 'Failed to delete file' });
     }
@@ -212,24 +216,22 @@ const useMessageStore = create((set, get) => ({
 
   submitMessage: async (messageId, content) => {
     set((state) => {
-     const newMap = new Map(state.uploadingMessages);
+      const newMap = new Map(state.uploadingMessages);
       const existing = newMap.get(messageId);
       if (existing) {
-        const new_message = { ...existing, isUploading: true , content }
+        const new_message = { ...existing, isUploading: true, content };
         newMap.set(messageId, new_message);
-        get().addMessage(new_message)
+        get().addMessage(new_message);
       }
 
-
       return { uploadingMessages: newMap, currentDraft: null };
-    })
+    });
   },
 
   createDraft: async () => {
     try {
       const response = await axios.post('/api/messages/text/draft');
       if (response.data) {
-        
         const draft = {
           id: response.data.id,
           // temp_id: tempId,
@@ -241,7 +243,7 @@ const useMessageStore = create((set, get) => ({
           updated_at: new Date().toISOString(),
         };
 
-        get().createUploadingMessage(response.data.id, draft)
+        get().createUploadingMessage(response.data.id, draft);
         set({ currentDraft: draft });
         return draft;
       }
@@ -249,10 +251,7 @@ const useMessageStore = create((set, get) => ({
       set({ error: 'Failed to create draft' });
       return null;
     }
-
   },
-  
-  
 }));
 
 export default useMessageStore;

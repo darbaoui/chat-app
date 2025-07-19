@@ -40,6 +40,7 @@ const editorVariants = {
 const MessageInput = () => {
 
   const {
+    error,
     createDraft,
     currentDraft,
     uploadingMessages,

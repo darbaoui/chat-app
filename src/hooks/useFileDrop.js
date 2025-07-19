@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   dropTargetForExternal,
   monitorForExternal,
@@ -50,7 +50,7 @@ export const useFileDrop = (dropTargetRef) => {
           setDragState('idle');
           preventUnhandled.stop();
         },
-      }),
+      })
     );
 
     return cleanup;
