@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
 import { Loader } from "lucide-react";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 
 
 const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 350 }) => {
@@ -132,7 +132,7 @@ const ImagesPreview = ({ images }) => {
 
     const isUploading = image.isUploading;
     const colSpan = gridConfig.spans[index] || 1;
-    const uploadProgress = getUploadProgress(imageData);
+    const uploadProgress = getUploadProgress(image);
 
     return <GridImageDisplay image={image} isUploading={isUploading} uploadProgress={uploadProgress} colSpan={colSpan} key={image.temp_id || image.id} />
   };
