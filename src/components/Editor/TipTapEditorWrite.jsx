@@ -18,7 +18,7 @@ import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import { BubbleMenu, EditorContent, PureEditorContent, useEditor } from '@tiptap/react';
 import mentionHandler from './suggestion';
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { EmojiNode } from './CustomEmojiExtension';
 import { cn } from '@/lib/utils';
 import MenuBar from './MenuBar';
@@ -28,13 +28,30 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 
-const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }) => {
+const TiptapEditorWrite = forwardRef(({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
 
 
     const [isLink, setIsLink] = useState(false);
     const [inputLink, setInputLink] = useState('');
 
 
+    useImperativeHandle(ref, () => ({
+    //   async addEmoji(emoji) {
+    //     const emojiUrl = emoji.emoji;
+    //     editor
+    //       .chain()
+    //       .focus()
+    //       .insertEmoji({
+    //         emoji: emojiUrl,
+    //         annotation: emojiUrl,
+    //         // url: 'https://zamma.com',
+    //       })
+    //       .run();
+    //     // .run();
+    //   },
+    //   setFocus,
+      setContent,
+    }));
 
     const editor = useEditor(
         {
@@ -143,6 +160,10 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
     );
 
 
+    const setContent = (content) => {
+      editor.commands.setContent(content);
+    };
+
     useEffect(() => {
         if (!editor) return;
         editor.commands.focus();
@@ -235,6 +256,6 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
             <EditorContent editor={editor} />
         </div>
     );
-};
+});
 
 export default TiptapEditorWrite

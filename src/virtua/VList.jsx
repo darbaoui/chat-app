@@ -45,25 +45,21 @@ export const VList = forwardRef(
       </Virtualizer>
     );
 
-    if (shouldReverse) {
+
+
+  if (shouldReverse) {
       element = (
         <div
           style={{
-            transform: "scaleY(-1)",
-            height: "100%",
-            // Re-enable text selection
+            // visibility: "hidden", // TODO replace with other optimization methods
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            minHeight: "100%",
             userSelect: "text",
           }}
         >
-          <div
-            style={{
-              transform: "scaleY(-1)",
-              // // Re-enable text selection
-              userSelect: "text",
-            }}
-          >
-            {element}
-          </div>
+          {element}
         </div>
       );
     }
@@ -73,17 +69,11 @@ export const VList = forwardRef(
         ref={scrollRef}
         {...attrs}
         style={{
-          minHeight: 0,
-          overflowY: "auto",
+          display: horizontal ? "inline-block" : "block",
+          [horizontal ? "overflowX" : "overflowY"]: "auto",
+          contain: "strict",
           width: "100%",
           height: "100%",
-          contain: "strict",
-          // Add flex styles to the scroll container when reversed
-          ...(shouldReverse && {
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-          }),
           ...style,
         }}
       >

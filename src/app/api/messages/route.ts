@@ -1,4 +1,4 @@
-import { generateTiptapJson, getRandomMediaItems } from "@/components/helper";
+import { generateTiptapJson, getRandomMediaItems } from "@/components/Chat/helper";
 import { CURRENT_USER } from "@/constants";
 import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";

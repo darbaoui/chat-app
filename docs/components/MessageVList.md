@@ -9,7 +9,7 @@ It uses `swr/infinite` for data fetching and `virtua` (wrapped in a custom `VLis
 ## Import
 
 ```jsx
-import MessageVList from '@/components/MessageVList';
+import MessageVList from '@/components/Chat/MessageVList';
 ```
 
 ## Props

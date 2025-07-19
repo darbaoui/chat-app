@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { AUDIO_WAVEFORM_OPRIONS, WAVEFORM_HEIGHT_SCALE_FACTOR } from '@/constants';
-import { scaleDataToFit } from '@/components/helper';
+import { scaleDataToFit } from '@/components/Chat/helper';
 
 
 
@@ -36,7 +36,7 @@ const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
             const { barWidth, barGap } = AUDIO_WAVEFORM_OPRIONS;
             const availableWidth = canvas.clientWidth; // Use clientWidth for actual display width
             return Math.floor(availableWidth / (barWidth + barGap));
-        }, []);
+        }, [canvasRef]);
 
     const drawRoundedRect = useCallback((ctx, x, y, width, height, radius) => {
         ctx.beginPath();

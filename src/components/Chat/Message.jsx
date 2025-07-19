@@ -17,7 +17,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
     <div
       key={message.id}
       className={cn(
-        "flex items-start mb-1",
+        "flex items-start mb-1 w-full",
         isMe ? "flex-row-reverse pe-4 ps-4 md:ps-5 md:pe-5" : " ps-4 pe-4 md:ps-5 md:pe-5",
         showAvatarAndName ? "mt-4" : ""
       )}
@@ -34,7 +34,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
         </div>
       </div>
 
-      <div className={`flex flex-col ${isMe ? "items-end content-end justify-self-end" : "items-start"}`}>
+      <div className={`flex flex-col w-full ${isMe ? "items-end content-end justify-self-end" : "items-start"}`}>
         {/* Sender Name and Time */}
         {showAvatarAndName && (
           <div className={cn("flex items-baseline text-meta-icon gap-2.5 mb-1", isMe ? "flex-row-reverse pe-4" : "ps-4")}>
@@ -45,7 +45,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
 
         {/* Message Bubble */}
         <div
-          className={cn('relative flex', isMe ? 'justify-end' : '')}
+          className={cn('relative flex w-full', isMe ? 'justify-end' : '')}
         >
           {showAvatarAndName && (
             <BoxCorner
@@ -58,7 +58,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
             />
           )}
           <MessageContent message={message} className={cn(
-            "rounded-3xl",
+            "rounded-3xl w-full",
             isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "
