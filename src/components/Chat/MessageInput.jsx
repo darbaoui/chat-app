@@ -110,7 +110,6 @@ const MessageInput = () => {
 
   const onDrop = useCallback(async (files) => {
 
-
     const draft = await ensureDraftExists();
 
     if (!draft) return;
@@ -126,7 +125,7 @@ const MessageInput = () => {
       }
     });
 
-  }, [files, filePreviews, content]);
+  }, [ensureDraftExists, filePreviews, uploadFile]);
 
 
 
