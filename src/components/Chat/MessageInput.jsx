@@ -403,9 +403,6 @@ const MessageInput = () => {
   const hasMedia = currentUploadingMessage?.media.length > 0;
 
 
-  console.log('messages ---->', messages)
-  console.log('hasMedia ---->', hasMedia)
-
   return (
     <div className="w-full flex min-h-16 items-center justify-center mx-auto border-t p-4">
       <div ref={wrapperRef} className="flex items-end justify-center gap-2.5">

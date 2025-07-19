@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.s3.amazonaws.com',
+        hostname: 's3.eu-west-3.amazonaws.com',
         port: '',
         search: '',
       },

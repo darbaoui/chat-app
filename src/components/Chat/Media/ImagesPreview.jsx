@@ -10,7 +10,8 @@ const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 35
   //TODO add uploadProgress UI
   const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
 
-  const src = isUploading ? decodeURIComponent(content) : original_url;
+  // const src = isUploading ? decodeURIComponent(content) : original_url;
+  const src = isUploading ? content : original_url;
   const alt = name || 'Image';
 
   // Calculate dimensions for single image view
@@ -55,7 +56,7 @@ const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
 
   const { content, original_url, name, blur_placeholder } = image;
 
-  const src = isUploading ? decodeURIComponent(content) : original_url;
+  const src = isUploading ? content : original_url;
 
   const alt = name || 'Image';
 
@@ -125,7 +126,7 @@ const ImagesPreview = ({ images }) => {
 
       const imageUploading = media.find(file => file.temp_id === temp_id);
 
-      uploadProgress =  imageUploading?.isUploading ?? 0
+      uploadProgress =  imageUploading?.upload_progress ?? 0
     }
 
     return <SingleImageDisplay image={imageData} isUploading={isUploading} uploadProgress={uploadProgress} />;
@@ -149,7 +150,7 @@ const ImagesPreview = ({ images }) => {
 
       const imageUploading = media.find(file => file.temp_id === temp_id);
 
-      uploadProgress =  imageUploading?.isUploading ?? 0;
+      uploadProgress =  imageUploading?.upload_progress ?? 0;
     }
 
 
