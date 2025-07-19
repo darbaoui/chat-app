@@ -168,12 +168,6 @@ const MessageInput = () => {
     });
   }, [ensureDraftExists, uploadFile, clearDroppedFiles]);
 
-  // useEffect(() => {
-  //   if (files.length) {
-  //     onDrop(files)
-  //   }
-  // }, [files, onDrop])
-
 
   const handleFileChange = async (e) => {
     setIsDropDownOpen(false);

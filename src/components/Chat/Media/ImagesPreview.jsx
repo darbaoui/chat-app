@@ -112,8 +112,7 @@ const ImagesPreview = ({ images }) => {
     }
     const { temp_id, message_id } = image;
     const message = uploadingMessages.get(message_id);
-    const media = message?.media;
-    const imageUploading = media.find(file => file.temp_id === temp_id);
+    const imageUploading = message?.media?.find(file => file.temp_id === temp_id);
     return imageUploading?.upload_progress ?? 0;
   }, [uploadingMessages]);
 
