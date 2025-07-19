@@ -69,8 +69,8 @@ const MessageInput = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasNoText, setHasNoText] = useState(true);
 
-  const [files, setFiles] = useState([]);
-  const [filePreviews, setFilePreviews] = useState([]);
+  // const [files, setFiles] = useState([]);
+  // const [filePreviews, setFilePreviews] = useState([]);
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -85,7 +85,7 @@ const MessageInput = () => {
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
-    if (files.length) return;
+    // if (files.length) return;
     if (isRecording) return;
     setIsExpanded(false);
   });
@@ -108,31 +108,38 @@ const MessageInput = () => {
   }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
 
 
-  const onDrop = useCallback(async (files) => {
+  // const onDrop = useCallback(async (files) => {
 
-    const draft = await ensureDraftExists();
+  //   const draft = await ensureDraftExists();
 
-    if (!draft) return;
+  //   if (!draft) return;
 
-    // Upload each file
-    files.forEach((file) => {
-      const filePreview = filePreviews.find(preview => preview.name === file.name);
-      if (filePreview) {
+  //   // Upload each file
+  //   files.forEach((file) => {
+  //     const filePreview = filePreviews.find(preview => preview.name === file.name);
+  //     if (filePreview) {
 
-        uploadFile(file, filePreview, draft.id);
-      } else {
-        console.error(`No preview found for file: ${file.name}`);
-      }
-    });
+  //       uploadFile(file, filePreview, draft.id);
+  //     } else {
+  //       console.error(`No preview found for file: ${file.name}`);
+  //     }
+  //   });
 
-  }, [ensureDraftExists, filePreviews, uploadFile]);
-
-
+  // }, [ensureDraftExists, filePreviews, uploadFile]);
 
 
-  const readAndPreviewFile = (selectedFiles) => {
-    // Convert FileList to an array if it's not already
-    const filesArray = Array.from(selectedFiles);
+
+
+  const readAndPreviewFile = useCallback(async (selectedFiles) => {
+    
+     const filesArray = Array.from(selectedFiles);
+    const draft = await ensureDraftExists(); // Ensure a draft exists for file uploads
+
+    if (!draft) {
+      console.error("Could not create or retrieve a draft message.");
+      return;
+    }
+
 
     const fileProcessingPromises = filesArray.map((file) => {
       return new Promise((resolve, reject) => {
@@ -194,36 +201,32 @@ const MessageInput = () => {
       });
     });
 
-    // Wait for all files to be processed
-    Promise.all(fileProcessingPromises).then((processedFiles) => {
-      // Note: 'processedFiles' will be an array of objects.
-      // Image objects will have a 'dimensions' property.
-      setFilePreviews((prev) => [...prev, ...processedFiles]);
-      setFiles((prev) => [...prev, ...filesArray]); // Assuming you still want the raw file list
-      clearDroppedFiles()
+   Promise.all(fileProcessingPromises).then((processedFilePreviews) => {
+    processedFilePreviews.forEach((filePreview) => {
+      uploadFile(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
     });
-  };
+    clearDroppedFiles(); // Clear the dropped files state if applicable
+  });
+  }, [ensureDraftExists, uploadFile, clearDroppedFiles]);
 
-  useEffect(() => {
-    if (files.length) {
-      onDrop(files)
-    }
-  }, [files, onDrop])
+  // useEffect(() => {
+  //   if (files.length) {
+  //     onDrop(files)
+  //   }
+  // }, [files, onDrop])
 
 
-  const handleFileChange = (e) => {
+  const handleFileChange =async (e) => {
     setIsDropDownOpen(false);
     handleExpand()
     const selectedFiles = Array.from(e.target.files);
-    readAndPreviewFile(selectedFiles)
+    await readAndPreviewFile(selectedFiles)
   };
 
 
-  const handleRemoveFile = (file, index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setFilePreviews((prev) => prev.filter((_, i) => i !== index));
-    deleteFile(file?.id || file?.tempId, currentDraft?.id)
-  };
+  const handleRemoveFile = useCallback((fileId, messageId) => {
+    deleteFile(fileId, messageId);
+  }, [deleteFile]);
 
 
   const setNewMessage = (messageContent) => {
@@ -247,8 +250,6 @@ const MessageInput = () => {
       // Clear local state after submission attempt
       editorRef.current?.setContent(null);
       setContent(null)
-      setFilePreviews([]);
-      setFiles([]);
       // Finally, allow new submissions
       setIsSubmitting(false);
     }
@@ -592,7 +593,7 @@ const MessageInput = () => {
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
-                              handleRemoveFile(file, index)
+                              handleRemoveFile(file.id || file.temp_id, currentDraft?.id);
                             }}
                           >
                             <X />
@@ -606,7 +607,7 @@ const MessageInput = () => {
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}
                     placeholder="Type your message..."
-                    className={cn("w-full", filePreviews.length ? 'min-h-8' : '')}
+                    className={cn("w-full", currentUploadingMessage?.media?.length ? 'min-h-8' : '')}
                   />
                 </div>
               </motion.div>

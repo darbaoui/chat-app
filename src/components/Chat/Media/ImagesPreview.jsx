@@ -10,13 +10,12 @@ const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 35
   //TODO add uploadProgress UI
   const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
 
-  // const src = isUploading ? decodeURIComponent(content) : original_url;
   const src = isUploading ? content : original_url;
   const alt = name || 'Image';
 
   // Calculate dimensions for single image view
-  const aspectRatio = width / height;
-  const displayHeight = Math.min(height, maxHeight);
+  const aspectRatio = (width && height) ? width / height : 1;
+  const displayHeight = height ? Math.min(height, maxHeight) : maxHeight;
   const displayWidth = displayHeight * aspectRatio;
 
   return (
@@ -51,7 +50,7 @@ const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 35
 
 
 const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
-  
+
   //TODO add uploadProgress UI
 
   const { content, original_url, name, blur_placeholder } = image;
@@ -90,7 +89,7 @@ const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
 
 const ImagesPreview = ({ images }) => {
 
-  const {uploadingMessages} = useMessageStore()
+  const { uploadingMessages } = useMessageStore()
 
   const gridConfig = useMemo(() => {
     const count = images.length;
@@ -107,27 +106,23 @@ const ImagesPreview = ({ images }) => {
 
   if (!images?.length) return null;
 
+  const getUploadProgress = useCallback((image) => {
+    if (!image.isUploading) {
+      return 0;
+    }
+    const { temp_id, message_id } = image;
+    const message = uploadingMessages.get(message_id);
+    const media = message?.media;
+    const imageUploading = media.find(file => file.temp_id === temp_id);
+    return imageUploading?.upload_progress ?? 0;
+  }, [uploadingMessages]);
+
 
   const renderSingleImage = () => {
 
     const imageData = images[0];
-    // The `isUploading` property on the image object itself should indicate its status.
     const isUploading = imageData.isUploading;
-
-    let uploadProgress = 0;
-
-    if(isUploading)
-    {
-      const { temp_id, message_id } = imageData
-
-      const message = uploadingMessages.get(message_id)
-
-      const media = message?.media
-
-      const imageUploading = media.find(file => file.temp_id === temp_id);
-
-      uploadProgress =  imageUploading?.upload_progress ?? 0
-    }
+    const uploadProgress = getUploadProgress(imageData);
 
     return <SingleImageDisplay image={imageData} isUploading={isUploading} uploadProgress={uploadProgress} />;
   }
@@ -137,22 +132,7 @@ const ImagesPreview = ({ images }) => {
 
     const isUploading = image.isUploading;
     const colSpan = gridConfig.spans[index] || 1;
-
-    let uploadProgress = 0;
-
-    if(isUploading)
-    {
-      const { temp_id, message_id } = image
-
-      const message = uploadingMessages.get(message_id)
-
-      const media = message?.media
-
-      const imageUploading = media.find(file => file.temp_id === temp_id);
-
-      uploadProgress =  imageUploading?.upload_progress ?? 0;
-    }
-
+    const uploadProgress = getUploadProgress(imageData);
 
     return <GridImageDisplay image={image} isUploading={isUploading} uploadProgress={uploadProgress} colSpan={colSpan} key={image.temp_id || image.id} />
   };
