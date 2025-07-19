@@ -209,12 +209,12 @@ const MessageInput = () => {
     if (files.length) {
       onDrop(files)
     }
-  }, [files])
+  }, [files, onDrop])
 
 
   const handleFileChange = (e) => {
     setIsDropDownOpen(false);
-    handleExpand(e)
+    handleExpand()
     const selectedFiles = Array.from(e.target.files);
     readAndPreviewFile(selectedFiles)
   };
@@ -582,8 +582,6 @@ const MessageInput = () => {
                           {
                             file.mime_type.startsWith('text/') && (
                               <div
-                                src={file.content}
-                                alt={file.name}
                                 className="max-w-full h-12 object-cover rounded"
                               >
                                 {file.content}
