@@ -600,7 +600,7 @@ const MessageInput = () => {
                           key={index}
                         >
 
-                          {(file?.upload_status === 'uploading' && (file.upload_progress < 100 || file.upload_progress > 0)) && (
+                          {(file?.upload_status === 'uploading' && file.upload_progress < 100) && (
                             <div className="absolute inset-0 w-full h-full bg-black/60 flex items-center justify-center rounded-md">
                               <CircularProgress progress={file.upload_progress} />
                             </div>

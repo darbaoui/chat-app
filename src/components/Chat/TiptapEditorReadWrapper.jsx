@@ -30,7 +30,7 @@ const TiptapEditorReadWrapper = ({message}) => {
                     updateMessageContent(message.id, {content: text, isUploading: false})
                 })
                 .catch((error) => {
-                    console.error("Audio upload failed:", error);
+                    console.error("Text message upload failed:", error);
                 })
                 .finally(() => {
                     uploadInProgress.current = false

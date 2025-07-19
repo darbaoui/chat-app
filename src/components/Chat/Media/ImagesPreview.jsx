@@ -125,7 +125,7 @@ const ImagesPreview = ({ images }) => {
 
       const imageUploading = media.find(file => file.temp_id === temp_id);
 
-      uploadProgress =  imageUploading?.isUploading
+      uploadProgress =  imageUploading?.isUploading ?? 0
     }
 
     return <SingleImageDisplay image={imageData} isUploading={isUploading} uploadProgress={uploadProgress} />;
@@ -149,7 +149,7 @@ const ImagesPreview = ({ images }) => {
 
       const imageUploading = media.find(file => file.temp_id === temp_id);
 
-      uploadProgress =  imageUploading?.isUploading
+      uploadProgress =  imageUploading?.isUploading ?? 0;
     }
 
 
