@@ -31,6 +31,7 @@ import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import FilesPreview from "./Media/FilesPreview";
 import CircularProgress from "@/icons/CircularProgress";
+import { useFileDrop } from "@/hooks/useFileDrop";
 
 
 
@@ -50,18 +51,12 @@ const editorVariants = {
 const MessageInput = () => {
 
   const {
-    messages,
     createDraft,
     currentDraft,
     uploadingMessages,
-    createUploadingMessage,
-    updateUploadingMessage,
-    removeUploadingMessage,
     uploadFile,
     deleteFile,
     submitMessage,
-    // sendMessage,
-    finalizeMessage,
     //DO NOT TOUCH THESE TWO FUNCTIONS
     addMessage, setShouldScrollToBottom
   } = useMessageStore();
@@ -76,15 +71,17 @@ const MessageInput = () => {
 
   const [files, setFiles] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
-  const [dragState, setDragState] = useState('idle');
-  const [dragAndDropfiles, setDragAndDropFiles] = useState(null);
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  
+
 
   const wrapperRef = useRef(null);
   const editorRef = useRef(null);
+
+
+  const { dragState, droppedFiles, clearDroppedFiles } = useFileDrop(wrapperRef);
+
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
@@ -94,7 +91,7 @@ const MessageInput = () => {
   });
 
 
-   const ensureDraftExists = useCallback(async () => {
+  const ensureDraftExists = useCallback(async () => {
     if (!currentDraft?.id) {
       return await createDraft();
     }
@@ -109,44 +106,6 @@ const MessageInput = () => {
       ensureDraftExists();
     }
   }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
-
-  useEffect(() => {
-    if (dragAndDropfiles) {
-      readAndPreviewFile(dragAndDropfiles);
-      handleExpand()
-    }
-  }, [dragAndDropfiles]);
-
-  useEffect(() => {
-    if (wrapperRef.current) {
-      const el = wrapperRef.current;
-      invariant(el);
-
-      return combine(
-        dropTargetForExternal({
-          element: el,
-          canDrop: containsFiles,
-          onDragEnter: () => setDragState('over'),
-          onDragLeave: () => setDragState('potential'),
-          onDrop: async ({ source }) => {
-            const files = await getFiles({ source });
-            setDragAndDropFiles(files);
-          },
-        }),
-        monitorForExternal({
-          canMonitor: containsFiles,
-          onDragStart: () => {
-            setDragState('potential');
-            preventUnhandled.start();
-          },
-          onDrop: () => {
-            setDragState('idle');
-            preventUnhandled.stop();
-          },
-        }),
-      );
-    }
-  }, [wrapperRef.current]);
 
 
   const onDrop = useCallback(async (files) => {
@@ -173,78 +132,78 @@ const MessageInput = () => {
 
 
   const readAndPreviewFile = (selectedFiles) => {
-  // Convert FileList to an array if it's not already
-  const filesArray = Array.from(selectedFiles);
+    // Convert FileList to an array if it's not already
+    const filesArray = Array.from(selectedFiles);
 
-  const fileProcessingPromises = filesArray.map((file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+    const fileProcessingPromises = filesArray.map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-      // Handle successful file reading
-      reader.onload = () => {
-        const commonData = {
-          file,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          content: reader.result,
+        // Handle successful file reading
+        reader.onload = () => {
+          const commonData = {
+            file,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            content: reader.result,
+          };
+
+          // If it's an image, get its dimensions
+          if (file.type.startsWith('image/')) {
+            const img = new Image();
+            img.onload = () => {
+              // Resolve with all data, including dimensions
+              resolve({
+                ...commonData,
+                dimensions: {
+                  width: img.width,
+                  height: img.height,
+                },
+              });
+            };
+            img.onerror = () => {
+              // If the image can't be loaded, resolve without dimensions
+              resolve({ ...commonData, dimensions: null });
+            };
+            img.src = reader.result; // This triggers img.onload or img.onerror
+          } else {
+            // For non-image files, resolve immediately
+            resolve(commonData);
+          }
         };
 
-        // If it's an image, get its dimensions
+        // Handle file reading errors
+        reader.onerror = (error) => reject(error);
+
+        // --- Start reading the file based on its type ---
         if (file.type.startsWith('image/')) {
-          const img = new Image();
-          img.onload = () => {
-            // Resolve with all data, including dimensions
-            resolve({
-              ...commonData,
-              dimensions: {
-                width: img.width,
-                height: img.height,
-              },
-            });
-          };
-          img.onerror = () => {
-            // If the image can't be loaded, resolve without dimensions
-            resolve({ ...commonData, dimensions: null });
-          };
-          img.src = reader.result; // This triggers img.onload or img.onerror
+          reader.readAsDataURL(file); // For images and previews
+        } else if (file.type.startsWith('text/')) {
+          reader.readAsText(file); // For text files
         } else {
-          // For non-image files, resolve immediately
-          resolve(commonData);
+          // For unsupported types, resolve with basic info and no content
+          resolve({
+            file,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            content: null, // No preview available
+            dimensions: null,
+          });
         }
-      };
-
-      // Handle file reading errors
-      reader.onerror = (error) => reject(error);
-
-      // --- Start reading the file based on its type ---
-      if (file.type.startsWith('image/')) {
-        reader.readAsDataURL(file); // For images and previews
-      } else if (file.type.startsWith('text/')) {
-        reader.readAsText(file); // For text files
-      } else {
-        // For unsupported types, resolve with basic info and no content
-        resolve({
-          file,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          content: null, // No preview available
-          dimensions: null,
-        });
-      }
+      });
     });
-  });
 
-  // Wait for all files to be processed
-  Promise.all(fileProcessingPromises).then((processedFiles) => {
-    // Note: 'processedFiles' will be an array of objects.
-    // Image objects will have a 'dimensions' property.
-    setFilePreviews((prev) => [...prev, ...processedFiles]);
-    setFiles((prev) => [...prev, ...filesArray]); // Assuming you still want the raw file list
-    setDragAndDropFiles(null); // Or whatever this is intended to do
-  });
-};
+    // Wait for all files to be processed
+    Promise.all(fileProcessingPromises).then((processedFiles) => {
+      // Note: 'processedFiles' will be an array of objects.
+      // Image objects will have a 'dimensions' property.
+      setFilePreviews((prev) => [...prev, ...processedFiles]);
+      setFiles((prev) => [...prev, ...filesArray]); // Assuming you still want the raw file list
+      clearDroppedFiles()
+    });
+  };
 
   useEffect(() => {
     if (files.length) {
@@ -302,6 +261,15 @@ const MessageInput = () => {
       setIsExpanded(true);
     }
   };
+
+
+  useEffect(() => {
+    if (droppedFiles) {
+      readAndPreviewFile(droppedFiles);
+      handleExpand()
+      clearDroppedFiles()
+    }
+  }, [droppedFiles, readAndPreviewFile, handleExpand, clearDroppedFiles]);
 
   const handlePauseRecord = useCallback(() => {
     if (audioRecorderRef.current) {
@@ -494,7 +462,7 @@ const MessageInput = () => {
                     <Plus />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent  className="rounded-3xl p-4" align="center">
+                <DropdownMenuContent className="rounded-3xl p-4" align="center">
                   <div className="w-full flex flex-col gap-2.5">
                     <div className="grid grid-cols-4">
                       <div className="w-10 h-7.5 bg-red-100"></div>
@@ -594,7 +562,7 @@ const MessageInput = () => {
                       {currentUploadingMessage.media.map((file, index) => (
                         <div
                           className={cn("w-12 h-auto rounded-md relative bg-accent border")}
-                          key={index}
+                          key={file.temp_id || file.id}
                         >
 
                           {(file?.upload_status === 'uploading' && file.upload_progress < 100) && (
