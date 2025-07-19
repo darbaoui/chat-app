@@ -41,8 +41,12 @@ const MessageInput = () => {
 
   const {
     error,
+    uploadFiles,
+    displayFileInUI,
     createDraft,
+    createTempDraft,
     currentDraft,
+    currentTempDraft,
     uploadingMessages,
     uploadFile,
     deleteFile,
@@ -75,7 +79,7 @@ const MessageInput = () => {
 
   const ensureDraftExists = useCallback(async () => {
     if (!currentDraft?.id) {
-      return await createDraft();
+      return await createTempDraft({ id: CURRENT_USER, name: 'Current User' }); // TODO: this user object should be updated by the auth user
     }
 
     return currentDraft;
@@ -99,7 +103,6 @@ const MessageInput = () => {
       console.error("Could not create or retrieve a draft message.");
       return;
     }
-
 
     const fileProcessingPromises = filesArray.map((file) => {
       return new Promise((resolve, reject) => {
@@ -161,10 +164,12 @@ const MessageInput = () => {
       });
     });
 
-    Promise.all(fileProcessingPromises).then((processedFilePreviews) => {
+    Promise.all(fileProcessingPromises).then(async (processedFilePreviews) => {
       processedFilePreviews.forEach((filePreview) => {
-        uploadFile(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
+        displayFileInUI(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
       });
+      const currentDraft = await createDraft(draft?.id)
+      uploadFiles(currentDraft)
       clearDroppedFiles(); // Clear the dropped files state if applicable
     });
   }, [ensureDraftExists, uploadFile, clearDroppedFiles]);
@@ -196,7 +201,7 @@ const MessageInput = () => {
     try {
       // Await the submission to ensure the draft is processed before we
       // clear the UI and change state. This prevents the race condition.
-      await submitMessage(currentDraft?.id, { ...content });
+      await submitMessage(currentDraft?.id || currentTempDraft?.temp_id, { ...content });
     } catch (error) {
       console.error("Failed to submit message:", error);
       // Optionally handle submission errors here, e.g., show a toast
@@ -320,7 +325,11 @@ const MessageInput = () => {
 
   const isAudioPaused = recordingState === 'paused';
 
-  const currentUploadingMessage = uploadingMessages.get(currentDraft?.id);
+  console.log('uploadingMessages --->', uploadingMessages)
+  console.log('currentDraft --->', currentDraft)
+  console.log('currentTempDraft --->', currentTempDraft)
+
+  const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentTempDraft?.temp_id);
 
   const hasMedia = currentUploadingMessage?.media.length > 0;
 

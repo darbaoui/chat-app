@@ -3,6 +3,7 @@ import { create } from 'zustand';
 
 const useMessageStore = create((set, get) => ({
   messages: null,
+  currentTempDraft: null,
   currentDraft: null,
   error: null,
   uploadingMessages: new Map(),
@@ -70,6 +71,19 @@ const useMessageStore = create((set, get) => ({
       return { uploadingMessages: newMap };
     });
   },
+  updatingUploadingMessageTempId: (tempId, id, payload) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      if (newMap.has(tempId)) {
+        const existing = newMap.get(tempId);
+        if (existing) {
+          newMap.set(id, { ...existing, id, user: payload.user });
+          newMap.delete(tempId);
+        }
+        return { uploadingMessages: newMap };
+      }
+    });
+  },
 
   updateUploadingMessage: (tempId, updates) => {
     set((state) => {
@@ -120,8 +134,7 @@ const useMessageStore = create((set, get) => ({
     });
   },
 
-  // The first function that used
-  uploadFile: async (file, filePreview, messageId) => {
+  displayFileInUI: (file, filePreview, messageId) => {
     const fileTempId = crypto.randomUUID();
     // Create file object for tracking
     const fileObj = {
@@ -135,6 +148,7 @@ const useMessageStore = create((set, get) => ({
         width: filePreview?.dimensions?.width,
         height: filePreview?.dimensions?.height,
       },
+      file,
       original_url: '',
       preview_url: '',
       upload_progress: 0,
@@ -146,10 +160,59 @@ const useMessageStore = create((set, get) => ({
 
     // Add file to uploading message
     get().addFileToUploadingMessage(messageId, fileObj);
+  },
+
+  uploadFiles: (draft) => {
+    const draftId = draft?.id;
+    if (!draftId) {
+      console.error('Please make sure the draft exist!');
+      return;
+    }
+
+    const files = get().uploadingMessages.get(draftId)?.media || [];
+    if (files.length === 0) {
+      console.warn('No files to upload');
+      return;
+    }
+
+    files.forEach((file) => {
+      get().uploadFile(file, draftId); // Upload each file via Zustand
+    });
+  },
+
+  // The first function that used
+  uploadFile: async (file, messageId) => {
+    // console.log('Uploading file:', file);
+    // const fileTempId = crypto.randomUUID();
+    // // Create file object for tracking
+    // const fileObj = {
+    //   id: '',
+    //   name: file.name,
+    //   file_name: file.name,
+    //   mime_type: file.type,
+    //   size: file.size,
+    //   content: filePreview.content,
+    //   attributes: {
+    //     width: filePreview?.dimensions?.width,
+    //     height: filePreview?.dimensions?.height,
+    //   },
+    //   original_url: '',
+    //   file,
+    //   preview_url: '',
+    //   upload_progress: 0,
+    //   upload_status: 'uploading',
+    //   isUploading: true,
+    //   message_id: messageId,
+    //   temp_id: fileTempId,
+    // };
+
+    // Add file to uploading message
+    // get().addFileToUploadingMessage(messageId, fileObj);
+    const { file: fileToUpload, temp_id: fileTempId } = file;
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUpload);
       formData.append('temp_id', fileTempId);
       if (messageId) {
         formData.append('message_id', messageId);
@@ -213,7 +276,11 @@ const useMessageStore = create((set, get) => ({
       set({ error: 'Failed to delete file' });
     }
   },
-
+  /**
+   *
+   * @param  messageId  can be message id or temp_id
+   * @param  content editor object
+   */
   submitMessage: async (messageId, content) => {
     set((state) => {
       const newMap = new Map(state.uploadingMessages);
@@ -224,11 +291,32 @@ const useMessageStore = create((set, get) => ({
         get().addMessage(new_message);
       }
 
-      return { uploadingMessages: newMap, currentDraft: null };
+      return {
+        uploadingMessages: newMap,
+        currentDraft: null,
+        currentTempDraft: null,
+      };
     });
   },
+  createTempDraft: (user) => {
+    const tempId = crypto.randomUUID();
+    const tempDraft = {
+      id: tempId,
+      temp_id: tempId,
+      content: null,
+      status: 'draft',
+      user,
+      media: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    set({ currentTempDraft: tempDraft });
+    get().createUploadingMessage(tempId, tempDraft);
 
-  createDraft: async () => {
+    return tempDraft;
+  },
+  createDraft: async (tempId) => {
+    if (get().currentDraft?.id) return;
     try {
       const response = await axios.post('/api/messages/text/draft');
       if (response.data) {
@@ -242,8 +330,12 @@ const useMessageStore = create((set, get) => ({
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
-
-        get().createUploadingMessage(response.data.id, draft);
+        console.log('tempId --->', tempId);
+        if (tempId) {
+          get().updatingUploadingMessageTempId(tempId, response.data.id, draft);
+        } else {
+          get().createUploadingMessage(response.data.id, draft);
+        }
         set({ currentDraft: draft });
         return draft;
       }
