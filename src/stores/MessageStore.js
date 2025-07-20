@@ -1,9 +1,9 @@
+import { MessageStatus } from '@/constants';
 import { axios } from '@/lib/axios';
 import { create } from 'zustand';
 
 const useMessageStore = create((set, get) => ({
   messages: null,
-  currentTempDraft: null,
   currentDraft: null,
   error: null,
   uploadingMessages: new Map(),
@@ -57,85 +57,31 @@ const useMessageStore = create((set, get) => ({
       messages: state.messages.filter((msg) => msg.id !== messageId),
     })),
 
-  updateMessageByTempId: (tempId, updates) => {
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.temp_id === tempId ? { ...msg, ...updates } : msg
-      ),
-    }));
-  },
-  createUploadingMessage: (tempId, payload) => {
+  submitMessage: async (content) => {
     set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      newMap.set(tempId, payload);
-      return { uploadingMessages: newMap };
-    });
-  },
-  updatingUploadingMessageTempId: (tempId, id, payload) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      if (newMap.has(tempId)) {
-        const existing = newMap.get(tempId);
-        if (existing) {
-          newMap.set(id, { ...existing, id, user: payload.user });
-          newMap.delete(tempId);
-        }
-        return { uploadingMessages: newMap };
+      const draft = state.currentDraft;
+      if (draft) {
+        const message = get().uploadingMessages.get(draft.id || draft.temp_id);
+        const new_message = { ...message, isUploading: true, content };
+        get().addMessage(new_message);
       }
+
+      return {
+        currentDraft: null,
+      };
     });
   },
 
-  updateUploadingMessage: (tempId, updates) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      const existing = newMap.get(tempId);
-      if (existing) {
-        newMap.set(tempId, { ...existing, ...updates });
-      }
-      return { uploadingMessages: newMap };
-    });
-  },
+  displayFileInUI: (file, filePreview) => {
+    const draft = get().currentDraft;
 
-  addFileToUploadingMessage: (tempId, file) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      const existing = newMap.get(tempId);
-      if (existing) {
-        newMap.set(tempId, {
-          ...existing,
-          media: [...existing.media, file],
-        });
-      }
-      return { uploadingMessages: newMap };
-    });
-  },
+    let messageId = null;
+    if (draft?.id) {
+      messageId = draft.id;
+    }
 
-  updateFileInUploadingMessage: (tempId, fileId, updates) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      const existing = newMap.get(tempId);
-      if (existing) {
-        newMap.set(tempId, {
-          ...existing,
-          media: existing.media.map((file) =>
-            file.temp_id === fileId ? { ...file, ...updates } : file
-          ),
-        });
-      }
-      return { uploadingMessages: newMap };
-    });
-  },
-
-  removeUploadingMessage: (tempId) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      newMap.delete(tempId);
-      return { uploadingMessages: newMap };
-    });
-  },
-
-  displayFileInUI: (file, filePreview, messageId) => {
     const fileTempId = crypto.randomUUID();
+
     // Create file object for tracking
     const fileObj = {
       id: '',
@@ -152,73 +98,151 @@ const useMessageStore = create((set, get) => ({
       original_url: '',
       preview_url: '',
       upload_progress: 0,
-      upload_status: 'uploading',
+      upload_status: draft?.uploading_status || 'pending',
       isUploading: true,
       message_id: messageId,
+      message_temp_id: draft?.temp_id,
       temp_id: fileTempId,
     };
 
-    // Add file to uploading message
-    get().addFileToUploadingMessage(messageId, fileObj);
+    // TODO: add this file to the current draft media array
+
+    get().addUploadingMessageMediaItem(draft?.id || draft?.temp_id, fileObj);
+
+    if (draft?.uploading_status === MessageStatus.UPLOADING && messageId) {
+      get().uploadFile(fileObj, messageId);
+    }
   },
-
-  uploadFiles: (draft) => {
-    const draftId = draft?.id;
-    if (!draftId) {
-      console.error('Please make sure the draft exist!');
-      return;
-    }
-
-    const files = get().uploadingMessages.get(draftId)?.media || [];
-    if (files.length === 0) {
-      console.warn('No files to upload');
-      return;
-    }
-
-    files.forEach((file) => {
-      get().uploadFile(file, draftId); // Upload each file via Zustand
+  createUploadingMessage: (tempId, payload) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      newMap.set(tempId, payload);
+      return { uploadingMessages: newMap };
     });
   },
+  updateUploadingMessage: (messageId, media) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+      if (existing) {
+        newMap.set(messageId, {
+          ...existing,
+          media,
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
+  updateUploadingMessageKey: (oldKey, newKey, data = {}) =>
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const message = newMap.get(oldKey);
+      if (message) {
+        newMap.delete(oldKey);
+        newMap.set(newKey, { ...message, ...data });
+      }
+      return { uploadingMessages: newMap };
+    }),
+  addUploadingMessageMediaItem: (messageKey, mediaItem) =>
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageKey);
+      if (existing) {
+        newMap.set(messageKey, {
+          ...existing,
+          media: [...existing.media, mediaItem],
+        });
+      }
+      return { uploadingMessages: newMap };
+    }),
+  updateUploadingMessageMediaItem: (messageKey, mediaId, updates) =>
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageKey);
+      if (existing) {
+        const updatedMedia = existing.media.map((item) =>
+          item.id === mediaId ? { ...item, ...updates } : item
+        );
+        newMap.set(messageKey, { ...existing, media: updatedMedia });
+      }
+      return { uploadingMessages: newMap };
+    }),
+  generateDraftIsFromServe: (messageTempId) => {
+    if (get().currentDraft?.id) return;
+    axios
+      .post('/api/messages/text/draft')
+      .then(({ data }) => {
+        if (get().currentDraft?.uploading_status === MessageStatus.UPLOADING) {
+          return;
+        }
 
+        // TODO updat the key and media items as well
+        const media = get()
+          .uploadingMessages.get(messageTempId)
+          ?.media.map((mediaItem) => ({
+            ...mediaItem,
+            message_id: data.id,
+            upload_status: MessageStatus.UPLOADING,
+            isUploading: true,
+          }));
+
+        get().updateUploadingMessageKey(messageTempId, data.id, {
+          ...data,
+          temp_id: null,
+          uploading_status: MessageStatus.UPLOADING,
+          media,
+        });
+
+        // // // May in this step the user already submited the draft
+        // if (currentDraft?.temp_id === messageTempId) {
+        //   set((state) => ({
+        //     currentDraft: {
+        //       ...state.currentDraft,
+        //       uploading_status: MessageStatus.UPLOADING,
+        //       id: data.id,
+        //       temp_id: null,
+        //     },
+        //   }));
+        // }
+
+        if (media && media.length) {
+          // If the media not in the draft, but exist in the messsage so we need to add it to a separate uploading message
+          media.forEach((mediaItem) => {
+            get().uploadFile(mediaItem, data.id);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error generating draft from server:', error);
+      });
+  },
+  updateFileInUploadingMessage: (messageId, fileId, updates) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+
+      if (existing) {
+        newMap.set(messageId, {
+          ...existing,
+          media: existing.media.map((file) =>
+            file.temp_id === fileId ? { ...file, ...updates } : file
+          ),
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
   // The first function that used
   uploadFile: async (file, messageId) => {
-    // console.log('Uploading file:', file);
-    // const fileTempId = crypto.randomUUID();
-    // // Create file object for tracking
-    // const fileObj = {
-    //   id: '',
-    //   name: file.name,
-    //   file_name: file.name,
-    //   mime_type: file.type,
-    //   size: file.size,
-    //   content: filePreview.content,
-    //   attributes: {
-    //     width: filePreview?.dimensions?.width,
-    //     height: filePreview?.dimensions?.height,
-    //   },
-    //   original_url: '',
-    //   file,
-    //   preview_url: '',
-    //   upload_progress: 0,
-    //   upload_status: 'uploading',
-    //   isUploading: true,
-    //   message_id: messageId,
-    //   temp_id: fileTempId,
-    // };
-
-    // Add file to uploading message
-    // get().addFileToUploadingMessage(messageId, fileObj);
     const { file: fileToUpload, temp_id: fileTempId } = file;
 
-    try {
-      const formData = new FormData();
-      formData.append('file', fileToUpload);
-      formData.append('temp_id', fileTempId);
-      if (messageId) {
-        formData.append('message_id', messageId);
-      }
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('temp_id', fileTempId);
+    formData.append('message_id', messageId);
 
-      const response = await axios.post('/api/messages/text/upload', formData, {
+    axios
+      .post('/api/messages/text/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -230,29 +254,49 @@ const useMessageStore = create((set, get) => ({
             upload_progress: progress,
           });
         },
-      });
-
-      if (response.data.success) {
+      })
+      .then(({ data }) => {
         get().updateFileInUploadingMessage(messageId, fileTempId, {
-          ...response.data.media,
-          upload_status: 'completed',
+          ...data.media,
+          upload_status: MessageStatus.COMPLETED,
           isUploading: false,
           upload_progress: 100,
         });
-
-        get().updateMessageMediaContent(messageId, fileTempId, {
-          ...response.data.media,
+        // TODO: update the message media content
+      })
+      .catch((error) => {
+        console.error('Error uploading file:', error);
+        get().updateFileInUploadingMessage(messageId, fileTempId, {
+          upload_status: 'failed',
           isUploading: false,
         });
-      }
-    } catch (error) {
-      get().updateFileInUploadingMessage(messageId, fileTempId, {
-        upload_status: 'failed',
+        set({ error: 'Failed to upload file' });
       });
-      set({ error: 'Failed to upload file' });
-    }
   },
-
+  createDraft: (user) => {
+    const { currentDraft } = get();
+    if (currentDraft?.id || currentDraft?.temp_id) return currentDraft;
+    // create a new message width a unique ID
+    const tempId = crypto.randomUUID();
+    const draft = {
+      // id: response.data.id,
+      temp_id: tempId,
+      content: null,
+      status: 'draft',
+      uploading_status: MessageStatus.PENDING,
+      user,
+      media: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    set((state) => ({
+      currentDraft: draft,
+    }));
+    get().createUploadingMessage(tempId, draft);
+    get().generateDraftIsFromServe(tempId);
+    return draft;
+  },
+  // TODO: implement this function
   deleteFile: async (mediaId, messageId) => {
     set((state) => {
       const newMap = new Map(state.uploadingMessages);
@@ -265,6 +309,19 @@ const useMessageStore = create((set, get) => ({
           ),
         });
       }
+
+      //TODO: remove the file from the current draft media array
+      const newCurrentDraft = state.currentDraft;
+      if (newCurrentDraft) {
+        const updatedMedia = newCurrentDraft.media.filter(
+          (file) => file.id !== mediaId && file.temp_id !== mediaId
+        );
+        return {
+          uploadingMessages: newMap,
+          currentDraft: { ...newCurrentDraft, media: updatedMedia },
+        };
+      }
+
       return { uploadingMessages: newMap };
     });
 
@@ -274,74 +331,6 @@ const useMessageStore = create((set, get) => ({
       });
     } catch (error) {
       set({ error: 'Failed to delete file' });
-    }
-  },
-  /**
-   *
-   * @param  messageId  can be message id or temp_id
-   * @param  content editor object
-   */
-  submitMessage: async (messageId, content) => {
-    set((state) => {
-      const newMap = new Map(state.uploadingMessages);
-      const existing = newMap.get(messageId);
-      if (existing) {
-        const new_message = { ...existing, isUploading: true, content };
-        newMap.set(messageId, new_message);
-        get().addMessage(new_message);
-      }
-
-      return {
-        uploadingMessages: newMap,
-        currentDraft: null,
-        currentTempDraft: null,
-      };
-    });
-  },
-  createTempDraft: (user) => {
-    const tempId = crypto.randomUUID();
-    const tempDraft = {
-      id: tempId,
-      temp_id: tempId,
-      content: null,
-      status: 'draft',
-      user,
-      media: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    set({ currentTempDraft: tempDraft });
-    get().createUploadingMessage(tempId, tempDraft);
-
-    return tempDraft;
-  },
-  createDraft: async (tempId) => {
-    if (get().currentDraft?.id) return;
-    try {
-      const response = await axios.post('/api/messages/text/draft');
-      if (response.data) {
-        const draft = {
-          id: response.data.id,
-          // temp_id: tempId,
-          content: null,
-          status: 'draft',
-          user: response.data.user,
-          media: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        console.log('tempId --->', tempId);
-        if (tempId) {
-          get().updatingUploadingMessageTempId(tempId, response.data.id, draft);
-        } else {
-          get().createUploadingMessage(response.data.id, draft);
-        }
-        set({ currentDraft: draft });
-        return draft;
-      }
-    } catch (error) {
-      set({ error: 'Failed to create draft' });
-      return null;
     }
   },
 }));

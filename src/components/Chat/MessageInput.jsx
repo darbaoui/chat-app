@@ -21,6 +21,7 @@ import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import CircularProgress from "@/icons/CircularProgress";
 import { useFileDrop } from "@/hooks/useFileDrop";
+import InputMediaPreview from "./Media/InputMediaPreview";
 
 
 
@@ -41,19 +42,25 @@ const MessageInput = () => {
 
   const {
     error,
-    uploadFiles,
-    displayFileInUI,
-    createDraft,
-    createTempDraft,
+
     currentDraft,
-    currentTempDraft,
-    uploadingMessages,
-    uploadFile,
+    createDraft,
+    displayFileInUI,
     deleteFile,
+    uploadingMessages,
     submitMessage,
+    // uploadFiles,
+    // createTempDraft,
+    // currentTempDraft,
+    // uploadingMessages,
+    // uploadFile,
+    // submitMessage,
     //DO NOT TOUCH THESE TWO FUNCTIONS
-    addMessage, setShouldScrollToBottom
+    addMessage,
+    messages,
+    setShouldScrollToBottom
   } = useMessageStore();
+
 
   const [recordingState, setRecordingState] = useState('inactive');
   const audioRecorderRef = useRef(null);
@@ -68,7 +75,8 @@ const MessageInput = () => {
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
+  // console.log('currentDraft --->', currentDraft);
+  // console.log('messages --->', messages);
 
   const wrapperRef = useRef(null);
   const editorRef = useRef(null);
@@ -79,7 +87,7 @@ const MessageInput = () => {
 
   const ensureDraftExists = useCallback(async () => {
     if (!currentDraft?.id) {
-      return await createTempDraft({ id: CURRENT_USER, name: 'Current User' }); // TODO: this user object should be updated by the auth user
+      return createDraft({ id: CURRENT_USER, name: 'Current User', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' }); // TODO: this user object should be updated by the auth user
     }
 
     return currentDraft;
@@ -166,13 +174,13 @@ const MessageInput = () => {
 
     Promise.all(fileProcessingPromises).then(async (processedFilePreviews) => {
       processedFilePreviews.forEach((filePreview) => {
-        displayFileInUI(filePreview.file, filePreview, draft.id); // Upload each file via Zustand
+        displayFileInUI(filePreview.file, filePreview, draft); // Upload each file via Zustand
       });
-      const currentDraft = await createDraft(draft?.id)
-      uploadFiles(currentDraft)
+      // const currentDraft = await createDraft(draft?.id)
+      // uploadFiles(currentDraft)
       clearDroppedFiles(); // Clear the dropped files state if applicable
     });
-  }, [ensureDraftExists, uploadFile, clearDroppedFiles]);
+  }, [ensureDraftExists, clearDroppedFiles]);
 
 
   const handleFileChange = async (e) => {
@@ -194,14 +202,15 @@ const MessageInput = () => {
 
   const sendMessage = async () => {
     // Prevent sending if already submitting or no draft exists
-    if (isSubmitting || !currentDraft?.id) return;
+
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
 
     try {
       // Await the submission to ensure the draft is processed before we
       // clear the UI and change state. This prevents the race condition.
-      await submitMessage(currentDraft?.id || currentTempDraft?.temp_id, { ...content });
+      await submitMessage(content ? { ...content } : null);
     } catch (error) {
       console.error("Failed to submit message:", error);
       // Optionally handle submission errors here, e.g., show a toast
@@ -325,14 +334,10 @@ const MessageInput = () => {
 
   const isAudioPaused = recordingState === 'paused';
 
-  console.log('uploadingMessages --->', uploadingMessages)
-  console.log('currentDraft --->', currentDraft)
-  console.log('currentTempDraft --->', currentTempDraft)
-
-  const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentTempDraft?.temp_id);
-
-  const hasMedia = currentUploadingMessage?.media.length > 0;
-
+  // Used to track media uploading
+  const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
+  console.log('uploadingMessages --->', uploadingMessages, currentDraft);
+  const hasMedia = currentUploadingMessage?.media?.length > 0;
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
@@ -528,48 +533,15 @@ const MessageInput = () => {
                 exit="exit"
               >
                 <div className="w-full flex flex-col gap-2.5">
-                  {currentUploadingMessage?.media.length > 0 && (
+                  {hasMedia && (
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {currentUploadingMessage.media.map((file, index) => (
-                        <div
-                          className={cn("w-12 h-auto rounded-md relative bg-accent border")}
+                      {currentUploadingMessage.media.map((file) => (
+                        <InputMediaPreview
                           key={file.temp_id || file.id}
-                        >
-
-                          {(file?.upload_status === 'uploading' && file.upload_progress < 100) && (
-                            <div className="absolute inset-0 w-full h-full bg-black/60 flex items-center justify-center rounded-md">
-                              <CircularProgress progress={file.upload_progress} />
-                            </div>
-                          )}
-                          {
-                            file.mime_type.startsWith('image/') && (
-                              <img
-                                src={file.content}
-                                alt={file.name}
-                                className="max-w-full h-12 object-cover rounded"
-                              />
-                            )
-                          }
-                          {
-                            file.mime_type.startsWith('text/') && (
-                              <div
-                                className="max-w-full h-12 object-cover rounded"
-                              >
-                                {file.content}
-                              </div>
-                            )
-                          }
-                          < div
-                            className="cursor-pointer border absolute -top-1.5 -right-1.5 shadow-sm w-4 h-4 rounded-full bg-background flex items-center justify-center z-10"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              handleRemoveFile(file.id || file.temp_id, currentDraft?.id);
-                            }}
-                          >
-                            <X />
-                          </div>
-                        </div>
+                          // currentUploadingMessage={currentUploadingMessage}
+                          file={file}
+                          onRemove={handleRemoveFile}
+                        />
                       ))}
                     </div>
                   )}
@@ -578,7 +550,7 @@ const MessageInput = () => {
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}
                     placeholder="Type your message..."
-                    className={cn("w-full", currentUploadingMessage?.media?.length ? 'min-h-8' : '')}
+                    className={cn("w-full", currentDraft?.media?.length ? 'min-h-8' : '')}
                   />
                 </div>
               </motion.div>

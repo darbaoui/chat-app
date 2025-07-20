@@ -14,8 +14,6 @@ const TiptapEditorReadWrapper = ({ message }) => {
 
     const [loading, setLoading] = useState(false)
 
-    console.log('message --->', message)
-
     const uploadMessage = useCallback(() => {
 
         if (uploadInProgress.current) return

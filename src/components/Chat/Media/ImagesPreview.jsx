@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
-import { Loader } from "lucide-react";
+import { Loader, LoaderCircle } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useCallback } from "react";
 
 
-const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 350 }) => {
+const SingleImageDisplay = ({ image, isPending, isUploading, uploadProgress, maxHeight = 350 }) => {
 
   //TODO add uploadProgress UI
   const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
@@ -26,11 +26,18 @@ const SingleImageDisplay = ({ image, isUploading, uploadProgress, maxHeight = 35
         width: 'fit-content'
       }}
     >
-      {isUploading && (
+      {isPending ? (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
-          <Loader className="animate-spin" />
+          <LoaderCircle className="animate-spin" />
         </div>
-      )}
+      ) : isUploading ?
+        (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+            <Loader className="animate-spin" />
+          </div>
+        ) : null
+      }
+
       <Image
         src={src}
         alt={alt}
@@ -106,24 +113,29 @@ const ImagesPreview = ({ images }) => {
 
   if (!images?.length) return null;
 
-  const getUploadProgress = useCallback((image) => {
-    if (!image.isUploading) {
+  const getUploadMediaData = useCallback((image) => {
+    if (!image.isUploading && image.uploading_status !== 'pending') {
       return 0;
     }
-    const { temp_id, message_id } = image;
-    const message = uploadingMessages.get(message_id);
+    const { temp_id, message_id, message_temp_id } = image;
+    console.log('temp_id --->', temp_id, 'message_id --->', message_id, 'message_temp_id --->', message_temp_id);
+    const message = uploadingMessages.get(message_id || message_temp_id);
     const imageUploading = message?.media?.find(file => file.temp_id === temp_id);
-    return imageUploading?.upload_progress ?? 0;
+    return imageUploading;
   }, [uploadingMessages]);
 
 
   const renderSingleImage = () => {
 
     const imageData = images[0];
-    const isUploading = imageData.isUploading;
-    const uploadProgress = getUploadProgress(imageData);
+    const isPending = imageData.upload_status === 'pending';
+    const imageUploading = getUploadMediaData(imageData);
+    const uploadProgress = imageUploading?.upload_progress ?? 0;
+    const isUploading = imageData?.isUploading;
 
-    return <SingleImageDisplay image={imageData} isUploading={isUploading} uploadProgress={uploadProgress} />;
+    console.log('From ImagePreview ---------', uploadingMessages, imageUploading, imageData);
+
+    return <SingleImageDisplay image={imageData} isPending={isPending} isUploading={isUploading} uploadProgress={uploadProgress} />;
   }
 
 
