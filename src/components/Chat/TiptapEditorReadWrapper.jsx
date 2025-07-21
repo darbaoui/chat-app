@@ -33,7 +33,7 @@ const TiptapEditorReadWrapper = ({ message }) => {
                 console.error("Text message upload failed:", error);
             })
             .finally(() => {
-                // uploadInProgress.current = false
+                uploadInProgress.current = false
                 setLoading(false);
             });
     }, [message, updateMessageContent]);

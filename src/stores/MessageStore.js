@@ -213,7 +213,9 @@ const useMessageStore = create((set, get) => ({
       const existing = newMap.get(messageKey);
       if (existing) {
         const updatedMedia = existing.media.map((item) =>
-          item.id === mediaId ? { ...item, ...updates } : item
+          (item.id && item.id === mediaId) || item.temp_id === mediaId
+            ? { ...item, ...updates }
+            : item
         );
         newMap.set(messageKey, { ...existing, media: updatedMedia });
       }
@@ -330,7 +332,7 @@ const useMessageStore = create((set, get) => ({
       .catch((error) => {
         console.error('Error uploading file:', error);
         get().updateFileInUploadingMessage(messageId, fileTempId, {
-          upload_status: 'failed',
+          upload_status: MessageStatus.FAILED,
           isUploading: false,
         });
         set({ error: 'Failed to upload file' });

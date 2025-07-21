@@ -42,7 +42,7 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
                     </div>
                 )
             }
-            < div
+            <div
                 className="cursor-pointer border absolute -top-1.5 -right-1.5 shadow-sm w-4 h-4 rounded-full bg-background flex items-center justify-center z-10"
                 onClick={(e) => {
                     e.preventDefault()
