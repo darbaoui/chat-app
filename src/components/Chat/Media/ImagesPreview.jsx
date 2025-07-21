@@ -1,3 +1,4 @@
+import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
@@ -31,10 +32,12 @@ const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadP
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
           <LoaderCircle className="animate-spin" />
         </div>
-      ) : uploadStatus === MessageStatus.UPLOADING ?
+      ) : uploadStatus === MessageStatus.UPLOADING && uploadProgress < 100 ?
         (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
-            <Loader className="animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
+            <div className="w-14 h-14 rounded-full bg-background flex items-center justify-center">
+              <ProgressCircle progressValue={uploadProgress >= 95 ? 95 : uploadProgress} progressColor="text-black/50" size={44} />
+            </div>
           </div>
         ) : null
       }
@@ -64,31 +67,33 @@ const GridImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadPro
 
   const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
   const src = readingFromLocalContent ? content : original_url;
-  // const alt = name || 'Image';
-
-  // const src = isUploading ? content : original_url;
 
   const alt = name || 'Image';
+
 
   return (
     <div
       key={image.temp_id || image.id}
-      className={cn('relative h-36', {
+      className={cn('relative h-36 w-full', {
         'col-span-3': colSpan === 3,
         'col-span-2': colSpan === 2,
       })}
     >
       {uploadStatus === MessageStatus.PENDING ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
           <LoaderCircle className="animate-spin" />
         </div>
       ) : uploadStatus === MessageStatus.UPLOADING ?
         (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
-            <Loader className="animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
+            <div className="w-14 h-14 rounded-full bg-background flex items-center justify-center">
+              <ProgressCircle progressValue={uploadProgress >= 95 ? 95 : uploadProgress} progressColor="text-black/50" size={44} />
+            </div>
           </div>
         ) : null
       }
+
+
       <Image
         src={src}
         alt={alt}
@@ -146,7 +151,7 @@ const ImagesPreview = ({ images }) => {
 
     return <SingleImageDisplay
       image={image}
-      uploadStatus={imageUploading.upload_status}
+      uploadStatus={imageUploading?.upload_status}
       isUploadingFromLocal={isUploadingFromLocal}
       uploadProgress={uploadProgress} />;
   }
@@ -159,10 +164,9 @@ const ImagesPreview = ({ images }) => {
     const isUploadingFromLocal = imageData?.isUploading;
     const uploadProgress = imageUploading?.upload_progress ?? 0;
     const image = isUploadingFromLocal ? imageUploading : imageData;
-
     return <GridImageDisplay
       image={image}
-      uploadStatus={imageUploading.upload_status}
+      uploadStatus={imageUploading?.upload_status}
       isUploadingFromLocal={isUploadingFromLocal}
       uploadProgress={uploadProgress}
       colSpan={colSpan} key={image.temp_id || image.id} />

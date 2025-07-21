@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
-import CircularProgress from "@/icons/CircularProgress";
 import { useFileDrop } from "@/hooks/useFileDrop";
 import InputMediaPreview from "./Media/InputMediaPreview";
 import { USERS } from "@/app/api/messages/route";

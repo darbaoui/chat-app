@@ -1,5 +1,5 @@
+import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
-import CircularProgress from "@/icons/CircularProgress";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
 import { LoaderCircle, X } from "lucide-react";
@@ -15,8 +15,11 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
         >
 
             {(file?.upload_status === MessageStatus.UPLOADING && file?.upload_progress < 100) && (
-                <div className="absolute inset-0 w-full h-full bg-black/60 flex items-center justify-center rounded-md">
-                    <CircularProgress progress={file.upload_progress} />
+
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
+                    <div className="w-6 h-6 rounded-full bg-background flex items-center justify-center">
+                        <ProgressCircle progressValue={file?.upload_progress >= 95 ? 95 : file?.upload_progress} progressColor="text-black/50" size={20} />
+                    </div>
                 </div>
             )}
             {(file?.upload_status === MessageStatus.PENDING) && (

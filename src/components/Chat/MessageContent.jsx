@@ -1,6 +1,5 @@
 import AudioPreview from "@/components/Chat/Media/AudioPreview/index";
 import FilesPreview from "@/components/Chat/Media/FilesPreview";
-import TiptapEditorRead from "@/components/Editor/TiptapEditorRead";
 import { cn } from "@/lib/utils";
 import TiptapEditorReadWrapper from "./TiptapEditorReadWrapper";
 
@@ -11,18 +10,19 @@ const MessageContent = ({ message, className }) => {
     const isAudioMedia = singleMediaFile
         ? ['audio', 'video'].some(type => singleMediaFile.mime_type.startsWith(type)) && !text
         : null;
+    const hasMedia = media.length > 0;
 
     return isAudioMedia ?
         (<div className={cn("max-w-[254px] py-1.5 ps-[7px] pe-[14px] overflow-hidden z-[2] relative", className)}>
             <AudioPreview mediaFile={singleMediaFile} />
         </div>)
         : (
-            <div className={cn("flex flex-col md:max-w-[70%]  gap-2.5 py-2.5 z-[2] relative", className)}>
+            <div className={cn("flex flex-col md:max-w-[70%]  gap-2.5 py-2.5 z-[2] relative", className, hasMedia && "w-full")}>
                 <div className="px-5">
                     <TiptapEditorReadWrapper message={message} />
                 </div>
                 {
-                    media.length > 0 ? (
+                    hasMedia ? (
                         <div className={cn("w-full px-5")}>
                             <FilesPreview attachments={media} />
                         </div>

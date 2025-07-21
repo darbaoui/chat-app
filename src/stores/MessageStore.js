@@ -70,14 +70,7 @@ const useMessageStore = create((set, get) => ({
       const draft = state.currentDraft;
       if (draft) {
         const message = get().uploadingMessages.get(draft.id || draft.temp_id);
-        if (!message) {
-          console.error(
-            'No message found for the current draft.',
-            draft,
-            get().uploadingMessages
-          );
-          return;
-        }
+
         if (message) {
           const new_message = {
             ...message,
@@ -222,9 +215,7 @@ const useMessageStore = create((set, get) => ({
       return { uploadingMessages: newMap };
     }),
   generateDraftIsFromServe: (messageTempId) => {
-    const { currentDraft } = get();
-
-    if (currentDraft?.id) return;
+    if (get().currentDraft?.id) return;
     axios
       .post('/api/messages/text/draft')
       .then(({ data }) => {
@@ -248,7 +239,7 @@ const useMessageStore = create((set, get) => ({
           media,
         });
 
-        if (currentDraft?.temp_id === messageTempId) {
+        if (get().currentDraft?.temp_id === messageTempId) {
           get().setCurrentDraft({
             ...currentDraft,
             ...data,

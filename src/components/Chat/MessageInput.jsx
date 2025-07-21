@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
-import CircularProgress from "@/icons/CircularProgress";
 import { useFileDrop } from "@/hooks/useFileDrop";
 import InputMediaPreview from "./Media/InputMediaPreview";
 
@@ -337,6 +336,8 @@ const MessageInput = () => {
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
   // console.log('uploadingMessages --->', uploadingMessages, currentDraft);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
+
+  console.log('currentDraft --->', currentDraft);
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
