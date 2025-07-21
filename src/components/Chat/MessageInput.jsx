@@ -241,13 +241,13 @@ const MessageInput = () => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.pauseRecord();
     }
-  }, []);
+  }, [audioRecorderRef]);
 
   const handleResumeRecord = useCallback(() => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.resumeRecord();
     }
-  }, []);
+  }, [audioRecorderRef]);
 
   const handleStartRecording = (e) => {
     setIsRecording(true);
@@ -336,8 +336,6 @@ const MessageInput = () => {
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
   // console.log('uploadingMessages --->', uploadingMessages, currentDraft);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
-
-  console.log('currentDraft --->', currentDraft);
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;
@@ -551,7 +549,7 @@ const MessageInput = () => {
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}
                     placeholder="Type your message..."
-                    className={cn("w-full", currentDraft?.media?.length ? 'min-h-8' : '')}
+                    className={cn("w-full", hasMedia ? 'min-h-8' : '')}
                   />
                 </div>
               </motion.div>

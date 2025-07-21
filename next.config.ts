@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
-  
+
   images: {
     remotePatterns: [
       {
@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 's3.eu-west-3.amazonaws.com',
         port: '',
-        search: '',
+        pathname: '/**',
       },
       {
         protocol: 'https',
@@ -31,6 +31,5 @@ const nextConfig: NextConfig = {
     ],
   },
 };
-
 
 export default nextConfig;

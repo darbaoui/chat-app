@@ -100,7 +100,7 @@ const useMessageStore = create((set, get) => ({
         };
 
         get().createUploadingMessage(tempId, newDraft);
-        get().generateDraftIsFromServe(tempId);
+        get().syncDraftWithServer(tempId);
         const new_message = {
           ...newDraft,
           isUploading: true,
@@ -214,7 +214,7 @@ const useMessageStore = create((set, get) => ({
       }
       return { uploadingMessages: newMap };
     }),
-  generateDraftIsFromServe: (messageTempId) => {
+  syncDraftWithServer: (messageTempId) => {
     if (get().currentDraft?.id) return;
     axios
       .post('/api/messages/text/draft')
@@ -241,7 +241,7 @@ const useMessageStore = create((set, get) => ({
 
         if (get().currentDraft?.temp_id === messageTempId) {
           get().setCurrentDraft({
-            ...currentDraft,
+            ...get().currentDraft,
             ...data,
             id: data.id,
             temp_id: null,
@@ -349,7 +349,7 @@ const useMessageStore = create((set, get) => ({
       currentDraft: draft,
     }));
     get().createUploadingMessage(tempId, draft);
-    get().generateDraftIsFromServe(tempId);
+    get().syncDraftWithServer(tempId);
     return draft;
   },
   // TODO: implement this function

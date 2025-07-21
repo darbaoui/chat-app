@@ -14,14 +14,12 @@ const TiptapEditorReadWrapper = ({ message }) => {
     const text = message?.content;
     const uploadInProgress = useRef(false);
 
-    const [loading, setLoading] = useState(false)
 
     const uploadMessage = useCallback(() => {
 
         if (uploadInProgress.current || !message?.id) return
 
         uploadInProgress.current = true;
-        setLoading(true);
 
         axios.put(`/api/messages/text/${message.id}`, {
             content: JSON.stringify(message.content)
@@ -34,7 +32,6 @@ const TiptapEditorReadWrapper = ({ message }) => {
             })
             .finally(() => {
                 uploadInProgress.current = false
-                setLoading(false);
             });
     }, [message, updateMessageContent]);
 
