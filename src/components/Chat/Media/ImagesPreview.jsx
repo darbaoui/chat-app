@@ -57,13 +57,16 @@ const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadP
 
 
 
-const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
+const GridImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadProgress, colSpan }) => {
 
   //TODO add uploadProgress UI
-
   const { content, original_url, name, blur_placeholder } = image;
 
-  const src = isUploading ? content : original_url;
+  const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
+  const src = readingFromLocalContent ? content : original_url;
+  // const alt = name || 'Image';
+
+  // const src = isUploading ? content : original_url;
 
   const alt = name || 'Image';
 
@@ -75,11 +78,17 @@ const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
         'col-span-2': colSpan === 2,
       })}
     >
-      {isUploading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
-          <Loader className="animate-spin" />
+      {uploadStatus === MessageStatus.PENDING ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+          <LoaderCircle className="animate-spin" />
         </div>
-      )}
+      ) : uploadStatus === MessageStatus.UPLOADING ?
+        (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
+            <Loader className="animate-spin" />
+          </div>
+        ) : null
+      }
       <Image
         src={src}
         alt={alt}
@@ -88,7 +97,7 @@ const GridImageDisplay = ({ image, isUploading, uploadProgress, colSpan }) => {
         style={{
           objectFit: 'cover',
         }}
-        {...(!isUploading && { placeholder: "blur", blurDataURL: blur_placeholder })}
+        {...(!readingFromLocalContent && { placeholder: "blur", blurDataURL: blur_placeholder })}
       />
     </div>
   );
@@ -116,7 +125,7 @@ const ImagesPreview = ({ images }) => {
 
   const getUploadMediaData = useCallback((image) => {
     if (!image.isUploading) {
-      return 0;
+      return null;
     }
     const { temp_id, message_id, message_temp_id } = image;
     const message = uploadingMessages.get(message_id || message_temp_id);
@@ -135,17 +144,28 @@ const ImagesPreview = ({ images }) => {
 
     const image = isUploadingFromLocal ? imageUploading : imageData;
 
-    return <SingleImageDisplay image={image} uploadStatus={imageUploading.upload_status} isUploadingFromLocal={isUploadingFromLocal} uploadProgress={uploadProgress} />;
+    return <SingleImageDisplay
+      image={image}
+      uploadStatus={imageUploading.upload_status}
+      isUploadingFromLocal={isUploadingFromLocal}
+      uploadProgress={uploadProgress} />;
   }
 
 
-  const renderGridImage = (image, index) => {
+  const renderGridImage = (imageData, index) => {
 
-    const isUploading = image.isUploading;
     const colSpan = gridConfig.spans[index] || 1;
-    const uploadProgress = getUploadProgress(image);
+    const imageUploading = getUploadMediaData(imageData);
+    const isUploadingFromLocal = imageData?.isUploading;
+    const uploadProgress = imageUploading?.upload_progress ?? 0;
+    const image = isUploadingFromLocal ? imageUploading : imageData;
 
-    return <GridImageDisplay image={image} isUploading={isUploading} uploadProgress={uploadProgress} colSpan={colSpan} key={image.temp_id || image.id} />
+    return <GridImageDisplay
+      image={image}
+      uploadStatus={imageUploading.upload_status}
+      isUploadingFromLocal={isUploadingFromLocal}
+      uploadProgress={uploadProgress}
+      colSpan={colSpan} key={image.temp_id || image.id} />
   };
 
   const renderGrid = () => (
