@@ -68,22 +68,24 @@ const MessageVList = () => {
     });
 
 
-  const { addMessage, messages, setMessages, shouldScrollToBottom } = useMessageStore();
+  // const { addMessage, messages, setMessages, shouldScrollToBottom } = useMessageStore();
 
-  useEffect(() => {
-    if (data) {
-      const messages = data ? data.flatMap((page) => page.data).reverse() : [];
-      setMessages(messages);
+  const [messages, setMessages] = useState([]);
 
-    }
-  }, [data])
+  // useEffect(() => {
+  //   if (data) {
+  //     const messages = data ? data.flatMap((page) => page.data).reverse() : [];
+  //     setMessages(messages);
+
+  //   }
+  // }, [data])
 
 
-  useEffect(() => {
-    if (shouldScrollToBottom) {
-      shouldStickToBottom.current = shouldScrollToBottom
-    }
-  }, [shouldScrollToBottom])
+  // useEffect(() => {
+  //   if (shouldScrollToBottom) {
+  //     shouldStickToBottom.current = shouldScrollToBottom
+  //   }
+  // }, [shouldScrollToBottom])
 
   const isLoadingMore =
     isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.next_page_url);// We use laravel pagination response
@@ -130,15 +132,6 @@ const MessageVList = () => {
 
   }, [messages]);
 
-
-
-  const generateVlistKey = useMemo(() => {
-    if (shouldScrollToBottom) {
-      return crypto.randomUUID(); // to Force re-rendering
-    }
-    return "message-list";
-  }, [items, shouldScrollToBottom]);
-
   useEffect(() => {
     if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
@@ -146,15 +139,6 @@ const MessageVList = () => {
       align: "end",
     });
   }, [items.length]);
-
-
-  useEffect(() => {
-    if (generateVlistKey !== 'message-list') {
-      ref.current.scrollToIndex(items.length - 1, {
-        align: "end",
-      });
-    }
-  }, [ref, generateVlistKey])
 
 
   useLayoutEffect(() => {
@@ -181,6 +165,16 @@ const MessageVList = () => {
     }
   }
 
+  const addMessage = (message) => {
+    setMessages((prev) => {
+      const newMessages = [...prev, message];
+      return newMessages;
+    });
+
+    // ref.current.scrollToIndex(newMessages.length - 1, {
+    //   align: "end",
+    // });    
+  }
 
   if (isLoading || !messages)
     return (
@@ -213,11 +207,12 @@ const MessageVList = () => {
                   }}
                   overscan={items.length >= 20 ? 20 : 0}
                   item={StickyItem}
+                  count={items.length}
                   keepMounted={[activeIndex]}
                   reverse
                   shift={isPrepend.current}
                   onScroll={handleScroll}
-                  key={generateVlistKey}
+                  key={items[items.length - 1]?.id || "message-list"}
                 >
 
 
@@ -241,7 +236,7 @@ const MessageVList = () => {
             )
           }
 
-          <MessageInput />
+          <MessageInput addMessageTest={addMessage} messagesTest={messages} />
         </div>
       </StickyIndexContext.Provider>
     </>

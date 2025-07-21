@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 import { NextRequest, NextResponse } from "next/server";
 
 const TOTAL_MESSAGES = 2000;
-const USERS = [
+export const USERS = [
   {
     id: CURRENT_USER,
     name: "John Doe",
