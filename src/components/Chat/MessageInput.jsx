@@ -75,7 +75,6 @@ const MessageInput = () => {
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log('currentDraft --->', currentDraft);
   // console.log('messages --->', messages);
 
   const wrapperRef = useRef(null);

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useMemo, useCallback } from "react";
 
 
-const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadProgress, maxHeight = 350 }) => {
+const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadProgress, maxHeight = 200 }) => {
 
   //TODO add uploadProgress UI
   const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
@@ -14,7 +14,6 @@ const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadP
   const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
   const src = readingFromLocalContent ? content : original_url;
   const alt = name || 'Image';
-  console.log('readingFromLocalContent ---->', readingFromLocalContent, image)
   // Calculate dimensions for single image view
   const aspectRatio = (width && height) ? width / height : 1;
   const displayHeight = height ? Math.min(height, maxHeight) : maxHeight;

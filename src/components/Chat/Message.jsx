@@ -8,11 +8,6 @@ import { memo } from "react";
 
 const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
-  if (!user?.id) {
-    console.log('message ------------')
-    console.log('message ------------', message)
-    console.log('message ------------')
-  }
   const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
   const time = fromNow(created_at)

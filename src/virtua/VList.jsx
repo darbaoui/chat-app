@@ -47,11 +47,11 @@ export const VList = forwardRef(
 
 
 
-  if (shouldReverse) {
+    if (shouldReverse) {
       element = (
         <div
           style={{
-            // visibility: "hidden", // TODO replace with other optimization methods
+            visibility: "hidden", // TODO replace with other optimization methods
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",

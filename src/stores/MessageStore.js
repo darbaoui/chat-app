@@ -8,7 +8,7 @@ const useMessageStore = create((set, get) => ({
   error: null,
   uploadingMessages: new Map(),
   unReadMessages: 0,
-  shouldScrollToBottom: true,
+  shouldScrollToBottom: false,
   setShouldScrollToBottom: (shouldScrollToBottom) =>
     set({ shouldScrollToBottom }),
   setCurrentDraft: (draft) => set({ currentDraft: draft }),
@@ -87,38 +87,39 @@ const useMessageStore = create((set, get) => ({
           };
           get().addMessage(new_message);
         }
+      } else {
+        //While a user use only content without media
+
+        const tempId = crypto.randomUUID();
+        const newDraft = {
+          // id: response.data.id,
+          temp_id: tempId,
+          content,
+          status: 'draft',
+          upload_status: MessageStatus.PENDING,
+          user: {
+            id: CURRENT_USER,
+            name: 'Current User',
+          },
+          media: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        get().createUploadingMessage(tempId, newDraft);
+        get().generateDraftIsFromServe(tempId);
+        const new_message = {
+          ...newDraft,
+          isUploading: true,
+          content,
+          created_at: new Date().toISOString(),
+        };
+        get().addMessage(new_message);
       }
-
-      //While a user use only content without media
-
-      const tempId = crypto.randomUUID();
-      const newDraft = {
-        // id: response.data.id,
-        temp_id: tempId,
-        content,
-        status: 'draft',
-        upload_status: MessageStatus.PENDING,
-        user: {
-          id: CURRENT_USER,
-          name: 'Current User',
-        },
-        media: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      get().createUploadingMessage(tempId, newDraft);
-      get().generateDraftIsFromServe(tempId);
-      const new_message = {
-        ...newDraft,
-        isUploading: true,
-        content,
-        created_at: new Date().toISOString(),
-      };
-      get().addMessage(new_message);
 
       return {
         currentDraft: null,
+        shouldScrollToBottom: true,
       };
     });
   },
