@@ -1,3 +1,4 @@
+import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
 import { Loader, LoaderCircle } from "lucide-react";
@@ -5,14 +6,15 @@ import Image from "next/image";
 import { useMemo, useCallback } from "react";
 
 
-const SingleImageDisplay = ({ image, isPending, isUploading, uploadProgress, maxHeight = 350 }) => {
+const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadProgress, maxHeight = 350 }) => {
 
   //TODO add uploadProgress UI
   const { content, original_url, name, blur_placeholder, attributes: { width, height } = {} } = image;
 
-  const src = isUploading ? content : original_url;
+  const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
+  const src = readingFromLocalContent ? content : original_url;
   const alt = name || 'Image';
-
+  console.log('readingFromLocalContent ---->', readingFromLocalContent, image)
   // Calculate dimensions for single image view
   const aspectRatio = (width && height) ? width / height : 1;
   const displayHeight = height ? Math.min(height, maxHeight) : maxHeight;
@@ -26,11 +28,11 @@ const SingleImageDisplay = ({ image, isPending, isUploading, uploadProgress, max
         width: 'fit-content'
       }}
     >
-      {isPending ? (
+      {uploadStatus === MessageStatus.PENDING ? (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
           <LoaderCircle className="animate-spin" />
         </div>
-      ) : isUploading ?
+      ) : uploadStatus === MessageStatus.UPLOADING ?
         (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
             <Loader className="animate-spin" />
@@ -48,7 +50,7 @@ const SingleImageDisplay = ({ image, isPending, isUploading, uploadProgress, max
           maxWidth: '100%',
           height: 'auto'
         }}
-        {...(!isUploading && { placeholder: "blur", blurDataURL: blur_placeholder })}
+        {...(!readingFromLocalContent && { placeholder: "blur", blurDataURL: blur_placeholder })}
       />
     </div>
   );
@@ -114,11 +116,10 @@ const ImagesPreview = ({ images }) => {
   if (!images?.length) return null;
 
   const getUploadMediaData = useCallback((image) => {
-    if (!image.isUploading && image.uploading_status !== 'pending') {
+    if (!image.isUploading) {
       return 0;
     }
     const { temp_id, message_id, message_temp_id } = image;
-    console.log('temp_id --->', temp_id, 'message_id --->', message_id, 'message_temp_id --->', message_temp_id);
     const message = uploadingMessages.get(message_id || message_temp_id);
     const imageUploading = message?.media?.find(file => file.temp_id === temp_id);
     return imageUploading;
@@ -128,14 +129,14 @@ const ImagesPreview = ({ images }) => {
   const renderSingleImage = () => {
 
     const imageData = images[0];
-    const isPending = imageData.upload_status === 'pending';
     const imageUploading = getUploadMediaData(imageData);
     const uploadProgress = imageUploading?.upload_progress ?? 0;
-    const isUploading = imageData?.isUploading;
+    // const isPending = imageUploading.upload_status === MessageStatus.PENDING;
+    const isUploadingFromLocal = imageData?.isUploading;
 
-    console.log('From ImagePreview ---------', uploadingMessages, imageUploading, imageData);
+    const image = isUploadingFromLocal ? imageUploading : imageData;
 
-    return <SingleImageDisplay image={imageData} isPending={isPending} isUploading={isUploading} uploadProgress={uploadProgress} />;
+    return <SingleImageDisplay image={image} uploadStatus={imageUploading.upload_status} isUploadingFromLocal={isUploadingFromLocal} uploadProgress={uploadProgress} />;
   }
 
 

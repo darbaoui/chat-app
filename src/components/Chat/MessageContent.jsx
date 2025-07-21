@@ -17,7 +17,7 @@ const MessageContent = ({ message, className }) => {
             <AudioPreview mediaFile={singleMediaFile} />
         </div>)
         : (
-            <div className={cn("flex flex-col w-full md:w-[70%]  gap-2.5 py-2.5 z-[2] relative", className)}>
+            <div className={cn("flex flex-col md:max-w-[70%]  gap-2.5 py-2.5 z-[2] relative", className)}>
                 <div className="px-5">
                     <TiptapEditorReadWrapper message={message} />
                 </div>

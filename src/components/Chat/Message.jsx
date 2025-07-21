@@ -8,6 +8,11 @@ import { memo } from "react";
 
 const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
+  if (!user?.id) {
+    console.log('message ------------')
+    console.log('message ------------', message)
+    console.log('message ------------')
+  }
   const isMe = user.id === CURRENT_USER;
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
   const time = fromNow(created_at)
@@ -58,7 +63,7 @@ const Message = memo(({ message, prevMessage = {} }) => {
             />
           )}
           <MessageContent message={message} className={cn(
-            "rounded-3xl w-full",
+            "rounded-3xl",
             isMe
               ? "bg-chatBoxMe text-chatBoxMe-foreground"
               : "bg-accent text-title "

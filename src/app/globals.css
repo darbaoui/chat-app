@@ -334,6 +334,7 @@
 
 .ProseMirror p {
   overflow-wrap: break-word;
+  /* white-space: nowrap; */
 }
 
 .emoji-with-text .ProseMirror span.emoji:first-of-type {

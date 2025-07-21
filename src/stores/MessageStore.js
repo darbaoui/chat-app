@@ -1,4 +1,4 @@
-import { MessageStatus } from '@/constants';
+import { CURRENT_USER, MessageStatus } from '@/constants';
 import { axios } from '@/lib/axios';
 import { create } from 'zustand';
 
@@ -26,6 +26,14 @@ const useMessageStore = create((set, get) => ({
     set((state) => ({
       messages: state.messages.map((msg) =>
         msg.id === messageId ? { ...msg, ...updates } : msg
+      ),
+    })),
+  updateMessageDraft: (tempId, updates) =>
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.temp_id === tempId
+          ? { ...msg, ...updates, content: msg.content }
+          : msg
       ),
     })),
   updateMessageMediaContent: (message_id, temp_id, newMediaContent) =>
@@ -62,9 +70,52 @@ const useMessageStore = create((set, get) => ({
       const draft = state.currentDraft;
       if (draft) {
         const message = get().uploadingMessages.get(draft.id || draft.temp_id);
-        const new_message = { ...message, isUploading: true, content };
-        get().addMessage(new_message);
+        if (!message) {
+          console.error(
+            'No message found for the current draft.',
+            draft,
+            get().uploadingMessages
+          );
+          return;
+        }
+        if (message) {
+          const new_message = {
+            ...message,
+            isUploading: true,
+            content,
+            created_at: new Date().toISOString(),
+          };
+          get().addMessage(new_message);
+        }
       }
+
+      //While a user use only content without media
+
+      const tempId = crypto.randomUUID();
+      const newDraft = {
+        // id: response.data.id,
+        temp_id: tempId,
+        content,
+        status: 'draft',
+        upload_status: MessageStatus.PENDING,
+        user: {
+          id: CURRENT_USER,
+          name: 'Current User',
+        },
+        media: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      get().createUploadingMessage(tempId, newDraft);
+      get().generateDraftIsFromServe(tempId);
+      const new_message = {
+        ...newDraft,
+        isUploading: true,
+        content,
+        created_at: new Date().toISOString(),
+      };
+      get().addMessage(new_message);
 
       return {
         currentDraft: null,
@@ -98,7 +149,7 @@ const useMessageStore = create((set, get) => ({
       original_url: '',
       preview_url: '',
       upload_progress: 0,
-      upload_status: draft?.uploading_status || 'pending',
+      upload_status: draft?.upload_status || MessageStatus.PENDING,
       isUploading: true,
       message_id: messageId,
       message_temp_id: draft?.temp_id,
@@ -109,7 +160,7 @@ const useMessageStore = create((set, get) => ({
 
     get().addUploadingMessageMediaItem(draft?.id || draft?.temp_id, fileObj);
 
-    if (draft?.uploading_status === MessageStatus.UPLOADING && messageId) {
+    if (draft?.upload_status === MessageStatus.UPLOADING && messageId) {
       get().uploadFile(fileObj, messageId);
     }
   },
@@ -168,11 +219,13 @@ const useMessageStore = create((set, get) => ({
       return { uploadingMessages: newMap };
     }),
   generateDraftIsFromServe: (messageTempId) => {
-    if (get().currentDraft?.id) return;
+    const { currentDraft } = get();
+
+    if (currentDraft?.id) return;
     axios
       .post('/api/messages/text/draft')
       .then(({ data }) => {
-        if (get().currentDraft?.uploading_status === MessageStatus.UPLOADING) {
+        if (get().currentDraft?.upload_status === MessageStatus.UPLOADING) {
           return;
         }
 
@@ -189,21 +242,34 @@ const useMessageStore = create((set, get) => ({
         get().updateUploadingMessageKey(messageTempId, data.id, {
           ...data,
           temp_id: null,
-          uploading_status: MessageStatus.UPLOADING,
+          upload_status: MessageStatus.UPLOADING,
           media,
         });
 
-        // // // May in this step the user already submited the draft
         // if (currentDraft?.temp_id === messageTempId) {
-        //   set((state) => ({
-        //     currentDraft: {
-        //       ...state.currentDraft,
-        //       uploading_status: MessageStatus.UPLOADING,
-        //       id: data.id,
-        //       temp_id: null,
-        //     },
-        //   }));
+        //   // console.log('currentDraft', currentDraft);
+        //   // console.log('data', data);
+        //   get().setCurrentDraft({
+        //     ...currentDraft,
+        //     ...data,
+        //     id: data.id,
+        //     // temp_id: null,
+        //     upload_status: MessageStatus.UPLOADING,
+        //     media,
+        //   });
         // }
+
+        const messageExisting = get().messages.find(
+          (msg) => msg.temp_id === messageTempId
+        );
+        if (messageExisting) {
+          get().updateMessageDraft(messageTempId, {
+            ...data,
+            // temp_id: null,
+            upload_status: MessageStatus.UPLOADING,
+            media,
+          });
+        }
 
         if (media && media.length) {
           // If the media not in the draft, but exist in the messsage so we need to add it to a separate uploading message
@@ -259,10 +325,9 @@ const useMessageStore = create((set, get) => ({
         get().updateFileInUploadingMessage(messageId, fileTempId, {
           ...data.media,
           upload_status: MessageStatus.COMPLETED,
-          isUploading: false,
+          isUploading: true, // keep it true to make the imagePreview in mode upload
           upload_progress: 100,
         });
-        // TODO: update the message media content
       })
       .catch((error) => {
         console.error('Error uploading file:', error);
@@ -283,7 +348,7 @@ const useMessageStore = create((set, get) => ({
       temp_id: tempId,
       content: null,
       status: 'draft',
-      uploading_status: MessageStatus.PENDING,
+      upload_status: MessageStatus.PENDING,
       user,
       media: [],
       created_at: new Date().toISOString(),

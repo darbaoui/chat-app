@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 
-const TiptapEditorWrite = forwardRef(({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
+const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
 
 
     const [isLink, setIsLink] = useState(false);
@@ -36,21 +36,21 @@ const TiptapEditorWrite = forwardRef(({ users, placeholder, onChange, jsonConten
 
 
     useImperativeHandle(ref, () => ({
-    //   async addEmoji(emoji) {
-    //     const emojiUrl = emoji.emoji;
-    //     editor
-    //       .chain()
-    //       .focus()
-    //       .insertEmoji({
-    //         emoji: emojiUrl,
-    //         annotation: emojiUrl,
-    //         // url: 'https://zamma.com',
-    //       })
-    //       .run();
-    //     // .run();
-    //   },
-    //   setFocus,
-      setContent,
+        //   async addEmoji(emoji) {
+        //     const emojiUrl = emoji.emoji;
+        //     editor
+        //       .chain()
+        //       .focus()
+        //       .insertEmoji({
+        //         emoji: emojiUrl,
+        //         annotation: emojiUrl,
+        //         // url: 'https://zamma.com',
+        //       })
+        //       .run();
+        //     // .run();
+        //   },
+        //   setFocus,
+        setContent,
     }));
 
     const editor = useEditor(
@@ -144,6 +144,10 @@ const TiptapEditorWrite = forwardRef(({ users, placeholder, onChange, jsonConten
                     showOnlyWhenEditable: true,
                 }),
             ],
+            editable,
+            // editorProps: {
+            //     editable: false,
+            // },
             onUpdate: ({ editor }) => {
                 const contentJSON = editor.getJSON();
                 const textContent = editor.state.doc?.textContent;
@@ -161,7 +165,7 @@ const TiptapEditorWrite = forwardRef(({ users, placeholder, onChange, jsonConten
 
 
     const setContent = (content) => {
-      editor.commands.setContent(content);
+        editor.commands.setContent(content);
     };
 
     useEffect(() => {

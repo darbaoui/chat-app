@@ -75,7 +75,7 @@ const MessageInput = () => {
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // console.log('currentDraft --->', currentDraft);
+  console.log('currentDraft --->', currentDraft);
   // console.log('messages --->', messages);
 
   const wrapperRef = useRef(null);
@@ -94,12 +94,12 @@ const MessageInput = () => {
   }, [createDraft, currentDraft]);
 
 
-  useEffect(() => {
-    if (isSubmitting || hasNoText) return;
-    if (!hasNoText && !currentDraft?.id && content) {
-      ensureDraftExists();
-    }
-  }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
+  // useEffect(() => {
+  //   if (isSubmitting || hasNoText) return;
+  //   if (!hasNoText && !currentDraft?.id && content) {
+  //     ensureDraftExists();
+  //   }
+  // }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
 
 
   const readAndPreviewFile = useCallback(async (selectedFiles) => {
@@ -210,7 +210,7 @@ const MessageInput = () => {
     try {
       // Await the submission to ensure the draft is processed before we
       // clear the UI and change state. This prevents the race condition.
-      await submitMessage(content ? { ...content } : null);
+      await submitMessage(content);
     } catch (error) {
       console.error("Failed to submit message:", error);
       // Optionally handle submission errors here, e.g., show a toast
@@ -336,7 +336,7 @@ const MessageInput = () => {
 
   // Used to track media uploading
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
-  console.log('uploadingMessages --->', uploadingMessages, currentDraft);
+  // console.log('uploadingMessages --->', uploadingMessages, currentDraft);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
 
   useOnClickOutside(wrapperRef, () => {
@@ -547,6 +547,7 @@ const MessageInput = () => {
                   )}
                   <TiptapEditorWrite
                     ref={editorRef}
+                    editable={true}
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}
                     placeholder="Type your message..."

@@ -3,20 +3,22 @@ import useMessageStore from "@/stores/MessageStore";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TiptapEditorRead from "../Editor/TiptapEditorRead";
 import { axios } from "@/lib/axios";
+import Message from "./Message";
+import { MessageStatus } from "@/constants";
 
 const TiptapEditorReadWrapper = ({ message }) => {
 
     const { updateMessageContent } = useMessageStore()
-    const isUploading = message?.isUploading
+    const needToUpload = message?.upload_status === MessageStatus.UPLOADING
+    const isPending = message?.upload_status === MessageStatus.PENDING
     const text = message?.content;
     const uploadInProgress = useRef(false);
-
 
     const [loading, setLoading] = useState(false)
 
     const uploadMessage = useCallback(() => {
 
-        if (uploadInProgress.current) return
+        if (uploadInProgress.current || !message?.id) return
 
         uploadInProgress.current = true;
         setLoading(true);
@@ -25,27 +27,28 @@ const TiptapEditorReadWrapper = ({ message }) => {
             content: JSON.stringify(message.content)
         })
             .then(({ data }) => {
-                updateMessageContent(message.id, { content: text, isUploading: false })
+                updateMessageContent(message.id, { upload_status: MessageStatus.COMPLETED })
             })
             .catch((error) => {
                 console.error("Text message upload failed:", error);
             })
             .finally(() => {
-                uploadInProgress.current = false
+                // uploadInProgress.current = false
                 setLoading(false);
             });
     }, [message, updateMessageContent]);
 
 
     useEffect(() => {
-        if (message?.id && isUploading) {
+        if (message?.id && needToUpload) {
             uploadMessage();
         }
-    }, [message, isUploading, uploadMessage]);
+    }, [message, needToUpload, uploadMessage]);
 
-    return <div className="relative">
-        <TiptapEditorRead jsonContent={text} className={cn(isUploading && 'text-description')} />
-    </div>
+    return (
+
+        <TiptapEditorRead jsonContent={text} className={cn((needToUpload || isPending) && 'text-description')} />
+    )
 
 }
 
