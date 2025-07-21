@@ -230,7 +230,6 @@ const useMessageStore = create((set, get) => ({
           return;
         }
 
-        // TODO updat the key and media items as well
         const media = get()
           .uploadingMessages.get(messageTempId)
           ?.media.map((mediaItem) => ({
@@ -247,18 +246,16 @@ const useMessageStore = create((set, get) => ({
           media,
         });
 
-        // if (currentDraft?.temp_id === messageTempId) {
-        //   // console.log('currentDraft', currentDraft);
-        //   // console.log('data', data);
-        //   get().setCurrentDraft({
-        //     ...currentDraft,
-        //     ...data,
-        //     id: data.id,
-        //     // temp_id: null,
-        //     upload_status: MessageStatus.UPLOADING,
-        //     media,
-        //   });
-        // }
+        if (currentDraft?.temp_id === messageTempId) {
+          get().setCurrentDraft({
+            ...currentDraft,
+            ...data,
+            id: data.id,
+            temp_id: null,
+            upload_status: MessageStatus.UPLOADING,
+            media,
+          });
+        }
 
         const messageExisting = get().messages.find(
           (msg) => msg.temp_id === messageTempId
@@ -266,7 +263,7 @@ const useMessageStore = create((set, get) => ({
         if (messageExisting) {
           get().updateMessageDraft(messageTempId, {
             ...data,
-            // temp_id: null,
+            temp_id: null,
             upload_status: MessageStatus.UPLOADING,
             media,
           });
