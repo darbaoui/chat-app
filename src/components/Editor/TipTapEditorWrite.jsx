@@ -16,7 +16,7 @@ import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
-import { BubbleMenu, EditorContent, PureEditorContent, useEditor } from '@tiptap/react';
+import { BubbleMenu, EditorContent, isNodeSelection, PureEditorContent, useEditor } from '@tiptap/react';
 import mentionHandler from './suggestion';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { EmojiNode } from './CustomEmojiExtension';
@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 
-const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
+const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, emojiToAdd, setEmojiToAdd, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
 
 
     const [isLink, setIsLink] = useState(false);
@@ -36,23 +36,57 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
 
 
     useImperativeHandle(ref, () => ({
-        async addEmoji(emoji) {
-            const emojiUrl = emoji.emoji;
-            console.log('im here !!!')
-            editor
-                .chain()
-                .focus()
-                .insertEmoji({
-                    emoji: emojiUrl,
-                    annotation: emojiUrl,
-                    // url: 'https://zamma.com',
-                })
-                .run();
-            // .run();
-        },
+        // addEmoji(emoji) {
+        //     console.log('im here !!!')
+        //     const emojiUrl = emoji.emoji;
+        //     editor
+        //         .chain()
+        //         .focus()
+        //         .insertEmoji({
+        //             emoji: emojiUrl,
+        //             annotation: emojiUrl,
+        //             // url: 'https://zamma.com',
+        //         })
+        //         .run();
+        //     // .run();
+        // },
         //   setFocus,
         setContent,
     }));
+
+    const getCleanedJSON = (json) => {
+        if (!json?.content) {
+            return json;
+        }
+
+        const newJson = JSON.parse(JSON.stringify(json));
+
+        newJson.content = newJson.content.map(pNode => {
+            if (pNode.type !== 'paragraph' || !pNode.content) {
+                return pNode;
+            }
+
+            const visibleNodes = pNode.content.filter(child => {
+                if (child.type === 'text' && child.text.trim().length === 0) {
+                    return false;
+                }
+                return true;
+            });
+
+            // V-- THIS LOGIC IS UPDATED --V
+            // Check if there's at least one visible node AND if every visible node is an emoji.
+            const allVisibleAreEmojis = visibleNodes.length > 0 && visibleNodes.every(node => node.type === 'emoji');
+
+            if (allVisibleAreEmojis) {
+                // Rebuild the paragraph's content with ALL the visible emoji nodes.
+                pNode.content = visibleNodes;
+            }
+
+            return pNode;
+        });
+
+        return newJson;
+    };
 
     const editor = useEditor(
         {
@@ -146,17 +180,16 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
                 }),
             ],
             editable,
-            // editorProps: {
-            //     editable: false,
-            // },
             onUpdate: ({ editor }) => {
-                const contentJSON = editor.getJSON();
-                const textContent = editor.state.doc?.textContent;
-                setNoText(textContent === '');
+
                 if (editor.isEmpty) {
+                    setNoText(true);
                     onChange(null);
                 } else {
-                    onChange(contentJSON);
+                    setNoText(false);
+                    const rawJSON = editor.getJSON();
+                    const cleanedJSON = getCleanedJSON(rawJSON);
+                    onChange(cleanedJSON);
                 }
             },
             content: jsonContent,
@@ -165,9 +198,28 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
     );
 
 
+
     const setContent = (content) => {
         editor.commands.setContent(content);
     };
+
+    useEffect(() => {
+        if (!editor) return;
+        const emojiUrl = emojiToAdd?.emoji;
+        if (emojiUrl) {
+
+            editor
+                .chain()
+                .focus()
+                .insertEmoji({
+                    emoji: emojiUrl,
+                    annotation: emojiUrl,
+                    // url: 'https://zamma.com',
+                })
+                .run();
+            setEmojiToAdd(null);
+        }
+    }, [editor, setEmojiToAdd, emojiToAdd])
 
     useEffect(() => {
         if (!editor) return;

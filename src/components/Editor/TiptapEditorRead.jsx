@@ -3,16 +3,16 @@ import StarterKit from '@tiptap/starter-kit';
 import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { cn } from '@/lib/utils';
-
+import { EmojiNode } from './CustomEmojiExtension';
 // Renders Tiptap JSON content to React elements
-const TiptapEditorRead =({ jsonContent, className }) => {
+const TiptapEditorRead = ({ jsonContent, className }) => {
   if (!jsonContent || !jsonContent.content) {
     return null;
   }
 
-   const editor = useEditor(
+  const editor = useEditor(
     {
-      extensions: [StarterKit],
+      extensions: [StarterKit, EmojiNode,],
       content: jsonContent,
       editable: false,
       immediatelyRender: false, // This helps prevent hydration errors in SSR environments like Next.js

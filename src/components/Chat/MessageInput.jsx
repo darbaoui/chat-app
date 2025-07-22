@@ -74,6 +74,7 @@ const MessageInput = () => {
   // const [filePreviews, setFilePreviews] = useState([]);
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emojiToAdd, setEmojiToAdd] = useState(null);
 
   // console.log('messages --->', messages);
 
@@ -92,13 +93,6 @@ const MessageInput = () => {
     return currentDraft;
   }, [createDraft, currentDraft]);
 
-
-  // useEffect(() => {
-  //   if (isSubmitting || hasNoText) return;
-  //   if (!hasNoText && !currentDraft?.id && content) {
-  //     ensureDraftExists();
-  //   }
-  // }, [hasNoText, currentDraft, ensureDraftExists, isSubmitting, content]);
 
 
   const readAndPreviewFile = useCallback(async (selectedFiles) => {
@@ -348,10 +342,7 @@ const MessageInput = () => {
   const handleEmojiSelect = (emoji) => {
     setIsDropDownOpen(false);
     handleExpand()
-
-    //TODO: before addEmoji i need to make sure the editor mounted and has a ref
-    editorRef.current.addEmoji(emoji)
-
+    setEmojiToAdd(emoji)
   }
 
   return (
@@ -454,7 +445,9 @@ const MessageInput = () => {
                           variant="ghost"
                           size="sm"
                           className="!w-10 !h-7.5 text-2xl hover:scale-110 transition-transform"
-                          onClick={() => alert(`You reacted with ${emoji}`)}
+                          onClick={() => handleEmojiSelect({
+                            emoji
+                          })}
                         >
                           {emoji}
                         </Button>
@@ -564,6 +557,8 @@ const MessageInput = () => {
                   )}
                   <TiptapEditorWrite
                     ref={editorRef}
+                    emojiToAdd={emojiToAdd}
+                    setEmojiToAdd={setEmojiToAdd}
                     editable={true}
                     setNoText={setHasNoText}
                     onChange={(data) => setNewMessage(data)}

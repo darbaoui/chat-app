@@ -12,7 +12,7 @@
     /* Zamma colors */
     --chat-box-color: #ECECEE;
     --chat-box-me: #DCF0FE;
-    --chat-box-me-foreground: #0c4a6eb3;
+    --chat-box-me-foreground: #0c4a6e;
     --chat-background: #FAFAFA;
     --chat-separator: #71717A;
 
@@ -359,6 +359,15 @@
   overflow-wrap: break-word;
 }
 
+.ProseMirror p.is-emoji-only .emoji {
+  /* font-size: 3rem; */
+
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%; 
+}
+
 .emoji-with-text .ProseMirror span.emoji:first-of-type {
   font-size: 1rem;
   line-height: 1;
@@ -367,6 +376,7 @@
 .emoji-without-text .ProseMirror span.emoji {
   font-size: 2rem;
   line-height: 1;
+
 }
 
 
