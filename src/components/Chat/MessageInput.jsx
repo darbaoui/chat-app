@@ -149,7 +149,7 @@ const MessageInput = () => {
           reader.readAsDataURL(file);
         } else if (file.type.startsWith('text/')) {
           reader.readAsText(file);
-        } else if (file.type === 'application/') {
+        } else if (file.type === 'application/pdf') {
           // Don't read PDF content, just store the file reference
           resolve({
             file,

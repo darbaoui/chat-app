@@ -85,7 +85,7 @@ const useMessageStore = create((set, get) => ({
 
         const tempId = crypto.randomUUID();
         const newDraft = {
-          // id: response.data.id,
+          id: null,
           temp_id: tempId,
           content,
           status: 'draft',
@@ -335,7 +335,7 @@ const useMessageStore = create((set, get) => ({
     // create a new message width a unique ID
     const tempId = crypto.randomUUID();
     const draft = {
-      // id: response.data.id,
+      id: null,
       temp_id: tempId,
       content: null,
       status: 'draft',

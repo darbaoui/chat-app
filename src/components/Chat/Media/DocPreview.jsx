@@ -17,7 +17,7 @@ const DocPreview = ({ file }) => {
         }
         const { temp_id, message_id, message_temp_id } = file;
         const message = uploadingMessages.get(message_id || message_temp_id);
-        const fileUploading = message?.media?.find(file => file.temp_id === temp_id);
+        const fileUploading = message?.media?.find(f => f.temp_id === temp_id);
         return fileUploading;
     }, [uploadingMessages]);
 
@@ -25,7 +25,7 @@ const DocPreview = ({ file }) => {
     const uploadProgress = fileUploading?.upload_progress ?? 0;
     const uploadStatus = fileUploading?.upload_status;
     const isUploadingFromLocal = file?.isUploading;
-    const fileToDisplay = isUploadingFromLocal ? fileUploading : file;
+    const fileToDisplay = isUploadingFromLocal ? fileUploading : file || file;
     const { content, preview_url, name } = fileToDisplay;
 
     const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED

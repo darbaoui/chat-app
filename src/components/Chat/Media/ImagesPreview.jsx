@@ -147,7 +147,7 @@ const ImagesPreview = ({ images }) => {
     // const isPending = imageUploading.upload_status === MessageStatus.PENDING;
     const isUploadingFromLocal = imageData?.isUploading;
 
-    const image = isUploadingFromLocal ? imageUploading : imageData;
+    const image = isUploadingFromLocal ? imageUploading : imageData || imageData;
 
     return <SingleImageDisplay
       image={image}
@@ -163,7 +163,7 @@ const ImagesPreview = ({ images }) => {
     const imageUploading = getUploadMediaData(imageData);
     const isUploadingFromLocal = imageData?.isUploading;
     const uploadProgress = imageUploading?.upload_progress ?? 0;
-    const image = isUploadingFromLocal ? imageUploading : imageData;
+    const image = isUploadingFromLocal ? imageUploading : imageData || imageData;
     return <GridImageDisplay
       image={image}
       uploadStatus={imageUploading?.upload_status}
