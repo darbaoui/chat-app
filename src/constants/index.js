@@ -71,6 +71,25 @@ export const AUDIO_WAVEFORM_OPRIONS = {
   waveMaxWidth: smScreenWidth * 2,
 };
 
+export const TOTAL_MESSAGES = 2000;
+export const USERS = [
+  {
+    id: CURRENT_USER,
+    name: 'John Doe',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+  },
+  {
+    id: 'user_2',
+    name: 'Jane Smith',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+  },
+  {
+    id: 'user_3',
+    name: 'Alex Lee',
+    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+  },
+];
+
 export const IMAGE_URLS = [
   {
     url: 'https://audio-samples-zamma.s3.eu-west-3.amazonaws.com/images/chris-weiher-SL5dYCFCgeE-unsplash.jpg',

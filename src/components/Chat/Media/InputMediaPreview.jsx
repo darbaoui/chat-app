@@ -1,15 +1,30 @@
+'use client'
 import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
 import { FileText, LoaderCircle, X } from "lucide-react";
 import mime from 'mime-types';
+import { useEffect, useState } from 'react';
 
 const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
     const { currentDraft } = useMessageStore();
 
-    //TODO: add preview from local file 
-    const pdfUrl = URL.createObjectURL(file.file);
+    const [pdfUrl, setPdfUrl] = useState('');
+
+    useEffect(() => {
+        // Check if the file is a PDF and has a file object
+        if (file.file && file.mime_type === 'application/pdf') {
+            const url = URL.createObjectURL(file.file);
+            setPdfUrl(url);
+
+            return () => {
+                URL.revokeObjectURL(url);
+            };
+        } else {
+            setPdfUrl('');
+        }
+    }, [file.file, file.mime_type]);
 
     return (
         <div
@@ -41,21 +56,32 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
             }
             {
                 file.mime_type.startsWith('application/') && (
-                    // <object
-                    //     data={pdfUrl}
-                    //     type="application/pdf"
-                    //     className="w-full h-12 object-cover rounded-md overflow-hidden"
-
-                    // >
-                    <div className="w-full h-12 bg-background flex items-center justify-center rounded-lg">
-                        <div className="flex items-center flex-col mt-1">
-                            <FileText className="w-4 h-4 text-gray-500" />
-                            <span className="text-10 font-bold uppercase text-chatBoxMe-foreground">
-                                {mime.extension(file.mime_type)}
-                            </span>
+                    file.mime_type === 'application/pdf' && pdfUrl ? (
+                        <object
+                            data={pdfUrl}
+                            type="application/pdf"
+                            className="w-full h-12 object-cover rounded-md overflow-hidden"
+                        >
+                            {/* Fallback for browsers that don't support <object> or PDF viewing */}
+                            <div className="w-full h-12 bg-background flex items-center justify-center rounded-lg">
+                                <div className="flex items-center flex-col mt-1">
+                                    <FileText className="w-4 h-4 text-gray-500" />
+                                    <span className="text-10 font-bold uppercase text-chatBoxMe-foreground">
+                                        {mime.extension(file.mime_type)}
+                                    </span>
+                                </div>
+                            </div>
+                        </object>
+                    ) : (
+                        <div className="w-full h-12 bg-background flex items-center justify-center rounded-lg">
+                            <div className="flex items-center flex-col mt-1">
+                                <FileText className="w-4 h-4 text-gray-500" />
+                                <span className="text-10 font-bold uppercase text-chatBoxMe-foreground">
+                                    {mime.extension(file.mime_type)}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    // </object>
+                    )
                 )
             }
 

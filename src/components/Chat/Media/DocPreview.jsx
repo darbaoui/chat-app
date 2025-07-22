@@ -25,7 +25,7 @@ const DocPreview = ({ file }) => {
     const uploadProgress = fileUploading?.upload_progress ?? 0;
     const uploadStatus = fileUploading?.upload_status;
     const isUploadingFromLocal = file?.isUploading;
-    const fileToDisplay = isUploadingFromLocal ? fileUploading : file || file;
+    const fileToDisplay = isUploadingFromLocal ? fileUploading : file;
     if (!fileToDisplay) {
         return null; // Or some fallback UI
     }

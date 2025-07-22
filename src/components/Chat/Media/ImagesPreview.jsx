@@ -148,7 +148,9 @@ const ImagesPreview = ({ images }) => {
     const isUploadingFromLocal = imageData?.isUploading;
 
     const image = isUploadingFromLocal ? imageUploading : imageData;
-
+    if (!image) {
+      return null;
+    }
     return <SingleImageDisplay
       image={image}
       uploadStatus={imageUploading?.upload_status}
@@ -164,6 +166,9 @@ const ImagesPreview = ({ images }) => {
     const isUploadingFromLocal = imageData?.isUploading;
     const uploadProgress = imageUploading?.upload_progress ?? 0;
     const image = isUploadingFromLocal ? imageUploading : imageData;
+    if (!image) {
+      return null;
+    }
     return <GridImageDisplay
       image={image}
       uploadStatus={imageUploading?.upload_status}
