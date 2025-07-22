@@ -334,7 +334,7 @@ const MessageInput = () => {
 
   // Used to track media uploading
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
-  console.log('currentUploadingMessage --->', currentUploadingMessage);
+  // console.log('currentUploadingMessage --->', currentUploadingMessage);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
 
   useOnClickOutside(wrapperRef, () => {

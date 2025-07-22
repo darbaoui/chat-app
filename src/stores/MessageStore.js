@@ -345,7 +345,7 @@ const useMessageStore = create((set, get) => ({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    set((state) => ({
+    set(() => ({
       currentDraft: draft,
     }));
     get().createUploadingMessage(tempId, draft);
@@ -384,7 +384,7 @@ const useMessageStore = create((set, get) => ({
         data: { media_id: mediaId },
       });
     } catch (error) {
-      set({ error: 'Failed to delete file' });
+      set({ error: `Failed to delete file ${error}` });
     }
   },
 }));

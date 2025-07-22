@@ -26,6 +26,9 @@ const DocPreview = ({ file }) => {
     const uploadStatus = fileUploading?.upload_status;
     const isUploadingFromLocal = file?.isUploading;
     const fileToDisplay = isUploadingFromLocal ? fileUploading : file || file;
+    if (!fileToDisplay) {
+        return null; // Or some fallback UI
+    }
     const { content, preview_url, name } = fileToDisplay;
 
     const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
