@@ -154,7 +154,7 @@
     --logo-white: #fff;
     --font-size-regular: 0.9375rem;
     --font-size-small: 0.8125rem;
-    --background: #fff;
+    --background: 255 255 255;
     --side_menu-background: #fbfbfb;
     --foreground: #020817;
     --title: #171717;
@@ -233,7 +233,7 @@
     --github-color: #ffffff;
     --logo-black: #fff;
     --logo-white: #171717;
-    --background: #09090B;
+    --background: 9 9 11;
     --side_menu-background: #232529;
     --foreground: #E4E4E7;
     --title: #eaeaea;

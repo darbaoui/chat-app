@@ -2,11 +2,14 @@ import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
-import { LoaderCircle, X } from "lucide-react";
+import { FileText, LoaderCircle, X } from "lucide-react";
+import mime from 'mime-types';
 
 const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
     const { currentDraft } = useMessageStore();
-    // const media = currentUploadingMessage?.media.find((m) => m.temp_id === file.temp_id || m.id === file.id);
+
+    //TODO: add preview from local file 
+    const pdfUrl = URL.createObjectURL(file.file);
 
     return (
         <div
@@ -16,9 +19,9 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
 
             {(file?.upload_status === MessageStatus.UPLOADING && file?.upload_progress < 100) && (
 
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
-                    <div className="w-6 h-6 rounded-full bg-background flex items-center justify-center">
-                        <ProgressCircle progressValue={file?.upload_progress >= 95 ? 95 : file?.upload_progress} progressColor="text-black/50" size={20} />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-background z-[2] rounded-md">
+                    <div className="w-6 h-6 rounded-full bg-background/70  flex items-center justify-center">
+                        <ProgressCircle progressValue={file?.upload_progress >= 95 ? 95 : file?.upload_progress} progressColor="text-black/70" size={20} />
                     </div>
                 </div>
             )}
@@ -37,8 +40,29 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
                 )
             }
             {
+                file.mime_type.startsWith('application/') && (
+                    // <object
+                    //     data={pdfUrl}
+                    //     type="application/pdf"
+                    //     className="w-full h-12 object-cover rounded-md overflow-hidden"
+
+                    // >
+                    <div className="w-full h-12 bg-background flex items-center justify-center rounded-lg">
+                        <div className="flex items-center flex-col mt-1">
+                            <FileText className="w-4 h-4 text-gray-500" />
+                            <span className="text-10 font-bold uppercase text-chatBoxMe-foreground">
+                                {mime.extension(file.mime_type)}
+                            </span>
+                        </div>
+                    </div>
+                    // </object>
+                )
+            }
+
+            {
                 file.mime_type.startsWith('text/') && (
                     <div
+                        src={file.content}
                         className="max-w-full h-12 object-cover rounded"
                     >
                         {file.content}

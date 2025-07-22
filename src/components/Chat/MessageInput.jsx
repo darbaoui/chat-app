@@ -101,9 +101,8 @@ const MessageInput = () => {
 
 
   const readAndPreviewFile = useCallback(async (selectedFiles) => {
-
     const filesArray = Array.from(selectedFiles);
-    const draft = await ensureDraftExists(); // Ensure a draft exists for file uploads
+    const draft = await ensureDraftExists();
 
     if (!draft) {
       console.error("Could not create or retrieve a draft message.");
@@ -114,7 +113,6 @@ const MessageInput = () => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
-        // Handle successful file reading
         reader.onload = () => {
           const commonData = {
             file,
@@ -124,11 +122,9 @@ const MessageInput = () => {
             content: reader.result,
           };
 
-          // If it's an image, get its dimensions
           if (file.type.startsWith('image/')) {
             const img = new Image();
             img.onload = () => {
-              // Resolve with all data, including dimensions
               resolve({
                 ...commonData,
                 dimensions: {
@@ -138,32 +134,38 @@ const MessageInput = () => {
               });
             };
             img.onerror = () => {
-              // If the image can't be loaded, resolve without dimensions
               resolve({ ...commonData, dimensions: null });
             };
-            img.src = reader.result; // This triggers img.onload or img.onerror
+            img.src = reader.result;
           } else {
-            // For non-image files, resolve immediately
             resolve(commonData);
           }
         };
 
-        // Handle file reading errors
         reader.onerror = (error) => reject(error);
 
-        // --- Start reading the file based on its type ---
+        // Handle different file types
         if (file.type.startsWith('image/')) {
-          reader.readAsDataURL(file); // For images and previews
+          reader.readAsDataURL(file);
         } else if (file.type.startsWith('text/')) {
-          reader.readAsText(file); // For text files
-        } else {
-          // For unsupported types, resolve with basic info and no content
+          reader.readAsText(file);
+        } else if (file.type === 'application/') {
+          // Don't read PDF content, just store the file reference
           resolve({
             file,
             name: file.name,
             type: file.type,
             size: file.size,
-            content: null, // No preview available
+            dimensions: null,
+          });
+        } else {
+          // For other unsupported types
+          resolve({
+            file,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            content: null,
             dimensions: null,
           });
         }
@@ -172,11 +174,9 @@ const MessageInput = () => {
 
     Promise.all(fileProcessingPromises).then(async (processedFilePreviews) => {
       processedFilePreviews.forEach((filePreview) => {
-        displayFileInUI(filePreview.file, filePreview, draft); // Upload each file via Zustand
+        displayFileInUI(filePreview.file, filePreview, draft);
       });
-      // const currentDraft = await createDraft(draft?.id)
-      // uploadFiles(currentDraft)
-      clearDroppedFiles(); // Clear the dropped files state if applicable
+      clearDroppedFiles();
     });
   }, [ensureDraftExists, clearDroppedFiles]);
 
@@ -334,7 +334,7 @@ const MessageInput = () => {
 
   // Used to track media uploading
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
-  // console.log('uploadingMessages --->', uploadingMessages, currentDraft);
+  console.log('currentUploadingMessage --->', currentUploadingMessage);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
 
   useOnClickOutside(wrapperRef, () => {
