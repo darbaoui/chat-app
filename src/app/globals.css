@@ -299,6 +299,29 @@
 
 
 
+.EmojiPickerReact {
+  --epr-emoji-size: 24px !important;
+  --epr-category-navigation-button-size: 24px !important;
+  --epr-horizontal-padding: 6px !important;
+  --epr-header-padding: 8px var(--epr-horizontal-padding) !important;
+  --epr-category-label-text-color: var(--foreground) !important;
+  --epr-category-label-bg-color: var(--popover) !important;
+  --epr-search-input-bg-color: var(--accent) !important;
+  --epr-search-input-height: 32px !important;
+  --epr-search-border-color: var(--primary) !important;
+
+  --epr-dark-search-input-bg-color-active: var(--background) !important;
+  --epr-dark-category-icon-active-color: var(--primary) !important;
+}
+
+.EmojiPickerReact h2 {
+  @apply !text-exs;
+}
+
+.EmojiPickerReact input {
+  @apply !text-xs;
+}
+
 .ProseMirror {
   word-wrap: break-word;
   white-space: pre-wrap;

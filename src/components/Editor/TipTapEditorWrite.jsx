@@ -36,19 +36,20 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
 
 
     useImperativeHandle(ref, () => ({
-        //   async addEmoji(emoji) {
-        //     const emojiUrl = emoji.emoji;
-        //     editor
-        //       .chain()
-        //       .focus()
-        //       .insertEmoji({
-        //         emoji: emojiUrl,
-        //         annotation: emojiUrl,
-        //         // url: 'https://zamma.com',
-        //       })
-        //       .run();
-        //     // .run();
-        //   },
+        async addEmoji(emoji) {
+            const emojiUrl = emoji.emoji;
+            console.log('im here !!!')
+            editor
+                .chain()
+                .focus()
+                .insertEmoji({
+                    emoji: emojiUrl,
+                    annotation: emojiUrl,
+                    // url: 'https://zamma.com',
+                })
+                .run();
+            // .run();
+        },
         //   setFocus,
         setContent,
     }));
