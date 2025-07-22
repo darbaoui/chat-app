@@ -352,7 +352,6 @@ const useMessageStore = create((set, get) => ({
     get().syncDraftWithServer(tempId);
     return draft;
   },
-  // TODO: implement this function
   deleteFile: async (mediaId, messageId) => {
     set((state) => {
       const newMap = new Map(state.uploadingMessages);
@@ -366,7 +365,6 @@ const useMessageStore = create((set, get) => ({
         });
       }
 
-      //TODO: remove the file from the current draft media array
       const newCurrentDraft = state.currentDraft;
       if (newCurrentDraft) {
         const updatedMedia = newCurrentDraft.media.filter(

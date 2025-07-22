@@ -241,13 +241,13 @@ const MessageInput = () => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.pauseRecord();
     }
-  }, [audioRecorderRef]);
+  }, []);
 
   const handleResumeRecord = useCallback(() => {
     if (audioRecorderRef.current) {
       audioRecorderRef.current.resumeRecord();
     }
-  }, [audioRecorderRef]);
+  }, []);
 
   const handleStartRecording = (e) => {
     setIsRecording(true);

@@ -3,7 +3,6 @@ import useMessageStore from "@/stores/MessageStore";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TiptapEditorRead from "../Editor/TiptapEditorRead";
 import { axios } from "@/lib/axios";
-import Message from "./Message";
 import { MessageStatus } from "@/constants";
 
 const TiptapEditorReadWrapper = ({ message }) => {
