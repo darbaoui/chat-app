@@ -1,8 +1,9 @@
 import useSWR from 'swr';
-import { axios } from '@/lib/axios';
+import axios from '@/lib/axios';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import userStore from '@/stores/useStore';
 // Token management utilities
 const getToken = () => {
   if (typeof window !== 'undefined') {
@@ -36,9 +37,9 @@ if (typeof window !== 'undefined') {
 
 export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
   const router = useRouter();
-
+  const { setUser } = userStore();
   // Fetcher function that handles token authentication
-  const fetcher = (url) => {
+  const fetcher = async (url) => {
     // const token = getToken();
     // if (!token) {
     //   throw new Error('No token available');
@@ -92,6 +93,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
       // Store the token from response
       if (response.data.token) {
         setToken(response.data.token);
+        setUser(response.data.user);
         revalidate();
         router.push('/');
       } else {
@@ -126,8 +128,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
         console.error('Logout API call failed:', error);
       }
     }
-
     // Always remove token and redirect
+    setUser(null);
     removeToken();
     revalidate();
     window.location.pathname = '/login';
@@ -139,6 +141,10 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
     }
     if (middleware === 'auth' && (error || !getToken())) {
       logout();
+    }
+
+    if (user) {
+      setUser(user);
     }
   }, [user, error]);
 

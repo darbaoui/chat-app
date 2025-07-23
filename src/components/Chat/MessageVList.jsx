@@ -11,10 +11,9 @@ import { VList } from "@/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
-import { axios } from "@/lib/axios";
+import axios from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
-import { faker } from "@faker-js/faker";
-import { CURRENT_USER } from "@/constants";
+import userStore from "@/stores/useStore";
 const LIMIT = 50;
 
 
@@ -27,11 +26,11 @@ const getKey = (pageIndex, previousPageData) => {
   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
 };
 
-export const StickyIndexContext = createContext(-1);
+export const ChatContext = createContext(-1);
 
 const StickyItem = forwardRef(
   ({ children, style, index }, ref) => {
-    const { activeIndex, stickyIndexes } = useContext(StickyIndexContext);
+    const { activeIndex, stickyIndexes } = useContext(ChatContext);
     return (
       <div
         ref={ref}
@@ -58,6 +57,8 @@ const StickyItem = forwardRef(
 StickyItem.displayName = 'StickyItem';
 
 const MessageVList = () => {
+
+
   const { data, error, size, setSize, isLoading, isValidating } =
     useSWRInfinite(getKey, fetcher, {
       revalidateFirstPage: false,
@@ -68,7 +69,8 @@ const MessageVList = () => {
     });
 
 
-  const { addMessage, messages, setMessages, shouldScrollToBottom } = useMessageStore();
+  const { messages, setMessages, shouldScrollToBottom } = useMessageStore();
+  const { user: authUser } = userStore();
 
   useEffect(() => {
     if (data) {
@@ -191,7 +193,7 @@ const MessageVList = () => {
 
   return (
     <>
-      <StickyIndexContext.Provider value={{ activeIndex: activeIndex, stickyIndexes: dateIndexesSet }}>
+      <ChatContext.Provider value={{ authUser, activeIndex: activeIndex, stickyIndexes: dateIndexesSet }}>
 
 
         <div className="flex flex-col h-full w-full relative">
@@ -243,7 +245,7 @@ const MessageVList = () => {
 
           <MessageInput />
         </div>
-      </StickyIndexContext.Provider>
+      </ChatContext.Provider>
     </>
   );
 };

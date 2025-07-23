@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { useFileDrop } from "@/hooks/useFileDrop";
 import InputMediaPreview from "./Media/InputMediaPreview";
 import { DefaultEmojis, EmojiPicker } from "@/components/ui/EmojiPicker";
+import userStore from "@/stores/useStore";
 
 
 
@@ -39,6 +40,8 @@ const editorVariants = {
 };
 
 const MessageInput = () => {
+
+  const { user: authUser } = userStore();
 
   const {
     error,
@@ -87,7 +90,7 @@ const MessageInput = () => {
 
   const ensureDraftExists = useCallback(async () => {
     if (!currentDraft?.id) {
-      return createDraft({ id: CURRENT_USER, name: 'Current User', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' }); // TODO: this user object should be updated by the auth user
+      return createDraft(authUser);
     }
 
     return currentDraft;
@@ -300,12 +303,7 @@ const MessageInput = () => {
         }
       ],
       content: null,
-      user: {
-        id: CURRENT_USER,
-        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        email: "faye59@example.net",
-        name: "Alexzander Wiza"
-      }
+      user: authUser
     }
 
 

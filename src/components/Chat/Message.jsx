@@ -1,14 +1,17 @@
 import { BoxCorner } from "@/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, fromNow } from "@/lib/utils";
-import { CURRENT_USER } from "@/constants";
 import MessageContent from "./MessageContent";
 import { memo } from "react";
+import userStore from "@/stores/useStore";
 
 
 const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
-  const isMe = user.id === CURRENT_USER;
+  const { user: authUser } = userStore();
+  const isMe = user.id === authUser?.id;
+
+
   const showAvatarAndName = prevMessage?.user?.id !== message.user?.id;
   const time = fromNow(created_at)
 

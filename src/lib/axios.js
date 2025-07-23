@@ -28,8 +28,4 @@ axios.interceptors.request.use(
   }
 );
 
-const initializeCsrf = async () => {
-  await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/sanctum/csrf-cookie`);
-};
-
-export { axios, initializeCsrf };
+export default axios;

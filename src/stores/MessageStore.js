@@ -1,6 +1,7 @@
 import { CURRENT_USER, MessageStatus } from '@/constants';
-import { axios } from '@/lib/axios';
+import axios from '@/lib/axios';
 import { create } from 'zustand';
+import userStore from './useStore';
 
 const useMessageStore = create((set, get) => ({
   messages: null,
@@ -82,7 +83,7 @@ const useMessageStore = create((set, get) => ({
         }
       } else {
         //While a user use only content without media
-
+        const currentAuthUser = userStore.getState().user;
         const tempId = crypto.randomUUID();
         const newDraft = {
           id: null,
@@ -90,10 +91,7 @@ const useMessageStore = create((set, get) => ({
           content,
           status: 'draft',
           upload_status: MessageStatus.PENDING,
-          user: {
-            id: CURRENT_USER,
-            name: 'Current User',
-          },
+          user: currentAuthUser,
           media: [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
