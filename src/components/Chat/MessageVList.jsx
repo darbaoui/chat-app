@@ -14,8 +14,8 @@ import MessageInput from "./MessageInput";
 import axios from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
 import userStore from "@/stores/useStore";
+import useEcho from '@/hooks/useEcho';
 const LIMIT = 50;
-
 
 
 const fetcher = (url) => axios.get(url).then(({ data }) => data);
@@ -71,6 +71,28 @@ const MessageVList = () => {
 
   const { messages, setMessages, shouldScrollToBottom } = useMessageStore();
   const { user: authUser } = userStore();
+
+
+
+  const echoInstance = useEcho();
+  useEffect(() => {
+    if (echoInstance && authUser?.id) {
+      echoInstance
+        .private(`chat.${authUser.id}`)
+        .listen('.message.created', (e) => {
+
+          console.log('e --->', e)
+
+        })
+        .listen('.message.updated', (e) => {
+
+        })
+        .listen('.message.deleted', (e) => {
+
+        })
+
+    }
+  }, [echoInstance, authUser]);
 
   useEffect(() => {
     if (data) {
