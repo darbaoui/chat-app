@@ -36,47 +36,17 @@ const Login = () => {
         }
     };
 
-    // const validateForm = () => {
-    //     const newErrors = {};
-
-    //     if (!formData.email) {
-    //         newErrors.email = 'Email is required';
-    //     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-    //         newErrors.email = 'Please enter a valid email';
-    //     }
-
-    //     if (!formData.password) {
-    //         newErrors.password = 'Password is required';
-    //     } else if (formData.password.length < 6) {
-    //         newErrors.password = 'Password must be at least 6 characters';
-    //     }
-
-    //     return newErrors;
-    // };
-
     const handleSubmit = async (e) => {
-        // const newErrors = validateForm();
-        // if (Object.keys(newErrors).length > 0) {
-        //     setErrors(newErrors);
-        //     return;
-        // }
+
 
         setIsLoading(true);
         setErrors({});
 
         try {
-            // Simulate API call
             await login({ ...formData, setErrors, });
-
-            // Here you would make your actual API call
-            console.log('Login attempt:', formData);
-
-            // Handle successful login
-            // alert('Login successful!');
         } catch (error) {
 
-            console.log('error --->', error)
-            // setErrors({ general: 'Login failed. Please try again.' });
+            console.error(error)
         } finally {
             setIsLoading(false);
         }
@@ -88,7 +58,6 @@ const Login = () => {
                 <Card className="shadow-none border-[0.5px] bg-white/80">
                     <CardHeader className="text-center">
                         <div className="mx-auto w-auto h-12  flex items-center justify-center mb-4">
-                            {/* <Lock className="w-6 h-6 text-white" /> */}
                             <Logo className="h-8 w-auto" />
                         </div>
                         <CardTitle className="text-3xl text-title font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text">

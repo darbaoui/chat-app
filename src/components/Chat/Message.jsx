@@ -2,13 +2,13 @@ import { BoxCorner } from "@/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, fromNow } from "@/lib/utils";
 import MessageContent from "./MessageContent";
-import { memo } from "react";
-import userStore from "@/stores/useStore";
+import { memo, useContext } from "react";
+import { ChatContext } from "./MessageVList";
 
 
 const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
-  const { user: authUser } = userStore();
+  const { authUser } = useContext(ChatContext);
   const isMe = user.id === authUser?.id;
 
 

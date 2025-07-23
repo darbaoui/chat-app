@@ -2,11 +2,10 @@ import { NextResponse } from 'next/server';
 
 export const AuthMiddleware = (next) => {
   return async (req, _next) => {
-    const unAuthenticateUrls = new RegExp('/(login)');
-    const openUrls = new RegExp('/(not-found|something-wrong)');
+    const unAuthenticateUrls = new RegExp('^/login/?$');
+    const openUrls = new RegExp('^/(not-found|something-wrong)/?$');
     const token = req.cookies.get('auth_token');
 
-    console.log('-----------', unAuthenticateUrls.test(req.url));
     if (openUrls.test(req.url)) {
       const pathname = req.nextUrl.pathname;
       console.log(pathname);
