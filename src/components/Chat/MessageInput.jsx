@@ -94,7 +94,7 @@ const MessageInput = () => {
     }
 
     return currentDraft;
-  }, [createDraft, currentDraft]);
+  }, [createDraft, currentDraft, authUser]);
 
 
 
@@ -176,7 +176,7 @@ const MessageInput = () => {
       });
       clearDroppedFiles();
     });
-  }, [ensureDraftExists, clearDroppedFiles]);
+  }, [ensureDraftExists, clearDroppedFiles, displayFileInUI]);
 
 
   const handleFileChange = async (e) => {
@@ -219,12 +219,13 @@ const MessageInput = () => {
     }
   };
 
-  const handleExpand = () => {
-    // e.stopPropagation();
+
+  const handleExpand = useCallback(() => {
+    // e.stopPropagation(); // Keep this commented if it's not needed
     if (!isRecording) {
       setIsExpanded(true);
     }
-  };
+  }, [isRecording]);
 
 
   useEffect(() => {

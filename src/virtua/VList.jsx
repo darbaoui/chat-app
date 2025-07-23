@@ -51,12 +51,13 @@ export const VList = forwardRef(
       element = (
         <div
           style={{
-            visibility: "hidden", // TODO replace with other optimization methods
+            // visibility: "hidden", // TODO replace with other optimization methods
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             minHeight: "100%",
             userSelect: "text",
+            overflowAnchor: "none"
           }}
         >
           {element}

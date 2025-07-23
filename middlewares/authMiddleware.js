@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
+const unAuthenticateUrls = /^\/login\/?$/;
+const openUrls = /^\/(not-found|something-wrong)\/?$/;
+
 export const AuthMiddleware = (next) => {
   return async (req, _next) => {
-    const unAuthenticateUrls = new RegExp('^/login/?$');
-    const openUrls = new RegExp('^/(not-found|something-wrong)/?$');
     const token = req.cookies.get('auth_token');
-
-    if (openUrls.test(req.url)) {
+    if (openUrls.test(req.nextUrl.pathname)) {
       const pathname = req.nextUrl.pathname;
       console.log(pathname);
       // return NextResponse.rewrite(new URL(

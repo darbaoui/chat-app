@@ -330,7 +330,6 @@
   font-variant-ligatures: none;
   font-feature-settings: 'liga' 0;
   position: relative;
-  /* color: var(--title-secondary); */
 }
 
 .ProseMirror:focus {
