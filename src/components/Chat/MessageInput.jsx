@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TiptapEditorWrite from "@/components/Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "@/components/Chat/Media/RecordAudio";
-import { CURRENT_USER } from "@/constants";
 import useMessageStore from "@/stores/MessageStore";
 import { getBarCount, scaleDataToFit } from "./helper";
 

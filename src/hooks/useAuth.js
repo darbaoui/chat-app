@@ -132,7 +132,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
     setUser(null);
     removeToken();
     revalidate();
-    window.location.pathname = '/login';
+    router.push('/login');
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { CURRENT_USER, MessageStatus } from '@/constants';
+import { MessageStatus } from '@/constants';
 import axios from '@/lib/axios';
 import { create } from 'zustand';
 import userStore from './useStore';

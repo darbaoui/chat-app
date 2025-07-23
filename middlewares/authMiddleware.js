@@ -14,7 +14,7 @@ export const AuthMiddleware = (next) => {
       //     req.url
       // ))
     } else {
-      if (unAuthenticateUrls.test(req.url)) {
+      if (unAuthenticateUrls.test(req.nextUrl.pathname)) {
         if (token) {
           const url = req.nextUrl.clone();
           url.pathname = `/`;
