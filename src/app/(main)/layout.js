@@ -3,9 +3,9 @@
 'use client'; // This is essential for using hooks like useAuth
 
 import BarTop from '@/components/BarTop';
+import { AuthAppContext } from '@/contexts/auth-context';
 import { useAuth } from '@/hooks/useAuth'; // Adjust the import path
-import { createContext } from 'react';
-export const AuthAppContext = createContext(null);
+
 export default function MainAppLayout({ children }) {
   const { user } = useAuth({ middleware: 'auth' });
 

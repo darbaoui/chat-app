@@ -283,14 +283,14 @@ const MessageInput = () => {
     const message_id = crypto.randomUUID();
     const message = {
       id: message_id,
-      tempId: message_id,
+      temp_id: message_id,
       isUploading: true,
       created_at: new Date(Date.now()).toISOString(),
       media: [
         {
           message_id,
           id: crypto.randomUUID(),
-          tempId: crypto.randomUUID(),
+          temp_id: crypto.randomUUID(),
           isUploading: true,
           file_name,
           file: audioBlob,

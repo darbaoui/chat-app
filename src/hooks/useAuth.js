@@ -100,7 +100,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
       }
     } catch (error) {
       if (error.response?.status === 422) {
-        setErrors(Object.values(error.response.data.errors).flat());
+        setErrors(error.response.data.errors);
       } else {
         throw error;
       }
