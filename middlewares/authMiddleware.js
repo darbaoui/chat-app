@@ -8,7 +8,7 @@ export const AuthMiddleware = (next) => {
     const token = req.cookies.get('auth_token');
     if (openUrls.test(req.nextUrl.pathname)) {
       const pathname = req.nextUrl.pathname;
-      console.log(pathname);
+      // console.log(pathname);
       // return NextResponse.rewrite(new URL(
       //     `/${pathname}`,
       //     req.url

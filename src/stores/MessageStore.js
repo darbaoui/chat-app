@@ -212,6 +212,30 @@ const useMessageStore = create((set, get) => ({
       }
       return { uploadingMessages: newMap };
     }),
+
+  /**
+   * Uploads text message content to the server and updates its status.
+   * @param {string} messageId - The ID of the message to upload.
+   * @param {object} content - The JSON content of the message.
+   */
+  uploadTextMessage: async (messageId, content) => {
+    try {
+      // The `uploadInProgress` ref in the component handles preventing duplicate calls
+      // from the component itself. Here, we just perform the API call.
+      await axios.put(`/api/messages/text/${messageId}`, {
+        content: JSON.stringify(content),
+      });
+      get().updateMessageContent(messageId, {
+        upload_status: MessageStatus.COMPLETED,
+      });
+    } catch (error) {
+      console.error('Text message upload failed:', error);
+      // Optionally, update the message status to FAILED in the UI
+      get().updateMessageContent(messageId, {
+        upload_status: MessageStatus.FAILED,
+      });
+    }
+  },
   syncDraftWithServer: (messageTempId) => {
     if (get().currentDraft?.id) return;
     axios

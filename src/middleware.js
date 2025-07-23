@@ -4,7 +4,7 @@ import { AuthMiddleware } from '../middlewares/authMiddleware';
 export const config = {
   matcher: '/((?!api|_next/static|_next/images|images|svgs|favicon.ico).*)',
 };
-export function defaultMiddleware(request) {
+export function defaultMiddleware() {
   return NextResponse.next();
 }
 export default AuthMiddleware(defaultMiddleware);

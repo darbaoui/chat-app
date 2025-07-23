@@ -86,7 +86,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated = '/' } = {}) => {
     setStatus?.(null);
     setErrors([]);
 
-    console.log('props --->', props);
     try {
       const response = await axios.post('/api/login', props);
 
