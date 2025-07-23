@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { IMAGE_MIME_TYPES } from "@/constants";
 import ImagesPreview from "./ImagesPreview";
 import DocsPreview from "./DocsPreview";
