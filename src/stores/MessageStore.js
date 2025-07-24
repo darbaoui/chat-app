@@ -328,6 +328,9 @@ const useMessageStore = create((set, get) => ({
       })
       .catch((error) => {
         console.error('Error generating draft from server:', error);
+        get().updateMessageDraft(messageTempId, {
+          upload_status: MessageStatus.FAILED,
+        });
       });
   },
   updateFileInUploadingMessage: (messageId, fileId, updates) => {

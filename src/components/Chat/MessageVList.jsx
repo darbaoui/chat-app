@@ -80,8 +80,6 @@ const MessageVList = () => {
       echoInstance
         .private(`chat`)
         .listen('.message.created', (e) => {
-
-          console.log('e --->', e)
           const { message, user } = e
           if (user?.id !== authUser?.id) {
             addMessage(message)
@@ -89,7 +87,6 @@ const MessageVList = () => {
 
         })
         .listen('.message.updated', (e) => {
-          console.log('update ----- e --->', e)
           const { message, user } = e
           if (user?.id !== authUser?.id) {
             updateMessage(message?.id, message)
