@@ -70,7 +70,7 @@ export const EmojiPicker = ({
                         searchPlaceholder="Search emojis..."
                         skinTonesDisabled={false}
                         lazyLoadEmojis={true}
-                        emojiStyle="native"
+                        emojiStyle="apple"
                         {...pickerProps}
                     />
                 </Suspense>

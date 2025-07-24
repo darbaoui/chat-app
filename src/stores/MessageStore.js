@@ -83,6 +83,7 @@ const useMessageStore = create((set, get) => ({
           const new_message = {
             ...message,
             isUploading: true,
+            upload_status: MessageStatus.UPLOADING,
             content,
             created_at: new Date().toISOString(),
           };
@@ -164,6 +165,8 @@ const useMessageStore = create((set, get) => ({
       message_temp_id: draft?.temp_id, // Link to the parent message (temp ID if server ID not available)
       temp_id: fileTempId, // Unique temporary ID for this specific file
     };
+
+    console.log('draft --->', draft);
 
     // Add this file object to the media array of the corresponding uploading message.
     // This updates the UI to show the file preview.

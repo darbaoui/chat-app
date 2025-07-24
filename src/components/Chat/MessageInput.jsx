@@ -22,6 +22,8 @@ import { useFileDrop } from "@/hooks/useFileDrop";
 import InputMediaPreview from "./Media/InputMediaPreview";
 import { DefaultEmojis, EmojiPicker } from "@/components/ui/EmojiPicker";
 import userStore from "@/stores/useStore";
+import axios from "@/lib/axios";
+import { MessageStatus } from "@/constants";
 
 
 
@@ -44,7 +46,8 @@ const MessageInput = () => {
 
   const {
     error,
-
+    createUploadingMessage,
+    setCurrentDraft,
     currentDraft,
     createDraft,
     displayFileInUI,
@@ -77,7 +80,7 @@ const MessageInput = () => {
   const [isOpenDropDown, setIsDropDownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emojiToAdd, setEmojiToAdd] = useState(null);
-
+  const canFetchUserDraft = useRef(true)
   // console.log('messages --->', messages);
 
   const wrapperRef = useRef(null);
@@ -94,6 +97,25 @@ const MessageInput = () => {
 
     return currentDraft;
   }, [createDraft, currentDraft, authUser]);
+
+  useEffect(() => {
+    const fetchDraft = () => {
+      axios.get(`/api/messages/draft`).then(({ data }) => {
+        if (data) {
+          setCurrentDraft({ ...data, upload_status: MessageStatus.UPLOADING })
+          createUploadingMessage(data.id, { ...data, upload_status: MessageStatus.UPLOADING })
+          handleExpand()
+          console.log('draft --->', data)
+        }
+
+      })
+    }
+
+    if (canFetchUserDraft.current) {
+      canFetchUserDraft.current = false
+      fetchDraft()
+    }
+  }, [])
 
 
 
@@ -327,8 +349,8 @@ const MessageInput = () => {
 
   // Used to track media uploading
   const currentUploadingMessage = uploadingMessages.get(currentDraft?.id || currentDraft?.temp_id);
-  // console.log('currentUploadingMessage --->', currentUploadingMessage);
   const hasMedia = currentUploadingMessage?.media?.length > 0;
+  // console.log('uploadingMessages --->', uploadingMessages, currentDraft?.id, currentUploadingMessage, hasMedia);
 
   useOnClickOutside(wrapperRef, () => {
     if (!hasNoText) return;

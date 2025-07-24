@@ -25,6 +25,8 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
             setPdfUrl('');
         }
     }, [file.file, file.mime_type]);
+    // 
+    const src = file?.preview_url ? file.preview_url : file.content
 
     return (
         <div
@@ -32,7 +34,7 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
             key={file.temp_id || file.id}
         >
 
-            {(file?.upload_status === MessageStatus.UPLOADING && file?.upload_progress < 100) && (
+            {(file?.upload_status === MessageStatus.UPLOADING) && (
 
                 <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-background z-[2] rounded-md">
                     <div className="w-6 h-6 rounded-full bg-background/70  flex items-center justify-center">
@@ -48,7 +50,7 @@ const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
             {
                 file.mime_type.startsWith('image/') && (
                     <img
-                        src={file.content}
+                        src={src}
                         alt={file.name}
                         className="max-w-full h-12 object-cover rounded"
                     />

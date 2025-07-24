@@ -13,6 +13,7 @@ const TiptapEditorReadWrapper = ({ message }) => {
     const text = message?.content;
     const uploadInProgress = useRef(false);
 
+    console.log('message --->', message)
 
     useEffect(() => {
         if (message?.id && needToUpload && !uploadInProgress.current) {
