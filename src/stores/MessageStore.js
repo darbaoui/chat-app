@@ -4,12 +4,14 @@ import { create } from 'zustand';
 import userStore from './useStore';
 
 const useMessageStore = create((set, get) => ({
-  messages: null,
-  currentDraft: null,
-  error: null,
-  uploadingMessages: new Map(),
-  unReadMessages: 0,
-  shouldScrollToBottom: false,
+  // State properties for managing chat messages and their lifecycle.
+  messages: null, // Array of message objects displayed in the chat.
+  currentDraft: null, // The message currently being composed or uploaded.
+  error: null, // Stores any errors related to message operations.
+  uploadingMessages: new Map(), // Map to track messages that are in the process of uploading (key: temp_id/id, value: message object).
+  unReadMessages: 0, // Count of unread messages.
+  shouldScrollToBottom: false, // Flag to indicate if the chat should scroll to the latest message.
+
   setShouldScrollToBottom: (shouldScrollToBottom) =>
     set({ shouldScrollToBottom }),
   setCurrentDraft: (draft) => set({ currentDraft: draft }),
@@ -67,8 +69,13 @@ const useMessageStore = create((set, get) => ({
     })),
 
   submitMessage: async (content) => {
+    // This action handles the submission of a message, which can either be a new message
+    // or an update to an existing draft (e.g., adding text to a media-only draft).
+    // It manages optimistic UI updates by adding the message to the store immediately
+    // and then initiating server synchronization.
     set((state) => {
       const draft = state.currentDraft;
+      // Scenario 1: An existing draft is present (e.g., user attached media first)
       if (draft) {
         const message = get().uploadingMessages.get(draft.id || draft.temp_id);
 
@@ -82,7 +89,7 @@ const useMessageStore = create((set, get) => ({
           get().addMessage(new_message);
         }
       } else {
-        //While a user use only content without media
+        // Scenario 2: No existing draft, creating a new text-only message
         const currentAuthUser = userStore.getState().user;
         const tempId = crypto.randomUUID();
         const newDraft = {
@@ -96,9 +103,12 @@ const useMessageStore = create((set, get) => ({
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
-
+        // Add this new draft to the `uploadingMessages` map for tracking.
         get().createUploadingMessage(tempId, newDraft);
+        // Initiate server synchronization to create a persistent draft on the backend.
+        // This will eventually update the message with a real ID from the server.
         get().syncDraftWithServer(tempId);
+        // Create a message object for immediate display in the UI.
         const new_message = {
           ...newDraft,
           isUploading: true,
@@ -107,7 +117,7 @@ const useMessageStore = create((set, get) => ({
         };
         get().addMessage(new_message);
       }
-
+      // Reset the current draft and ensure the chat scrolls to the bottom after submission.
       return {
         currentDraft: null,
         shouldScrollToBottom: true,
@@ -116,42 +126,51 @@ const useMessageStore = create((set, get) => ({
   },
 
   displayFileInUI: (file, filePreview) => {
+    // This function is responsible for preparing a selected file (image, PDF, etc.)
+    // for immediate display in the UI (optimistic update) and initiating its upload process.
+    // It creates a temporary representation of the file and associates it with the current draft message.
     const draft = get().currentDraft;
 
     let messageId = null;
+    // If a server-assigned ID already exists for the current draft, use it.
+    // Otherwise, the message will initially be tracked by its temporary ID.
     if (draft?.id) {
       messageId = draft.id;
     }
 
+    // Generate a temporary ID for the file itself, for client-side tracking before server assignment.
     const fileTempId = crypto.randomUUID();
 
-    // Create file object for tracking
+    // Create a file object with all necessary metadata for display and upload tracking.
+    // This object will be stored in the `uploadingMessages` map.
     const fileObj = {
-      id: '',
+      id: '', // Server-assigned ID will populate this later
       name: file.name,
       file_name: file.name,
       mime_type: file.type,
       size: file.size,
-      content: filePreview.content,
+      content: filePreview.content, // Base64 or text content for immediate preview
       attributes: {
         width: filePreview?.dimensions?.width,
         height: filePreview?.dimensions?.height,
       },
-      file,
-      original_url: '',
-      preview_url: '',
+      file, // The actual File object for upload
+      original_url: '', // Server-assigned URL after successful upload
+      preview_url: '', // Server-assigned preview URL
       upload_progress: 0,
       upload_status: draft?.upload_status || MessageStatus.PENDING,
       isUploading: true,
-      message_id: messageId,
-      message_temp_id: draft?.temp_id,
-      temp_id: fileTempId,
+      message_id: messageId, // Link to the parent message (server ID if available)
+      message_temp_id: draft?.temp_id, // Link to the parent message (temp ID if server ID not available)
+      temp_id: fileTempId, // Unique temporary ID for this specific file
     };
 
-    // TODO: add this file to the current draft media array
-
+    // Add this file object to the media array of the corresponding uploading message.
+    // This updates the UI to show the file preview.
     get().addUploadingMessageMediaItem(draft?.id || draft?.temp_id, fileObj);
 
+    // If the draft message is already in an 'UPLOADING' state (meaning it has a server ID)
+    // and a messageId is available, immediately start uploading the file to the server.
     if (draft?.upload_status === MessageStatus.UPLOADING && messageId) {
       get().uploadFile(fileObj, messageId);
     }
@@ -237,14 +256,25 @@ const useMessageStore = create((set, get) => ({
     }
   },
   syncDraftWithServer: (messageTempId) => {
+    // This function is responsible for synchronizing a client-side draft message with the server.
+    // It creates a persistent draft on the backend and updates the local state with the server-assigned ID.
+    // This is a critical step for ensuring message durability and handling media uploads.
+    // If the current draft already has a server-assigned ID, it means it's already synced or being synced,
+    // so we can exit early to prevent duplicate server calls.
     if (get().currentDraft?.id) return;
     axios
       .post('/api/messages/text/draft')
       .then(({ data }) => {
+        // After a successful server response, update the local state.
+        // Check if the current draft's upload status is already 'UPLOADING'.
+        // This can happen if a use submit message with media uploads, before the draft received a server ID.
+        // If it's already uploading, we don't want to reset its status here
         if (get().currentDraft?.upload_status === MessageStatus.UPLOADING) {
           return;
         }
 
+        // Map existing media items from the temporary uploading message to include the new server-assigned message_id.
+        // Also, update their status to 'UPLOADING' as they are now ready to be sent to the server.
         const media = get()
           .uploadingMessages.get(messageTempId)
           ?.media.map((mediaItem) => ({
@@ -254,13 +284,15 @@ const useMessageStore = create((set, get) => ({
             isUploading: true,
           }));
 
+        // Update the key of the uploading message in the `uploadingMessages` map from its temporary ID
+        // to the new server-assigned ID. Also, update its properties with data from the server.
         get().updateUploadingMessageKey(messageTempId, data.id, {
           ...data,
           temp_id: null,
           upload_status: MessageStatus.UPLOADING,
           media,
         });
-
+        // If the synced draft is the currently active draft in the UI, update its properties.
         if (get().currentDraft?.temp_id === messageTempId) {
           get().setCurrentDraft({
             ...get().currentDraft,
@@ -272,6 +304,8 @@ const useMessageStore = create((set, get) => ({
           });
         }
 
+        // Find the message in the main `messages` array using its temporary ID and update it.
+        // This ensures the message displayed in the chat list reflects the server-assigned ID and status.
         const messageExisting = get().messages.find(
           (msg) => msg.temp_id === messageTempId
         );
@@ -284,9 +318,10 @@ const useMessageStore = create((set, get) => ({
           });
         }
 
+        // If there are media items associated with this message, initiate their upload to the server.
         if (media && media.length) {
-          // If the media not in the draft, but exist in the messsage so we need to add it to a separate uploading message
           media.forEach((mediaItem) => {
+            // Call uploadFile for each media item
             get().uploadFile(mediaItem, data.id);
           });
         }

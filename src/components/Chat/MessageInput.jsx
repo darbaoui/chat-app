@@ -339,7 +339,7 @@ const MessageInput = () => {
 
   const handleEmojiSelect = (emoji) => {
     setIsDropDownOpen(false);
-    handleExpand()
+    handleExpand() // Ensure the input area is expanded to display the editor for the selected emoji.
     setEmojiToAdd(emoji)
   }
 

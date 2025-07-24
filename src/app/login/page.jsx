@@ -45,7 +45,9 @@ const Login = () => {
         try {
             await login({ ...formData, setErrors, });
         } catch (error) {
-
+            if (error.response?.status !== 422) {
+                setErrors(prev => ({ ...prev, general: 'An unexpected error occurred. Please try again.' }));
+            }
             console.error(error)
         } finally {
             setIsLoading(false);
@@ -54,7 +56,7 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-            <div className="w-full max-w-sm">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm">
                 <Card className="shadow-none border-[0.5px] bg-white/80">
                     <CardHeader className="text-center">
                         <div className="mx-auto w-auto h-12  flex items-center justify-center mb-4">
@@ -134,8 +136,7 @@ const Login = () => {
 
 
                             <Button
-                                type="button"
-                                onClick={handleSubmit}
+                                type="submit"
                                 disabled={isLoading}
                                 className="w-full bg-blue-600 hover:bg-blue-700  text-white font-semibold py-3 transition-all duration-200 transform disabled:hover:scale-100"
                             >
@@ -153,7 +154,7 @@ const Login = () => {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+            </form>
         </div>
     );
 };
