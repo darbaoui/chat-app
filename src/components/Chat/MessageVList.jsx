@@ -69,7 +69,7 @@ const MessageVList = () => {
     });
 
 
-  const { messages, setMessages, shouldScrollToBottom } = useMessageStore();
+  const { messages, setMessages, shouldScrollToBottom, updateMessage, addMessage, removeMessage } = useMessageStore();
   const { user: authUser } = userStore();
 
 
@@ -78,17 +78,28 @@ const MessageVList = () => {
   useEffect(() => {
     if (echoInstance && authUser?.id) {
       echoInstance
-        .private(`chat.${authUser.id}`)
+        .private(`chat`)
         .listen('.message.created', (e) => {
 
           console.log('e --->', e)
+          const { message, user } = e
+          if (user?.id !== authUser?.id) {
+            addMessage(message)
+          }
 
         })
         .listen('.message.updated', (e) => {
-
+          console.log('update ----- e --->', e)
+          const { message, user } = e
+          if (user?.id !== authUser?.id) {
+            updateMessage(message?.id, message)
+          }
         })
         .listen('.message.deleted', (e) => {
-
+          const { message, user } = e
+          if (user?.id !== authUser?.id) {
+            removeMessage(message?.id)
+          }
         })
 
     }

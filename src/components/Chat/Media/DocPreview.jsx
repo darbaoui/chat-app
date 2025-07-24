@@ -32,6 +32,8 @@ const DocPreview = ({ file }) => {
     const { content, preview_url, name } = fileToDisplay;
 
     const readingFromLocalContent = isUploadingFromLocal && uploadStatus !== MessageStatus.COMPLETED
+
+    // src can be null when a user broadcast a message with docs, the preview not created yet
     const src = readingFromLocalContent ? content : preview_url;
 
     const alt = name || 'Image';
@@ -57,7 +59,7 @@ const DocPreview = ({ file }) => {
 
 
             <div className="w-[45px] h-[64px] overflow-hidden relative">
-                {readingFromLocalContent ? (
+                {readingFromLocalContent || !src ? (
 
                     <div className="w-full h-full bg-background flex items-center justify-center rounded-lg">
                         <div className="flex items-center flex-col mt-1">

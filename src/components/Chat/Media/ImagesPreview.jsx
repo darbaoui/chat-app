@@ -52,7 +52,7 @@ const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadP
           maxWidth: '100%',
           height: 'auto'
         }}
-        {...(!readingFromLocalContent && { placeholder: "blur", blurDataURL: blur_placeholder })}
+        {...(!readingFromLocalContent && blur_placeholder && { placeholder: "blur", blurDataURL: blur_placeholder })}
       />
     </div>
   );
@@ -102,7 +102,7 @@ const GridImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadPro
         style={{
           objectFit: 'cover',
         }}
-        {...(!readingFromLocalContent && { placeholder: "blur", blurDataURL: blur_placeholder })}
+        {...(!readingFromLocalContent && blur_placeholder && { placeholder: "blur", blurDataURL: blur_placeholder })}
       />
     </div>
   );
