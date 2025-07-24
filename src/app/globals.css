@@ -14,6 +14,8 @@
     --chat-box-me: #DCF0FE;
     --chat-box-me-foreground: #0c4a6e;
     --chat-background: #FAFAFA;
+   
+    
     --chat-separator: #71717A;
 
     --bg-colors: #ffffff;
@@ -218,6 +220,7 @@
     --chat-box-color: #27272A;
     --chat-box-me: #09324E;
     --chat-box-me-foreground: #0c4a6ebf;
+     --chat-background: #27272A;
     --meta: #A1A1AA;
     --meta-icon: #797986;
     --box-bg: #222226;
