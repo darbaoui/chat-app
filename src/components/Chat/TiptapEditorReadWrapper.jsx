@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import TiptapEditorRead from "../Editor/TiptapEditorRead";
-import axios from "@/lib/axios";
 import { MessageStatus } from "@/constants";
 
 const TiptapEditorReadWrapper = ({ message }) => {
@@ -12,8 +11,6 @@ const TiptapEditorReadWrapper = ({ message }) => {
     const isPending = message?.upload_status === MessageStatus.PENDING
     const text = message?.content;
     const uploadInProgress = useRef(false);
-
-    console.log('message --->', message)
 
     useEffect(() => {
         if (message?.id && needToUpload && !uploadInProgress.current) {

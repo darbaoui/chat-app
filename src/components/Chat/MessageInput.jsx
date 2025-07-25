@@ -10,21 +10,19 @@ import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "@/components/Chat/Media/RecordAudio";
 import useMessageStore from "@/stores/MessageStore";
 import { getBarCount, scaleDataToFit } from "./helper";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useFileDrop } from "@/hooks/useFileDrop";
 import InputMediaPreview from "./Media/InputMediaPreview";
-import { DefaultEmojis, EmojiPicker } from "@/components/ui/EmojiPicker";
 import userStore from "@/stores/useStore";
 import axios from "@/lib/axios";
 import { MessageStatus } from "@/constants";
-import { useOptimizedAutoSave } from "@/hooks/useOptimizedAutoSave";
+import AttachmentMenu from "./AttachmentMenu";
+import RecordingUI from "./RecordingUI";
+import InputActions from "./InputActions";
+import MediaPreviewBar from "./MediaPreviewBar";
+import useDraftStore from "@/stores/DraftStore";
+import useUploadStore from "@/stores/UploadStore";
+import messageService from "@/services/messageService";
 
 
 
@@ -52,19 +50,13 @@ const MessageInput = () => {
     setCurrentDraft,
     currentDraft,
     createDraft,
-    displayFileInUI,
-    deleteFile,
+    handleFileDisplayAndUpload,
+    deleteFileFromServer,
     uploadingMessages,
     submitMessage,
-    // uploadFiles,
-    // createTempDraft,
-    // currentTempDraft,
-    // uploadingMessages,
-    // uploadFile,
-    // submitMessage,
+
     //DO NOT TOUCH THESE TWO FUNCTIONS
     addMessage,
-    messages,
     setShouldScrollToBottom
   } = useMessageStore();
 
@@ -197,11 +189,11 @@ const MessageInput = () => {
 
     Promise.all(fileProcessingPromises).then(async (processedFilePreviews) => {
       processedFilePreviews.forEach((filePreview) => {
-        displayFileInUI(filePreview.file, filePreview, draft);
+        handleFileDisplayAndUpload(filePreview.file, filePreview, draft);
       });
       clearDroppedFiles();
     });
-  }, [ensureDraftExists, clearDroppedFiles, displayFileInUI]);
+  }, [ensureDraftExists, clearDroppedFiles, handleFileDisplayAndUpload]);
 
 
   const handleFileChange = async (e) => {
@@ -213,8 +205,8 @@ const MessageInput = () => {
 
 
   const handleRemoveFile = useCallback((fileId, messageId) => {
-    deleteFile(fileId, messageId);
-  }, [deleteFile]);
+    deleteFileFromServer(fileId, messageId);
+  }, [deleteFileFromServer]);
 
 
   const setNewMessage = (messageContent) => {
@@ -378,6 +370,7 @@ const MessageInput = () => {
   // console.log('uploadingMessages --->', uploadingMessages, currentDraft?.id, currentUploadingMessage, hasMedia);
 
   useOnClickOutside(wrapperRef, () => {
+    if (isOpenDropDown) return
     if (!hasNoText) return;
     if (currentUploadingMessage?.media?.length) return;
     if (isRecording) return;
@@ -468,75 +461,12 @@ const MessageInput = () => {
               </Button>
             </motion.div>
           ) : (
-            <motion.div
-              key="plus-btn"
-              variants={itemVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <DropdownMenu open={isOpenDropDown} onOpenChange={setIsDropDownOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="!w-8 !h-8 rounded-full bg-chat border-none text-meta-icon">
-                    <Plus />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="rounded-3xl p-4" align="center">
-                  <div className="w-full flex flex-col gap-2.5">
-                    <div className="grid grid-cols-4">
-                      {DefaultEmojis.map((emoji, index) => (
-                        <Button
-                          key={index}
-                          variant="ghost"
-                          size="sm"
-                          className="!w-10 !h-7.5 text-2xl hover:scale-110 transition-transform"
-                          onClick={() => handleEmojiSelect({
-                            emoji
-                          })}
-                        >
-                          {emoji}
-                        </Button>
-                      ))}
-
-                      <div className="w-10 h-7.5 flex items-center justify-center">
-                        <EmojiPicker
-                          onEmojiSelect={(emoji) => handleEmojiSelect(emoji)}
-                          preload={true} // Preload for better UX
-                        >
-
-                          <Button variant="secondary" className="rounded-full !h-[22px] !w-[22px] !p-0">
-                            <Plus />
-                          </Button>
-                        </EmojiPicker>
-                      </div>
-                    </div>
-                    <Separator />
-
-                    <label
-                      htmlFor="file-upload"
-                      className="inline-flex items-center justify-center rounded-md bg-chatBox hover:bg-accent h-9 hover:text-accent-foreground p-0 hover:opacity-100 cursor-pointer  text-title"
-                    >
-
-                      <span className="text-sm font-medium">
-                        Attach a file
-                      </span>
-                      <input
-                        id="file-upload"
-                        multiple
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        // accept="image/*"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-
-            </motion.div>
+            <AttachmentMenu
+              isOpenDropDown={isOpenDropDown}
+              setIsDropDownOpen={setIsDropDownOpen}
+              handleEmojiSelect={handleEmojiSelect}
+              handleFileChange={handleFileChange}
+              itemVariants={itemVariants} />
           )}
         </AnimatePresence>
 
@@ -551,22 +481,11 @@ const MessageInput = () => {
         >
           <AnimatePresence mode="wait">
             {isRecording ? (
-              <motion.div
-                key="recording-indicator"
-                className="text-xs text-meta-icon w-full"
-                variants={editorVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <RecordAudio
-                  ref={audioRecorderRef}
-                  isRecording={isRecording}
-                  sendFinalAudioBlob={sendAudioMessage}
-                  updateRecordingState={setRecordingState}
-                  autoStart={true}
-                />
-              </motion.div>
+              <RecordingUI
+                audioRecorderRef={audioRecorderRef}
+                sendAudioMessage={sendAudioMessage}
+                setRecordingState={setRecordingState}
+                editorVariants={editorVariants} />
             ) : !isExpanded ? (
               <motion.span
                 key="placeholder"
@@ -588,18 +507,11 @@ const MessageInput = () => {
                 exit="exit"
               >
                 <div className="w-full flex flex-col gap-2.5 ">
-                  {hasMedia && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {currentUploadingMessage.media.map((file) => (
-                        <InputMediaPreview
-                          key={file.temp_id || file.id}
-                          // currentUploadingMessage={currentUploadingMessage}
-                          file={file}
-                          onRemove={handleRemoveFile}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <MediaPreviewBar
+                    hasMedia={hasMedia}
+                    currentUploadingMessage={currentUploadingMessage}
+                    handleRemoveFile={handleRemoveFile}
+                  />
                   <TiptapEditorWrite
                     ref={editorRef}
                     jsonContent={content}
@@ -618,88 +530,17 @@ const MessageInput = () => {
         </motion.div>
 
         {/* Right-side Buttons */}
-        <div className="flex items-center gap-2.5">
-          <AnimatePresence mode="wait">
-            {isRecording ? (
-              // Recording state buttons
-              <>
-                {!isAudioPaused ? (
-                  <motion.div key="pause" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-8 h-8 rounded-full bg-chat border-none"
-                      onClick={handlePauseRecord}
-                    >
-                      <Pause className="text-meta-icon w-4" />
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div key="resume" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-8 h-8 rounded-full bg-chat border-none"
-                      onClick={handleResumeRecord}
-                    >
-                      <Mic className="text-meta-icon w-4" />
-                    </Button>
-                  </motion.div>
-                )}
-              </>
-            ) : (
-              // Non-recording state buttons
-              <>
-                {hasNoText && !hasMedia ? (
-                  <motion.div key="mic" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-8 h-8 rounded-full bg-chat border-none"
-                      onClick={handleStartRecording}
-                    >
-                      <Mic className="text-meta-icon w-4" />
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div key="send" variants={itemVariants} initial="initial" animate="animate" exit="exit">
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="w-8 h-8 rounded-full"
-                      onClick={() => sendMessage()}
-                    >
-                      <SendHorizonal className="text-background w-4" />
-                    </Button>
-                  </motion.div>
-                )}
-              </>
-            )}
-          </AnimatePresence>
-
-          {/* Send button during recording */}
-          <AnimatePresence>
-            {isRecording && (
-              <motion.div
-                key="send-record"
-                variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                style={{ position: 'relative' }}
-              >
-                <Button
-                  variant="default"
-                  size="icon"
-                  className="w-8 h-8 rounded-full"
-                  onClick={sendAudioContent}
-                >
-                  <SendHorizonal className="text-background w-4" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <InputActions
+          isRecording={isRecording}
+          isAudioPaused={isAudioPaused}
+          hasNoText={hasNoText}
+          hasMedia={hasMedia}
+          handlePauseRecord={handlePauseRecord}
+          handleResumeRecord={handleResumeRecord}
+          handleStartRecording={handleStartRecording}
+          sendMessage={sendMessage}
+          sendAudioContent={sendAudioContent}
+          itemVariants={itemVariants} />
       </div >
     </div >
   );

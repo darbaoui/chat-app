@@ -126,7 +126,7 @@ const useMessageStore = create((set, get) => ({
     });
   },
 
-  displayFileInUI: (file, filePreview) => {
+  handleFileDisplayAndUpload: (file, filePreview) => {
     // This function is responsible for preparing a selected file (image, PDF, etc.)
     // for immediate display in the UI (optimistic update) and initiating its upload process.
     // It creates a temporary representation of the file and associates it with the current draft message.
