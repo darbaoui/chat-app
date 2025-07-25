@@ -90,7 +90,7 @@ const useMessageStore = create((set, get) => ({
           get().addMessage(new_message);
         }
       } else {
-        // Scenario 2: No existing draft, creating a new text-only message
+        // Scenario 2: No existing draft, creating a new text-only message ans submit before the draft was created
         const currentAuthUser = userStore.getState().user;
         const tempId = crypto.randomUUID();
         const newDraft = {
@@ -165,8 +165,6 @@ const useMessageStore = create((set, get) => ({
       message_temp_id: draft?.temp_id, // Link to the parent message (temp ID if server ID not available)
       temp_id: fileTempId, // Unique temporary ID for this specific file
     };
-
-    console.log('draft --->', draft);
 
     // Add this file object to the media array of the corresponding uploading message.
     // This updates the UI to show the file preview.
@@ -258,6 +256,16 @@ const useMessageStore = create((set, get) => ({
       });
     }
   },
+  updateDraftContent: (content) => {
+    const { currentDraft, updateUploadingMessageContent } = get();
+    axios
+      .put(`/api/messages/text/draft/${currentDraft.id}`, {
+        content: JSON.stringify(content),
+      })
+      .then(() => {
+        updateUploadingMessageContent(currentDraft?.id, content);
+      });
+  },
   syncDraftWithServer: (messageTempId) => {
     // This function is responsible for synchronizing a client-side draft message with the server.
     // It creates a persistent draft on the backend and updates the local state with the server-assigned ID.
@@ -266,7 +274,9 @@ const useMessageStore = create((set, get) => ({
     // so we can exit early to prevent duplicate server calls.
     if (get().currentDraft?.id) return;
     axios
-      .post('/api/messages/text/draft')
+      .post('/api/messages/text/draft', {
+        content: JSON.stringify(get().currentDraft?.content),
+      })
       .then(({ data }) => {
         // After a successful server response, update the local state.
         // Check if the current draft's upload status is already 'UPLOADING'.
@@ -392,7 +402,21 @@ const useMessageStore = create((set, get) => ({
         set({ error: 'Failed to upload file' });
       });
   },
-  createDraft: (user) => {
+  updateUploadingMessageContent: (messageId, updateContent) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+
+      if (existing) {
+        newMap.set(messageId, {
+          ...existing,
+          content: updateContent,
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
+  createDraft: (user, content = null) => {
     const { currentDraft } = get();
     if (currentDraft?.id || currentDraft?.temp_id) return currentDraft;
     // create a new message width a unique ID
@@ -400,7 +424,7 @@ const useMessageStore = create((set, get) => ({
     const draft = {
       id: null,
       temp_id: tempId,
-      content: null,
+      content,
       status: 'draft',
       upload_status: MessageStatus.PENDING,
       user,

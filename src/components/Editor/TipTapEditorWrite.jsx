@@ -18,7 +18,7 @@ import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import { BubbleMenu, EditorContent, isNodeSelection, PureEditorContent, useEditor } from '@tiptap/react';
 import mentionHandler from './suggestion';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { EmojiNode } from './CustomEmojiExtension';
 import { cn } from '@/lib/utils';
 import MenuBar from './MenuBar';
@@ -33,24 +33,10 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
 
     const [isLink, setIsLink] = useState(false);
     const [inputLink, setInputLink] = useState('');
+    const canUpdateStateAndContentCursor = useRef(true);
 
 
     useImperativeHandle(ref, () => ({
-        // addEmoji(emoji) {
-        //     console.log('im here !!!')
-        //     const emojiUrl = emoji.emoji;
-        //     editor
-        //         .chain()
-        //         .focus()
-        //         .insertEmoji({
-        //             emoji: emojiUrl,
-        //             annotation: emojiUrl,
-        //             // url: 'https://zamma.com',
-        //         })
-        //         .run();
-        //     // .run();
-        // },
-        //   setFocus,
         setContent,
     }));
 
@@ -180,8 +166,19 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
                 }),
             ],
             editable,
+            editorProps: {
+                /**
+                 * This function is called when plain text is pasted.
+                 * @param {string} text The pasted text.
+                 * @returns {string} The modified text to be inserted.
+                 */
+                transformPastedText(text) {
+                    // Replace all newline characters (\n) with a space
+                    // The 'g' flag ensures all occurrences are replaced, not just the first one.
+                    return text.replace(/\n/g, ' ');
+                },
+            },
             onUpdate: ({ editor }) => {
-
                 if (editor.isEmpty) {
                     setNoText(true);
                     onChange(null);
@@ -196,6 +193,15 @@ const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, 
             immediatelyRender: false,
         },
     );
+
+    useEffect(() => {
+        if (!editor) return
+        if (jsonContent && canUpdateStateAndContentCursor.current) {
+            canUpdateStateAndContentCursor.current = false;
+            setNoText(false);
+            editor.chain().focus('end').run();
+        }
+    }, [editor, jsonContent, canUpdateStateAndContentCursor])
 
 
 

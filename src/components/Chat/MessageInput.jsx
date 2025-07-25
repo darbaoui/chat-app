@@ -4,7 +4,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { File, GalleryThumbnails, Mic, Pause, Plus, SendHorizonal, Trash, X } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { useDebounce } from "use-debounce";
 import TiptapEditorWrite from "@/components/Editor/TipTapEditorWrite";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import RecordAudio from "@/components/Chat/Media/RecordAudio";
@@ -24,6 +24,7 @@ import { DefaultEmojis, EmojiPicker } from "@/components/ui/EmojiPicker";
 import userStore from "@/stores/useStore";
 import axios from "@/lib/axios";
 import { MessageStatus } from "@/constants";
+import { useOptimizedAutoSave } from "@/hooks/useOptimizedAutoSave";
 
 
 
@@ -46,6 +47,7 @@ const MessageInput = () => {
 
   const {
     error,
+    updateDraftContent,
     createUploadingMessage,
     setCurrentDraft,
     currentDraft,
@@ -85,7 +87,7 @@ const MessageInput = () => {
 
   const wrapperRef = useRef(null);
   const editorRef = useRef(null);
-
+  const lastSavedContent = useRef(null)
 
   const { dragState, droppedFiles, clearDroppedFiles } = useFileDrop(wrapperRef);
 
@@ -105,7 +107,9 @@ const MessageInput = () => {
           setCurrentDraft({ ...data, upload_status: MessageStatus.UPLOADING })
           createUploadingMessage(data.id, { ...data, upload_status: MessageStatus.UPLOADING })
           handleExpand()
-          console.log('draft --->', data)
+          // console.log('draft --->', data)
+          setContent(data.content)
+          // editorRef.current?.setContent(data.content)
         }
 
       })
@@ -292,6 +296,27 @@ const MessageInput = () => {
       audioRecorderRef.current.stopRecord?.();
     }
   }, []);
+
+  // create editor instance and other stuff
+  const [debouncedEditor] = useDebounce(content, 2000);
+
+  const saveContent = useCallback((content) => {
+
+    if (isSubmitting || !content) return;
+
+    if (JSON.stringify(content) === JSON.stringify(lastSavedContent.current)) return
+    lastSavedContent.current = content
+    if (currentDraft?.id) {
+      updateDraftContent(content)
+    } else {
+      createDraft(authUser, content)
+    }
+  }, [updateDraftContent, createDraft, currentDraft, authUser, isSubmitting, content])
+
+  useEffect(() => {
+    saveContent(debouncedEditor)
+  }, [debouncedEditor]);
+
 
 
   const sendAudioMessage = ({ audioBlob, duration, waveData }) => {
@@ -556,13 +581,13 @@ const MessageInput = () => {
             ) : (
               <motion.div
                 key="editor"
-                className="w-full px-2.5"
+                className="w-full px-2.5 max-h-[calc(60vh_-_80px)] overflow-y-auto"
                 variants={editorVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
               >
-                <div className="w-full flex flex-col gap-2.5">
+                <div className="w-full flex flex-col gap-2.5 ">
                   {hasMedia && (
                     <div className="flex flex-wrap gap-2 pt-2">
                       {currentUploadingMessage.media.map((file) => (
@@ -577,6 +602,7 @@ const MessageInput = () => {
                   )}
                   <TiptapEditorWrite
                     ref={editorRef}
+                    jsonContent={content}
                     emojiToAdd={emojiToAdd}
                     setEmojiToAdd={setEmojiToAdd}
                     editable={true}
