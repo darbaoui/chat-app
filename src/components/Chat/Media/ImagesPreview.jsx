@@ -32,7 +32,7 @@ const SingleImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadP
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background">
           <LoaderCircle className="animate-spin" />
         </div>
-      ) : uploadStatus === MessageStatus.UPLOADING && uploadProgress < 100 ?
+      ) : uploadStatus === MessageStatus.UPLOADING ?
         (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-background z-[2]">
             <div className="w-14 h-14 rounded-full bg-background flex items-center justify-center">
@@ -113,6 +113,8 @@ const ImagesPreview = ({ images }) => {
 
   const { uploadingMessages } = useMessageStore()
 
+  console.log('uploadingMessages -->', uploadingMessages)
+
   const gridConfig = useMemo(() => {
     const count = images.length;
     if (count <= 2) return { cols: count, spans: [] };
@@ -143,6 +145,8 @@ const ImagesPreview = ({ images }) => {
 
     const imageData = images[0];
     const imageUploading = getUploadMediaData(imageData);
+
+    console.log('imageUploading -->', imageUploading)
     const uploadProgress = imageUploading?.upload_progress ?? 0;
     // const isPending = imageUploading.upload_status === MessageStatus.PENDING;
     const isUploadingFromLocal = imageData?.isUploading;
