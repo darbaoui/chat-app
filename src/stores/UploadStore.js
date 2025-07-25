@@ -13,6 +13,19 @@ const useUploadStore = create((set, get) => ({
     set((state) => ({
       uploadingMessages: new Map(state.uploadingMessages).set(key, payload),
     })),
+  updateUploadingMessage: (messageId, media) => {
+    set((state) => {
+      const newMap = new Map(state.uploadingMessages);
+      const existing = newMap.get(messageId);
+      if (existing) {
+        newMap.set(messageId, {
+          ...existing,
+          media,
+        });
+      }
+      return { uploadingMessages: newMap };
+    });
+  },
   updateUploadingMessageKey: (oldKey, newKey, data = {}) =>
     set((state) => {
       const newMap = new Map(state.uploadingMessages);

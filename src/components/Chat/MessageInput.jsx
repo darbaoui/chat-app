@@ -42,17 +42,18 @@ const editorVariants = {
 const MessageInput = () => {
 
   const { user: authUser } = userStore();
-
+  const { currentDraft, createDraft, setCurrentDraft, updateDraftContent } = useDraftStore();
+  const { deleteFile, uploadingMessages, createUploadingMessage, handleFileDisplayAndUpload } = useUploadStore();
   const {
     error,
-    updateDraftContent,
-    createUploadingMessage,
-    setCurrentDraft,
-    currentDraft,
-    createDraft,
-    handleFileDisplayAndUpload,
-    deleteFileFromServer,
-    uploadingMessages,
+    // updateDraftContent,
+    // createUploadingMessage,
+    // setCurrentDraft,
+    // currentDraft,
+    // createDraft,
+    // handleFileDisplayAndUpload,
+    // deleteFile,
+    // uploadingMessages,
     submitMessage,
 
     //DO NOT TOUCH THESE TWO FUNCTIONS
@@ -205,8 +206,8 @@ const MessageInput = () => {
 
 
   const handleRemoveFile = useCallback((fileId, messageId) => {
-    deleteFileFromServer(fileId, messageId);
-  }, [deleteFileFromServer]);
+    deleteFile(fileId, messageId);
+  }, [deleteFile]);
 
 
   const setNewMessage = (messageContent) => {

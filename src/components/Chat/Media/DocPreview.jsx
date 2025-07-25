@@ -6,11 +6,12 @@ import { useCallback } from "react";
 import useMessageStore from "@/stores/MessageStore";
 import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
+import useUploadStore from "@/stores/UploadStore";
 
 
 
 const DocPreview = ({ file }) => {
-    const { uploadingMessages } = useMessageStore()
+    const { uploadingMessages } = useUploadStore()
     const getUploadMediaData = useCallback((file) => {
         if (!file.isUploading) {
             return null;

@@ -2,13 +2,14 @@
 import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
+import useDraftStore from "@/stores/DraftStore";
 import useMessageStore from "@/stores/MessageStore";
 import { FileText, LoaderCircle, X } from "lucide-react";
 import mime from 'mime-types';
 import { useEffect, useState } from 'react';
 
 const InputMediaPreview = ({ file, onRemove, currentUploadingMessage }) => {
-    const { currentDraft } = useMessageStore();
+    const { currentDraft } = useDraftStore();
 
     const [pdfUrl, setPdfUrl] = useState('');
 

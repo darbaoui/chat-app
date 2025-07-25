@@ -2,6 +2,7 @@ import ProgressCircle from "@/components/ui/ProgressCircle";
 import { MessageStatus } from "@/constants";
 import { cn } from "@/lib/utils";
 import useMessageStore from "@/stores/MessageStore";
+import useUploadStore from "@/stores/UploadStore";
 import { Loader, LoaderCircle } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useCallback } from "react";
@@ -111,9 +112,7 @@ const GridImageDisplay = ({ image, uploadStatus, isUploadingFromLocal, uploadPro
 
 const ImagesPreview = ({ images }) => {
 
-  const { uploadingMessages } = useMessageStore()
-
-  console.log('uploadingMessages -->', uploadingMessages)
+  const { uploadingMessages } = useUploadStore()
 
   const gridConfig = useMemo(() => {
     const count = images.length;
@@ -146,7 +145,6 @@ const ImagesPreview = ({ images }) => {
     const imageData = images[0];
     const imageUploading = getUploadMediaData(imageData);
 
-    console.log('imageUploading -->', imageUploading)
     const uploadProgress = imageUploading?.upload_progress ?? 0;
     // const isPending = imageUploading.upload_status === MessageStatus.PENDING;
     const isUploadingFromLocal = imageData?.isUploading;
