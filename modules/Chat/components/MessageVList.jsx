@@ -1,21 +1,21 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { createContext, forwardRef, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
-import { formatDateSeparator, generateTiptapJson } from "./helper";
+import { formatDateSeparator, } from "./helper";
 import DateSeparator from "./DateSeparator";
 // import { VList } from "virtua";
-import { VList } from "@/virtua/VList";
+import { VList } from "@/modules/Chat/virtua/VList";
 // import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
 import axios from "@/lib/axios";
-import useMessageStore from "@/stores/MessageStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import userStore from "@/stores/useStore";
-import useEcho from '@/hooks/useEcho';
-import { useChatContext, ChatContext } from "@/contexts/chat-context";
+import { useChatContext, ChatContext } from "@/modules/Chat/contexts/chat-context";
+import { useContentableEcho } from "@/modules/Chat/hooks/useContentableEcho";
 const LIMIT = 50;
 
 
@@ -103,34 +103,9 @@ const MessageVList = ({ contentableType, contentableId }) => {
   }, [contentableType, contentableId, initialize]);
 
 
-  const echoInstance = useEcho();
-  useEffect(() => {
-    if (echoInstance && authUser?.id) {
-      echoInstance
-        .private(`chat`)
-        .listen('.content.created', (e) => {
-          console.log('e ----->', e)
-          const { content, user } = e
-          if (user?.id !== authUser?.id) {
-            addMessage(content)
-          }
 
-        })
-        .listen('.content.updated', (e) => {
-          const { content, user } = e
-          if (user?.id !== authUser?.id) {
-            updateMessage(content?.id, content)
-          }
-        })
-        .listen('.content.deleted', (e) => {
-          const { content, user } = e
-          if (user?.id !== authUser?.id) {
-            removeMessage(content?.id)
-          }
-        })
+  useContentableEcho(contentableType, contentableId, authUser, { addMessage, updateMessage, removeMessage })
 
-    }
-  }, [echoInstance, authUser]);
 
   useEffect(() => {
     if (data) {

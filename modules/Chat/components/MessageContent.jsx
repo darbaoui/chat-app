@@ -1,5 +1,5 @@
-import AudioPreview from "@/components/Chat/Media/AudioPreview/index";
-import FilesPreview from "@/components/Chat/Media/FilesPreview";
+import AudioPreview from "@/modules/Chat/components/Media/AudioPreview/index";
+import FilesPreview from "@/modules/Chat/components/Media/FilesPreview";
 import { cn } from "@/lib/utils";
 import TiptapEditorReadWrapper from "./TiptapEditorReadWrapper";
 

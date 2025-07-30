@@ -1,5 +1,12 @@
-import { AUDIO_DEFINITIONS, AUDIO_MEDIA_DEFINITION, AUDIO_WAVEFORM_OPRIONS, IMAGE_URLS, NON_AUDIO_MEDIA_DEFINITIONS, PDF_URLS } from "@/constants";
-import { faker } from "@faker-js/faker";
+import {
+  AUDIO_DEFINITIONS,
+  AUDIO_MEDIA_DEFINITION,
+  AUDIO_WAVEFORM_OPRIONS,
+  IMAGE_URLS,
+  NON_AUDIO_MEDIA_DEFINITIONS,
+  PDF_URLS,
+} from '@/modules/Chat/constants';
+import { faker } from '@faker-js/faker';
 
 export const generateTiptapJson = (messageNumber = 0) => {
   const formats = ['bold', 'italic', 'code'];
@@ -30,7 +37,6 @@ export const generateTiptapJson = (messageNumber = 0) => {
   };
 };
 
-
 /**
  * Formats a date string into a human-readable separator like "Today", "Yesterday", or "Month Day, Year".
  * @param {Date} date - The date object to format.
@@ -54,10 +60,11 @@ export const formatDateSeparator = (date) => {
   }).format(date);
 };
 
-
 export const createMediaItem = (mediaDef, url) => {
   const fileName = url.substring(url.lastIndexOf('/') + 1);
-  const mimeType = mediaDef.mime_prefix + (fileName.includes('.') ? fileName.split('.').pop() : 'octet-stream');
+  const mimeType =
+    mediaDef.mime_prefix +
+    (fileName.includes('.') ? fileName.split('.').pop() : 'octet-stream');
   const mediaItem = {
     id: faker.string.uuid(),
     file_name: fileName,
@@ -68,20 +75,20 @@ export const createMediaItem = (mediaDef, url) => {
 
   // Add the exact duration for audio files based on the URL
   if (mediaDef.type === 'audio') {
-    const exactAudioDef = AUDIO_DEFINITIONS.find(audio => audio.url === url);
+    const exactAudioDef = AUDIO_DEFINITIONS.find((audio) => audio.url === url);
     if (exactAudioDef) {
       mediaItem.duration = exactAudioDef.duration;
     }
   }
   if (mediaDef.type === 'image') {
-    const exactImageDef = IMAGE_URLS.find(image => image.url === url);
+    const exactImageDef = IMAGE_URLS.find((image) => image.url === url);
     if (exactImageDef) {
       mediaItem.dimensions = exactImageDef.dimensions;
     }
   }
 
   if (mediaDef.type === 'pdf') {
-    const exactPDFDef = PDF_URLS.find(pdf => pdf.url === url);
+    const exactPDFDef = PDF_URLS.find((pdf) => pdf.url === url);
     if (exactPDFDef) {
       mediaItem.size = exactPDFDef.size;
       // mediaItem.mime_type = mediaDef.type;
@@ -90,7 +97,7 @@ export const createMediaItem = (mediaDef, url) => {
   }
 
   return mediaItem;
-}
+};
 
 /**
  * Generates a random array of media items (images, PDFs, audio).
@@ -103,9 +110,16 @@ export const getRandomMediaItems = () => {
   let hasAudio = false;
 
   // Decide if this will be an audio-only message (20% chance)
-  if (faker.number.float() < 0.2) { // 20% chance for audio-only message
+  if (faker.number.float() < 0.2) {
+    // 20% chance for audio-only message
     // Select one random audio file
-    const randomAudioUrl = AUDIO_MEDIA_DEFINITION.urls[faker.number.int({ min: 0, max: AUDIO_MEDIA_DEFINITION.urls.length - 1 })];
+    const randomAudioUrl =
+      AUDIO_MEDIA_DEFINITION.urls[
+        faker.number.int({
+          min: 0,
+          max: AUDIO_MEDIA_DEFINITION.urls.length - 1,
+        })
+      ];
     mediaItems.push(createMediaItem(AUDIO_MEDIA_DEFINITION, randomAudioUrl));
     hasAudio = true;
   } else {
@@ -115,17 +129,25 @@ export const getRandomMediaItems = () => {
       const numMedia = faker.number.int({ min: 1, max: 3 }); // 1 to 3 non-audio media items
       for (let i = 0; i < numMedia; i++) {
         // Randomly select a non-audio media type (image or pdf)
-        const randomMediaDef = NON_AUDIO_MEDIA_DEFINITIONS[faker.number.int({ min: 0, max: NON_AUDIO_MEDIA_DEFINITIONS.length - 1 })];
+        const randomMediaDef =
+          NON_AUDIO_MEDIA_DEFINITIONS[
+            faker.number.int({
+              min: 0,
+              max: NON_AUDIO_MEDIA_DEFINITIONS.length - 1,
+            })
+          ];
         // Randomly pick a URL for the selected media type
-        const randomUrl = randomMediaDef.urls[faker.number.int({ min: 0, max: randomMediaDef.urls.length - 1 })];
+        const randomUrl =
+          randomMediaDef.urls[
+            faker.number.int({ min: 0, max: randomMediaDef.urls.length - 1 })
+          ];
         mediaItems.push(createMediaItem(randomMediaDef, randomUrl));
       }
     }
   }
 
   return { media: mediaItems, hasAudio: hasAudio };
-}
-
+};
 
 export function autoFormatSize(bytes) {
   const MB = bytes / (1024 * 1024); // Convert bytes to MB
@@ -140,14 +162,12 @@ export function autoFormatSize(bytes) {
   }
 }
 
-
 // // Fixed bar count calculation
 export const getBarCount = () => {
   const { barWidth, barGap, waveMaxWidth } = AUDIO_WAVEFORM_OPRIONS;
   const availableWidth = waveMaxWidth; // Use clientWidth for actual display width
   return Math.floor(availableWidth / (barWidth + barGap));
 };
-
 
 // Fixed data scaling
 export const scaleDataToFit = (data, targetCount) => {

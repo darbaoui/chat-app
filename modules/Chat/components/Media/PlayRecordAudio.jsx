@@ -3,8 +3,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import useWaveformCanvas from "@/hooks/useWaveformCanvas";
-import useAudioPlaybackAndWaveform from "@/hooks/useAudioPlaybackAndWaveform";
+import useWaveformCanvas from "@/modules/Chat/hooks/useWaveformCanvas";
+import useAudioPlaybackAndWaveform from "@/modules/Chat/hooks/useAudioPlaybackAndWaveform";
 
 const PlayRecordAudio = ({ audioBlob, waveformData }) => {
 

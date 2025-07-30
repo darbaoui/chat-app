@@ -4,11 +4,11 @@ import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AUDIO_WAVEFORM_OPRIONS } from '@/constants';
+import { AUDIO_WAVEFORM_OPRIONS } from '@/modules/Chat/constants';
 import { LoaderCircle, Pause, Play } from 'lucide-react';
 import PropTypes from 'prop-types';
-import useWaveformCanvas from '@/hooks/useWaveformCanvas';
-import useAudioPlaybackAndWaveform from '@/hooks/useAudioPlaybackAndWaveform';
+import useWaveformCanvas from '@/modules/Chat/hooks/useWaveformCanvas';
+import useAudioPlaybackAndWaveform from '@/modules/Chat/hooks/useAudioPlaybackAndWaveform';
 
 const RESIZE_REDRAW_DEBOUNCE_MS = 100;
 

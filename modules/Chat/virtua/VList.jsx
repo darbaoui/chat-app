@@ -1,5 +1,5 @@
 import { forwardRef, useRef } from "react";
-import { Virtualizer } from "@/virtua/Virtualizer";
+import { Virtualizer } from "@/modules/Chat/virtua/Virtualizer";
 
 export const VList = forwardRef(
   (

@@ -1,5 +1,5 @@
 'use client'
-import MessageVList from "@/components/Chat/MessageVList";
+import MessageVList from "@/modules/Chat/components/MessageVList";
 
 export default function HomePage() {
 

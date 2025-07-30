@@ -1,8 +1,8 @@
 import {
   generateTiptapJson,
   getRandomMediaItems,
-} from '@/components/Chat/helper';
-import { TOTAL_MESSAGES, USERS } from '@/constants';
+} from '@/modules/Chat/components/helper';
+import { TOTAL_MESSAGES, USERS } from '@/modules/Chat/constants';
 import { faker } from '@faker-js/faker';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -2,8 +2,8 @@ import { useCallback, useEffect } from 'react';
 import {
   AUDIO_WAVEFORM_OPRIONS,
   WAVEFORM_HEIGHT_SCALE_FACTOR,
-} from '@/constants';
-import { scaleDataToFit } from '@/components/Chat/helper';
+} from '@/modules/Chat/constants';
+import { scaleDataToFit } from '@/modules/Chat/components/helper';
 
 const useWaveformCanvas = (canvasRef, waveformContainerRef) => {
   const setupCanvas = useCallback(() => {

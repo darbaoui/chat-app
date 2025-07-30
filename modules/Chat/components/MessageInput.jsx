@@ -2,28 +2,25 @@
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { File, GalleryThumbnails, Mic, Pause, Plus, SendHorizonal, Trash, X } from "lucide-react";
+import { File, GalleryThumbnails, Trash } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from "use-debounce";
 import TiptapEditorWrite from "@/components/Editor/TipTapEditorWrite";
-import { useOnClickOutside } from "@/hooks/use-on-click-outside";
-import RecordAudio from "@/components/Chat/Media/RecordAudio";
-import useMessageStore from "@/stores/MessageStore";
+import { useOnClickOutside } from "@/modules/Chat/hooks/use-on-click-outside";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { getBarCount, scaleDataToFit } from "./helper";
 import { cn } from "@/lib/utils";
-import { useFileDrop } from "@/hooks/useFileDrop";
-import InputMediaPreview from "./Media/InputMediaPreview";
+import { useFileDrop } from "@/modules/Chat/hooks/useFileDrop";
 import userStore from "@/stores/useStore";
 import axios from "@/lib/axios";
-import { MessageStatus } from "@/constants";
+import { MessageStatus } from "@/modules/Chat/constants";
 import AttachmentMenu from "./AttachmentMenu";
 import RecordingUI from "./RecordingUI";
 import InputActions from "./InputActions";
 import MediaPreviewBar from "./MediaPreviewBar";
-import useDraftStore from "@/stores/DraftStore";
-import useUploadStore from "@/stores/UploadStore";
-import messageService from "@/services/messageService";
-import { useChatContext } from "@/contexts/chat-context";
+import useDraftStore from "@/modules/Chat/stores/DraftStore";
+import useUploadStore from "@/modules/Chat/stores/UploadStore";
+import { useChatContext } from "@/modules/Chat/contexts/chat-context";
 
 
 

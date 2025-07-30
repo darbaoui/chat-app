@@ -1,10 +1,10 @@
-import { MessageStatus } from '@/constants';
+import { MessageStatus } from '@/modules/Chat/constants';
 import axios from '@/lib/axios';
 import { create } from 'zustand';
-import userStore from './useStore';
+import userStore from '@/stores/useStore';
 import useDraftStore from './DraftStore';
 import useUploadStore from './UploadStore';
-import messageService from '@/services/messageService';
+import messageService from '@/modules/Chat/services/messageService';
 const messageApi = new messageService();
 
 const useMessageStore = create((set, get) => ({

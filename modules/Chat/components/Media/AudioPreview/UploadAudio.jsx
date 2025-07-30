@@ -1,6 +1,6 @@
-import { AUDIO_WAVEFORM_OPRIONS } from "@/constants";
+import { AUDIO_WAVEFORM_OPRIONS } from "@/modules/Chat/constants";
 import axios from "@/lib/axios";
-import useMessageStore from "@/stores/MessageStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react"
 const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10;

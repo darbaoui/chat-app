@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from "react";
-import { IMAGE_MIME_TYPES } from "@/constants";
+import { IMAGE_MIME_TYPES } from "@/modules/Chat/constants";
 import ImagesPreview from "./ImagesPreview";
 import DocsPreview from "./DocsPreview";
 

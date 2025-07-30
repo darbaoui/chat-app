@@ -1,9 +1,9 @@
 'use client'
 import ProgressCircle from "@/components/ui/ProgressCircle";
-import { MessageStatus } from "@/constants";
+import { MessageStatus } from "@/modules/Chat/constants";
 import { cn } from "@/lib/utils";
-import useDraftStore from "@/stores/DraftStore";
-import useMessageStore from "@/stores/MessageStore";
+import useDraftStore from "@/modules/Chat/stores/DraftStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { FileText, LoaderCircle, X } from "lucide-react";
 import mime from 'mime-types';
 import { useEffect, useState } from 'react';

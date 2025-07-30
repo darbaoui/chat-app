@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import RecordAudio from '@/components/Chat/Media/RecordAudio';
+import RecordAudio from '@/modules/Chat/components/Media/RecordAudio';
 
 const RecordingUI = ({
     audioRecorderRef,

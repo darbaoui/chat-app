@@ -30,7 +30,7 @@ import {
   microtask,
   sort,
 } from "virtua/unstable_core";
-import { BUFFER_MULTIPLIER } from "@/constants";
+import { BUFFER_MULTIPLIER } from "@/modules/Chat/constants";
 
 
 /**

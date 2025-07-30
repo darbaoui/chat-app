@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { MessageStatus } from '@/constants';
-import messageService from '@/services/messageService';
+import { MessageStatus } from '@/modules/Chat/constants';
+import messageService from '@/modules/Chat/services/messageService';
 import useUploadStore from './UploadStore';
 import useMessageStore from './MessageStore';
 

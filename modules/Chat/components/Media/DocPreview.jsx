@@ -1,12 +1,12 @@
 import { File, FileText, LoaderCircle } from "lucide-react";
 import mime from 'mime-types';
 import NextImage from 'next/image';
-import { autoFormatSize } from "@/components/Chat/helper";
+import { autoFormatSize } from "@/modules/Chat/components/helper";
 import { useCallback } from "react";
-import useMessageStore from "@/stores/MessageStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import ProgressCircle from "@/components/ui/ProgressCircle";
-import { MessageStatus } from "@/constants";
-import useUploadStore from "@/stores/UploadStore";
+import { MessageStatus } from "@/modules/Chat/constants";
+import useUploadStore from "@/modules/Chat/stores/UploadStore";
 
 
 

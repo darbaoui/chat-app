@@ -4,9 +4,9 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayo
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AUDIO_WAVEFORM_OPRIONS, RMS_AMPLITUDE_SCALAR } from "@/constants";
+import { AUDIO_WAVEFORM_OPRIONS, RMS_AMPLITUDE_SCALAR } from "@/modules/Chat/constants";
 import PlayRecordAudio from "./PlayRecordAudio";
-import useWaveformCanvas from "@/hooks/useWaveformCanvas";
+import useWaveformCanvas from "@/modules/Chat/hooks/useWaveformCanvas";
 const PUSH_INTERVAL = 50;
 
 const RecordAudio = forwardRef(({ updateRecordingState, autoStart, sendFinalAudioBlob }, ref) => {

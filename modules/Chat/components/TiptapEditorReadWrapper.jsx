@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import useMessageStore from "@/stores/MessageStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { useEffect, useRef } from "react";
-import TiptapEditorRead from "../Editor/TiptapEditorRead";
-import { MessageStatus } from "@/constants";
+import TiptapEditorRead from "@/components/Editor/TiptapEditorRead";
+import { MessageStatus } from "@/modules/Chat/constants";
 
 const TiptapEditorReadWrapper = ({ message }) => {
 

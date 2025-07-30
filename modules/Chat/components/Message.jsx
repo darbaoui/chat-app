@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, fromNow } from "@/lib/utils";
 import MessageContent from "./MessageContent";
 import { memo, useContext } from "react";
-import { useChatContext } from "@/contexts/chat-context";
+import { useChatContext } from "@/modules/Chat/contexts/chat-context";
 
 
 const Message = memo(({ message, prevMessage = {} }) => {

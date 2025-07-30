@@ -1,8 +1,8 @@
 import ProgressCircle from "@/components/ui/ProgressCircle";
-import { MessageStatus } from "@/constants";
+import { MessageStatus } from "@/modules/Chat/constants";
 import { cn } from "@/lib/utils";
-import useMessageStore from "@/stores/MessageStore";
-import useUploadStore from "@/stores/UploadStore";
+import useMessageStore from "@/modules/Chat/stores/MessageStore";
+import useUploadStore from "@/modules/Chat/stores/UploadStore";
 import { Loader, LoaderCircle } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useCallback } from "react";
