@@ -5,6 +5,7 @@ import userStore from './useStore';
 import useDraftStore from './DraftStore';
 import useUploadStore from './UploadStore';
 import messageService from '@/services/messageService';
+const messageApi = new messageService();
 
 const useMessageStore = create((set, get) => ({
   // State properties for managing chat messages and their lifecycle.
@@ -13,7 +14,23 @@ const useMessageStore = create((set, get) => ({
   uploadingMessages: new Map(), // Map to track messages that are in the process of uploading (key: temp_id/id, value: message object).
   unReadMessages: 0, // Count of unread messages.
   shouldScrollToBottom: false, // Flag to indicate if the chat should scroll to the latest message.
+  api: null, // Will hold the initialized messageService
+  initialize: (contentableType, contentableId) => {
+    // const messageService = new messageService();
+    const initializedApi = messageApi.initialize(
+      contentableType,
+      contentableId
+    );
 
+    set({
+      api: initializedApi,
+      messages: null, // Reset messages for new context
+      uploadingMessages: new Map(),
+      unReadMessages: 0,
+      shouldScrollToBottom: false,
+      error: null,
+    });
+  },
   setShouldScrollToBottom: (shouldScrollToBottom) =>
     set({ shouldScrollToBottom }),
 
@@ -220,10 +237,11 @@ const useMessageStore = create((set, get) => ({
    * @param {object} content - The JSON content of the message.
    */
   uploadTextMessage: async (messageId, content) => {
+    const { api } = get();
     try {
       // The `uploadInProgress` ref in the component handles preventing duplicate calls
       // from the component itself. Here, we just perform the API call.
-      await messageService.submitTextMessageToServer(messageId, content);
+      await api.submitTextMessageToServer(messageId, content);
       get().updateMessageContent(messageId, {
         upload_status: MessageStatus.COMPLETED,
       });
@@ -235,6 +253,7 @@ const useMessageStore = create((set, get) => ({
       });
     }
   },
+
   // updateDraftContent: (content) => {
   //   const { currentDraft, updateUploadingMessageContent } = get();
   //   axios

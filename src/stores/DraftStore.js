@@ -27,8 +27,9 @@ const useDraftStore = create((set, get) => ({
       .updateUploadingMessageContent(currentDraft.id, content);
 
     try {
+      const { api } = useMessageStore.getState();
       // Call the service to persist the change on the backend
-      await messageService.updateDraftContentOnServer(currentDraft.id, content);
+      await api.updateDraftContentOnServer(currentDraft.id, content);
     } catch (error) {
       console.error('Failed to update draft content on server:', error);
       // Optionally, add logic here to revert the optimistic update on failure
@@ -77,7 +78,9 @@ const useDraftStore = create((set, get) => ({
     if (get().currentDraft?.id) return; // Already synced
 
     try {
-      const { data } = await messageService.createDraftOnServer(content);
+      const { api } = useMessageStore.getState();
+
+      const { data } = await api.createDraftOnServer(content);
 
       // If the draft was submitted before the server responded, abort the update.
       if (get().currentDraft?.upload_status === MessageStatus.UPLOADING) {

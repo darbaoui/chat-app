@@ -23,6 +23,7 @@ import MediaPreviewBar from "./MediaPreviewBar";
 import useDraftStore from "@/stores/DraftStore";
 import useUploadStore from "@/stores/UploadStore";
 import messageService from "@/services/messageService";
+import { useChatContext } from "@/contexts/chat-context";
 
 
 
@@ -44,6 +45,7 @@ const MessageInput = () => {
   const { user: authUser } = userStore();
   const { currentDraft, createDraft, setCurrentDraft, updateDraftContent } = useDraftStore();
   const { deleteFile, uploadingMessages, createUploadingMessage, handleFileDisplayAndUpload } = useUploadStore();
+  const { contentableType, contentableId, setShouldStickToBottom } = useChatContext()
   const {
     error,
     // updateDraftContent,
@@ -95,7 +97,7 @@ const MessageInput = () => {
 
   useEffect(() => {
     const fetchDraft = () => {
-      axios.get(`/api/messages/draft`).then(({ data }) => {
+      axios.get(`/api/contents/${contentableType}/${contentableId}/draft`).then(({ data }) => {
         if (data) {
           setCurrentDraft({ ...data, upload_status: MessageStatus.UPLOADING })
           createUploadingMessage(data.id, { ...data, upload_status: MessageStatus.UPLOADING })
@@ -112,7 +114,7 @@ const MessageInput = () => {
       canFetchUserDraft.current = false
       fetchDraft()
     }
-  }, [])
+  }, [contentableType, contentableId])
 
 
 
@@ -347,7 +349,8 @@ const MessageInput = () => {
     }
 
 
-    setShouldScrollToBottom(true)
+    // setShouldScrollToBottom(true)
+    setShouldStickToBottom()
     addMessage(message);
 
     // Reset states after sending

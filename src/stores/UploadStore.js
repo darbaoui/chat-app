@@ -169,7 +169,9 @@ const useUploadStore = create((set, get) => ({
           });
       };
 
-      const { data } = await messageService.uploadFileToServer(
+      const { api } = useMessageStore.getState();
+      const { data } = await api.uploadFileToServer(
+        messageId,
         formData,
         onUploadProgress
       );
@@ -226,8 +228,10 @@ const useUploadStore = create((set, get) => ({
       return { uploadingMessages: newMap };
     });
 
+    const { api } = useMessageStore.getState();
+
     try {
-      await messageService.deleteFileFromServer(mediaId);
+      await api.deleteFileFromServer(mediaId);
     } catch (error) {
       set({ error: `Failed to delete file ${error}` });
       // Here you could add logic to revert the optimistic deletion on failure

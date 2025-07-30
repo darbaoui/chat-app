@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, forwardRef, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import Message from "./Message";
 import { formatDateSeparator, generateTiptapJson } from "./helper";
@@ -15,22 +15,22 @@ import axios from "@/lib/axios";
 import useMessageStore from "@/stores/MessageStore";
 import userStore from "@/stores/useStore";
 import useEcho from '@/hooks/useEcho';
+import { useChatContext, ChatContext } from "@/contexts/chat-context";
 const LIMIT = 50;
 
 
 const fetcher = (url) => axios.get(url).then(({ data }) => data);
 // const fetcher = (url) => fetch(url).then((res) => res.json());
 
-const getKey = (pageIndex, previousPageData) => {
-  if (previousPageData && !previousPageData.hasMore) return null;
-  return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
-};
+// const getKey = (pageIndex, previousPageData) => {
+//   if (previousPageData && !previousPageData.hasMore) return null;
+//   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
+// };
 
-export const ChatContext = createContext(-1);
 
 const StickyItem = forwardRef(
   ({ children, style, index }, ref) => {
-    const { activeIndex, stickyIndexes } = useContext(ChatContext);
+    const { activeIndex, stickyIndexes } = useChatContext();
     return (
       <div
         ref={ref}
@@ -56,7 +56,32 @@ const StickyItem = forwardRef(
 
 StickyItem.displayName = 'StickyItem';
 
-const MessageVList = () => {
+const MessageVList = ({ contentableType, contentableId }) => {
+
+
+  const { messages, setMessages, shouldScrollToBottom, updateMessage, addMessage, removeMessage, initialize } = useMessageStore();
+
+
+  const getKey = useCallback((pageIndex, previousPageData) => {
+    // If there's no more data, don't fetch
+    if (previousPageData && !previousPageData.next_page_url) return null;
+
+    if (!contentableType || !contentableId) return null;
+
+    // Construct the paginated URL
+    const baseUrl = `/api/contents/${contentableType}/${contentableId}`;
+    const params = new URLSearchParams({
+      page: pageIndex + 1,
+      limit: LIMIT,
+    });
+
+    // Add cursor-based pagination if using cursor
+    if (previousPageData?.nextCursor) {
+      params.set('cursor', previousPageData.nextCursor);
+    }
+
+    return `${baseUrl}?${params.toString()}`;
+  }, [contentableType, contentableId]);
 
 
   const { data, error, size, setSize, isLoading, isValidating } =
@@ -69,9 +94,13 @@ const MessageVList = () => {
     });
 
 
-  const { messages, setMessages, shouldScrollToBottom, updateMessage, addMessage, removeMessage } = useMessageStore();
   const { user: authUser } = userStore();
 
+  useEffect(() => {
+    // Initialize all stores with the same contentable context
+    initialize(contentableType, contentableId);
+
+  }, [contentableType, contentableId, initialize]);
 
 
   const echoInstance = useEcho();
@@ -79,23 +108,24 @@ const MessageVList = () => {
     if (echoInstance && authUser?.id) {
       echoInstance
         .private(`chat`)
-        .listen('.message.created', (e) => {
-          const { message, user } = e
+        .listen('.content.created', (e) => {
+          console.log('e ----->', e)
+          const { content, user } = e
           if (user?.id !== authUser?.id) {
-            addMessage(message)
+            addMessage(content)
           }
 
         })
-        .listen('.message.updated', (e) => {
-          const { message, user } = e
+        .listen('.content.updated', (e) => {
+          const { content, user } = e
           if (user?.id !== authUser?.id) {
-            updateMessage(message?.id, message)
+            updateMessage(content?.id, content)
           }
         })
-        .listen('.message.deleted', (e) => {
-          const { message, user } = e
+        .listen('.content.deleted', (e) => {
+          const { content, user } = e
           if (user?.id !== authUser?.id) {
-            removeMessage(message?.id)
+            removeMessage(content?.id)
           }
         })
 
@@ -111,11 +141,11 @@ const MessageVList = () => {
   }, [data])
 
 
-  useEffect(() => {
-    if (shouldScrollToBottom) {
-      shouldStickToBottom.current = shouldScrollToBottom
-    }
-  }, [shouldScrollToBottom])
+  // useEffect(() => {
+  //   if (shouldScrollToBottom) {
+  //     shouldStickToBottom.current = shouldScrollToBottom
+  //   }
+  // }, [shouldScrollToBottom])
 
   const isLoadingMore =
     isLoading || (size > 0 && data && data?.data?.[data.length - 1]?.next_page_url);// We use laravel pagination response
@@ -162,6 +192,10 @@ const MessageVList = () => {
 
   }, [messages]);
 
+
+  const setShouldStickToBottom = () => {
+    shouldStickToBottom.current = true
+  }
 
 
   const generateVlistKey = useMemo(() => {
@@ -213,6 +247,24 @@ const MessageVList = () => {
     }
   }
 
+  const contextValue = useMemo(() => {
+    return {
+      authUser,
+      activeIndex,
+      stickyIndexes: dateIndexesSet,
+      contentableType,
+      contentableId,
+      setShouldStickToBottom,
+    };
+  }, [
+    authUser,
+    activeIndex,
+    dateIndexesSet,
+    contentableType,
+    contentableId,
+    setShouldStickToBottom,
+  ]);
+
 
   if (isLoading || !messages)
     return (
@@ -223,7 +275,7 @@ const MessageVList = () => {
 
   return (
     <>
-      <ChatContext.Provider value={{ authUser, activeIndex: activeIndex, stickyIndexes: dateIndexesSet }}>
+      <ChatContext.Provider value={contextValue}>
 
 
         <div className="flex flex-col h-full w-full relative">

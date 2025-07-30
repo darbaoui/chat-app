@@ -3,12 +3,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, fromNow } from "@/lib/utils";
 import MessageContent from "./MessageContent";
 import { memo, useContext } from "react";
-import { ChatContext } from "./MessageVList";
+import { useChatContext } from "@/contexts/chat-context";
 
 
 const Message = memo(({ message, prevMessage = {} }) => {
   const { user, created_at } = message;
-  const { authUser } = useContext(ChatContext);
+  const { authUser } = useChatContext();
   const isMe = user.id === authUser?.id;
 
 
