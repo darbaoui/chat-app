@@ -11,7 +11,7 @@ import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { getBarCount, scaleDataToFit } from "./helper";
 import { cn } from "@/lib/utils";
 import { useFileDrop } from "@/modules/Chat/hooks/useFileDrop";
-import userStore from "@/stores/useStore";
+import userStore from "@/stores/userStore";
 import axios from "@/lib/axios";
 import { MessageStatus } from "@/modules/Chat/constants";
 import AttachmentMenu from "./AttachmentMenu";

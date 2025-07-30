@@ -1,7 +1,7 @@
 import { MessageStatus } from '@/modules/Chat/constants';
 import axios from '@/lib/axios';
 import { create } from 'zustand';
-import userStore from '@/stores/useStore';
+import userStore from '@/stores/userStore';
 import useDraftStore from './DraftStore';
 import useUploadStore from './UploadStore';
 import messageService from '@/modules/Chat/services/messageService';

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
 import axios from "@/lib/axios";
 import useMessageStore from "@/modules/Chat/stores/MessageStore";
-import userStore from "@/stores/useStore";
+import userStore from "@/stores/userStore";
 import { useChatContext, ChatContext } from "@/modules/Chat/contexts/chat-context";
 import { useContentableEcho } from "@/modules/Chat/hooks/useContentableEcho";
 const LIMIT = 50;
@@ -56,7 +56,7 @@ const StickyItem = forwardRef(
 
 StickyItem.displayName = 'StickyItem';
 
-const MessageVList = ({ contentableType, contentableId }) => {
+const MessageVList = ({ contentableType, contentableId, className }) => {
 
 
   const { messages, setMessages, shouldScrollToBottom, updateMessage, addMessage, removeMessage, initialize } = useMessageStore();
@@ -253,7 +253,7 @@ const MessageVList = ({ contentableType, contentableId }) => {
       <ChatContext.Provider value={contextValue}>
 
 
-        <div className="flex flex-col h-full w-full relative">
+        <div className={cn("flex flex-col w-full relative", className)}>
           {
             isEmpty ? <div className="flex-1" /> : (
 

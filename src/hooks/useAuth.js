@@ -3,7 +3,7 @@ import axios from '@/lib/axios';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import userStore from '@/stores/useStore';
+import userStore from '@/stores/userStore';
 // Token management utilities
 const getToken = () => {
   if (typeof window !== 'undefined') {
