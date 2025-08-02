@@ -1,22 +1,20 @@
 import { MessageStatus } from '@/modules/Chat/constants';
-import axios from '@/lib/axios';
 import { create } from 'zustand';
 import userStore from '@/stores/userStore';
 import useDraftStore from './DraftStore';
 import useUploadStore from './UploadStore';
 import messageService from '@/modules/Chat/services/messageService';
-const messageApi = new messageService();
 
 const useMessageStore = create((set, get) => ({
   // State properties for managing chat messages and their lifecycle.
   messages: null, // Array of message objects displayed in the chat.
   error: null, // Stores any errors related to message operations.
-  uploadingMessages: new Map(), // Map to track messages that are in the process of uploading (key: temp_id/id, value: message object).
+  // uploadingMessages: new Map(), // Map to track messages that are in the process of uploading (key: temp_id/id, value: message object).
   unReadMessages: 0, // Count of unread messages.
   shouldScrollToBottom: false, // Flag to indicate if the chat should scroll to the latest message.
   api: null, // Will hold the initialized messageService
   initialize: (contentableType, contentableId) => {
-    // const messageService = new messageService();
+    const messageApi = new messageService();
     const initializedApi = messageApi.initialize(
       contentableType,
       contentableId
@@ -25,7 +23,7 @@ const useMessageStore = create((set, get) => ({
     set({
       api: initializedApi,
       messages: null, // Reset messages for new context
-      uploadingMessages: new Map(),
+      // uploadingMessages: new Map(),
       unReadMessages: 0,
       shouldScrollToBottom: false,
       error: null,
@@ -252,6 +250,14 @@ const useMessageStore = create((set, get) => ({
         upload_status: MessageStatus.FAILED,
       });
     }
+  },
+  handleDraftServerResponse: (messageTempId, serverData, updatedMedia) => {
+    get().updateMessageByTempId(messageTempId, {
+      ...serverData,
+      upload_status: MessageStatus.UPLOADING,
+      media: updatedMedia,
+      // media will be handled by uploadStore's response
+    });
   },
 
   // updateDraftContent: (content) => {

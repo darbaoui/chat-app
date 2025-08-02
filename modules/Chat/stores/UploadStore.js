@@ -141,7 +141,33 @@ const useUploadStore = create((set, get) => ({
       get().uploadFile(fileObj, draft.id);
     }
   },
+  handleDraftServerResponse: async (messageTempId, serverData) => {
+    const uploadStore = get(); // Get current state of uploadStore
+    const media = uploadStore.uploadingMessages
+      .get(messageTempId)
+      ?.media.map((mediaItem) => ({
+        ...mediaItem,
+        message_id: serverData.id,
+        upload_status: MessageStatus.UPLOADING,
+      }));
 
+    // Update the key in the upload store from temp_id to the new server ID
+    uploadStore.updateUploadingMessageKey(messageTempId, serverData.id, {
+      ...serverData,
+      temp_id: null,
+      upload_status: MessageStatus.UPLOADING,
+      media,
+    });
+
+    // If media exists, begin uploading files now that we have a message ID
+    if (media?.length) {
+      media.forEach((mediaItem) =>
+        uploadStore.uploadFile(mediaItem, serverData.id)
+      );
+    }
+
+    return media;
+  },
   /**
    * Uploads a single file to the server.
    * @param {object} file - The file object from the media array.

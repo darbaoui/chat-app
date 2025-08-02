@@ -87,22 +87,12 @@ const useDraftStore = create((set, get) => ({
         return;
       }
 
-      const uploadStore = useUploadStore.getState();
-      const media = uploadStore.uploadingMessages
-        .get(messageTempId)
-        ?.media.map((mediaItem) => ({
-          ...mediaItem,
-          message_id: data.id,
-          upload_status: MessageStatus.UPLOADING,
-        }));
-
-      // Update the key in the upload store from temp_id to the new server ID
-      uploadStore.updateUploadingMessageKey(messageTempId, data.id, {
-        ...data,
-        temp_id: null,
-        upload_status: MessageStatus.UPLOADING,
-        media,
-      });
+      const media = await useUploadStore
+        .getState()
+        .handleDraftServerResponse(messageTempId, data);
+      useMessageStore
+        .getState()
+        .handleDraftServerResponse(messageTempId, data, media);
 
       // Update the current draft with server data
       if (get().currentDraft?.temp_id === messageTempId) {
@@ -114,20 +104,6 @@ const useDraftStore = create((set, get) => ({
             media,
           },
         });
-      }
-
-      // Update the message in the main UI list with the server ID
-      useMessageStore.getState().updateMessageByTempId(messageTempId, {
-        ...data,
-        upload_status: MessageStatus.UPLOADING,
-        media,
-      });
-
-      // If media exists, begin uploading files now that we have a message ID
-      if (media?.length) {
-        media.forEach((mediaItem) =>
-          uploadStore.uploadFile(mediaItem, data.id)
-        );
       }
     } catch (error) {
       console.error('Error generating draft from server:', error);
