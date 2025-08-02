@@ -174,11 +174,20 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
 
 
   const generateVlistKey = useMemo(() => {
-    if (shouldScrollToBottom) {
-      return crypto.randomUUID(); // to Force re-rendering
+    if (ref.current) {
+      const { totalSize, viewportSize } = ref.current;
+      if (totalSize !== undefined && viewportSize !== undefined) {
+        if (totalSize <= viewportSize * 2)// We estime by test while the total size is > viewport size * 2 the items will rendering again
+        {
+          const key = crypto.randomUUID();
+          return key; // to Force re-rendering
+        }
+      }
     }
+    // if (shouldScrollToBottom) {
+    // }
     return "message-list";
-  }, [items, shouldScrollToBottom]);
+  }, [items]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -187,6 +196,7 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
       align: "end",
     });
   }, [items.length]);
+
 
 
   useEffect(() => {

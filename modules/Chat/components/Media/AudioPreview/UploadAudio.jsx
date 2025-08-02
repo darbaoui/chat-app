@@ -3,6 +3,7 @@ import axios from "@/lib/axios";
 import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import { Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatContext } from "@/modules/Chat/contexts/chat-context";
 const GAP_BETWEEN_WAVE_SPEED_AND_DURATION = 10;
 const WIDTH_SPEED_AND_DURATION = 74;
 const WIDTH_PROGRESS = 32;
@@ -16,6 +17,7 @@ const UploadAudio = ({ mediaFile }) => {
     const [loading, setLoading] = useState(false)
     const [progress, setProgressUpload] = useState(0);
     const uploadInProgress = useRef(false);
+    const { contentableType, contentableId } = useChatContext()
 
     // We decide to use small width for now, because we don't have how we can works with big width
     const wave_form_width = Math.min(mediaFile.attributes.wave_samples.length * (barWidth + barGap), smScreenWidth);
@@ -34,7 +36,7 @@ const UploadAudio = ({ mediaFile }) => {
         data.append('wave_samples', JSON.stringify(wave_samples));
         data.append('content', null);
         setProgressUpload(0)
-        axios.post('/api/messages/audio', data, {
+        axios.post(`/api/contents/${contentableType}/${contentableId}/audio`, data, {
             onUploadProgress: function (progressEvent) {
                 const percentCompleted = Math.round(
                     (progressEvent.loaded * 100) / progressEvent.total,

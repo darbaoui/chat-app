@@ -221,6 +221,9 @@ export const Virtualizer = forwardRef(
         get viewportSize() {
           return store.$getViewportSize();
         },
+        get totalSize() {
+          return store.$getTotalSize();
+        },
         findStartIndex: store.$findStartIndex,
         findEndIndex: store.$findEndIndex,
         getItemOffset: store.$getItemOffset,
