@@ -16,9 +16,9 @@ import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
-import { BubbleMenu, EditorContent, PureEditorContent, useEditor } from '@tiptap/react';
+import { BubbleMenu, EditorContent, isNodeSelection, PureEditorContent, useEditor } from '@tiptap/react';
 import mentionHandler from './suggestion';
-import { useEffect, useState } from 'react';
+import { forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { EmojiNode } from './CustomEmojiExtension';
 import { cn } from '@/lib/utils';
 import MenuBar from './MenuBar';
@@ -28,13 +28,51 @@ import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
 
 
-const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, setEditorFocus = true, setNoText, className }) => {
+const TiptapEditorWrite = forwardRef(({ users, editable, placeholder, onChange, emojiToAdd, setEmojiToAdd, jsonContent = null, setEditorFocus = true, setNoText, className }, ref) => {
 
 
     const [isLink, setIsLink] = useState(false);
     const [inputLink, setInputLink] = useState('');
+    const canUpdateStateAndContentCursor = useRef(true);
 
 
+    useImperativeHandle(ref, () => ({
+        setContent,
+    }));
+
+    const getCleanedJSON = (json) => {
+        if (!json?.content) {
+            return json;
+        }
+
+        const newJson = JSON.parse(JSON.stringify(json));
+
+        newJson.content = newJson.content.map(pNode => {
+            if (pNode.type !== 'paragraph' || !pNode.content) {
+                return pNode;
+            }
+
+            const visibleNodes = pNode.content.filter(child => {
+                if (child.type === 'text' && child.text.trim().length === 0) {
+                    return false;
+                }
+                return true;
+            });
+
+            // V-- THIS LOGIC IS UPDATED --V
+            // Check if there's at least one visible node AND if every visible node is an emoji.
+            const allVisibleAreEmojis = visibleNodes.length > 0 && visibleNodes.every(node => node.type === 'emoji');
+
+            if (allVisibleAreEmojis) {
+                // Rebuild the paragraph's content with ALL the visible emoji nodes.
+                pNode.content = visibleNodes;
+            }
+
+            return pNode;
+        });
+
+        return newJson;
+    };
 
     const editor = useEditor(
         {
@@ -127,14 +165,28 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
                     showOnlyWhenEditable: true,
                 }),
             ],
+            editable,
+            editorProps: {
+                /**
+                 * This function is called when plain text is pasted.
+                 * @param {string} text The pasted text.
+                 * @returns {string} The modified text to be inserted.
+                 */
+                transformPastedText(text) {
+                    // Replace all newline characters (\n) with a space
+                    // The 'g' flag ensures all occurrences are replaced, not just the first one.
+                    return text.replace(/\n/g, ' ');
+                },
+            },
             onUpdate: ({ editor }) => {
-                const contentJSON = editor.getJSON();
-                const textContent = editor.state.doc?.textContent;
-                setNoText(textContent === '');
                 if (editor.isEmpty) {
+                    setNoText(true);
                     onChange(null);
                 } else {
-                    onChange(contentJSON);
+                    setNoText(false);
+                    const rawJSON = editor.getJSON();
+                    const cleanedJSON = getCleanedJSON(rawJSON);
+                    onChange(cleanedJSON);
                 }
             },
             content: jsonContent,
@@ -142,6 +194,38 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
         },
     );
 
+    useEffect(() => {
+        if (!editor) return
+        if (jsonContent && canUpdateStateAndContentCursor.current) {
+            canUpdateStateAndContentCursor.current = false;
+            setNoText(false);
+            editor.chain().focus('end').run();
+        }
+    }, [editor, jsonContent, canUpdateStateAndContentCursor])
+
+
+
+    const setContent = (content) => {
+        editor.commands.setContent(content);
+    };
+
+    useEffect(() => {
+        if (!editor) return;
+        const emojiUrl = emojiToAdd?.emoji;
+        if (emojiUrl) {
+
+            editor
+                .chain()
+                .focus()
+                .insertEmoji({
+                    emoji: emojiUrl,
+                    annotation: emojiUrl,
+                    // url: 'https://zamma.com',
+                })
+                .run();
+            setEmojiToAdd(null);
+        }
+    }, [editor, setEmojiToAdd, emojiToAdd])
 
     useEffect(() => {
         if (!editor) return;
@@ -235,6 +319,6 @@ const TiptapEditorWrite = ({ users, placeholder, onChange, jsonContent = null, s
             <EditorContent editor={editor} />
         </div>
     );
-};
+});
 
 export default TiptapEditorWrite

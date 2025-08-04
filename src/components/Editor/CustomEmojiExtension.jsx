@@ -1,5 +1,6 @@
 import { mergeAttributes, Node } from '@tiptap/core';
-
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 export const EmojiNode = Node.create({
   name: 'emoji',
   group: 'inline',
@@ -84,4 +85,53 @@ export const EmojiNode = Node.create({
       },
     };
   },
+
+  // ... inside your EmojiNode.create({ ... })
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('emojiSizing'),
+        props: {
+          decorations(state) {
+            const decorations = [];
+            const { doc } = state;
+
+            doc.descendants((node, pos) => {
+              if (node.type.name !== 'paragraph') {
+                return;
+              }
+
+              let emojiCount = 0;
+              let hasOtherVisibleContent = false;
+
+              node.forEach(childNode => {
+                if (childNode.type.name === 'emoji') {
+                  emojiCount++;
+                } else if (childNode.isText) {
+                  if (childNode.textContent.trim().length > 0) {
+                    hasOtherVisibleContent = true;
+                  }
+                } else {
+                  hasOtherVisibleContent = true;
+                }
+              });
+
+              // V-- THIS IS THE ONLY CHANGE HERE --V
+              // If there are one or more emojis and no other text...
+              if (emojiCount > 0 && !hasOtherVisibleContent) {
+                decorations.push(
+                  Decoration.node(pos, pos + node.nodeSize, {
+                    class: 'is-emoji-only',
+                  })
+                );
+              }
+            });
+
+            return DecorationSet.create(doc, decorations);
+          },
+        },
+      }),
+    ];
+  },
+  // ...
 });

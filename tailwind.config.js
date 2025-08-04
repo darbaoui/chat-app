@@ -3,11 +3,14 @@ const { fontFamily, colors } = require('tailwindcss/defaultTheme');
 module.exports = {
   darkMode: ['class'],
   content: [
+    './modules/**/*.{js,jsx}',
+    './modules/**/**/*.{js,jsx}',
+
     './icons/**/*.{js,jsx}',
     './src/components/*.{js,jsx}',
     './src/components/**/*.{js,jsx}',
     './src/**/*.{js,jsx}',
-    
+    './src/**/**/*.{js,jsx}',
   ],
   theme: {
     container: {
@@ -77,7 +80,8 @@ module.exports = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
-        background: 'var(--background)',
+        // background: 'var(--background)',
+        background: 'rgb(var(--background)/1)',
         foreground: 'var(--foreground)',
         primary: {
           DEFAULT: 'var(--primary)',

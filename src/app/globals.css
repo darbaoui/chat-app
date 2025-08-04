@@ -12,8 +12,10 @@
     /* Zamma colors */
     --chat-box-color: #ECECEE;
     --chat-box-me: #DCF0FE;
-    --chat-box-me-foreground: #0c4a6eb3;
+    --chat-box-me-foreground: #0c4a6e;
     --chat-background: #FAFAFA;
+   
+    
     --chat-separator: #71717A;
 
     --bg-colors: #ffffff;
@@ -154,7 +156,7 @@
     --logo-white: #fff;
     --font-size-regular: 0.9375rem;
     --font-size-small: 0.8125rem;
-    --background: #fff;
+    --background: 255 255 255;
     --side_menu-background: #fbfbfb;
     --foreground: #020817;
     --title: #171717;
@@ -218,6 +220,7 @@
     --chat-box-color: #27272A;
     --chat-box-me: #09324E;
     --chat-box-me-foreground: #0c4a6ebf;
+     --chat-background: #27272A;
     --meta: #A1A1AA;
     --meta-icon: #797986;
     --box-bg: #222226;
@@ -233,7 +236,7 @@
     --github-color: #ffffff;
     --logo-black: #fff;
     --logo-white: #171717;
-    --background: #09090B;
+    --background: 9 9 11;
     --side_menu-background: #232529;
     --foreground: #E4E4E7;
     --title: #eaeaea;
@@ -299,6 +302,29 @@
 
 
 
+.EmojiPickerReact {
+  --epr-emoji-size: 24px !important;
+  --epr-category-navigation-button-size: 24px !important;
+  --epr-horizontal-padding: 6px !important;
+  --epr-header-padding: 8px var(--epr-horizontal-padding) !important;
+  --epr-category-label-text-color: var(--foreground) !important;
+  --epr-category-label-bg-color: var(--popover) !important;
+  --epr-search-input-bg-color: var(--accent) !important;
+  --epr-search-input-height: 32px !important;
+  --epr-search-border-color: var(--primary) !important;
+
+  --epr-dark-search-input-bg-color-active: var(--background) !important;
+  --epr-dark-category-icon-active-color: var(--primary) !important;
+}
+
+.EmojiPickerReact h2 {
+  @apply !text-exs;
+}
+
+.EmojiPickerReact input {
+  @apply !text-xs;
+}
+
 .ProseMirror {
   word-wrap: break-word;
   white-space: pre-wrap;
@@ -307,7 +333,6 @@
   font-variant-ligatures: none;
   font-feature-settings: 'liga' 0;
   position: relative;
-  color: var(--title-secondary);
 }
 
 .ProseMirror:focus {
@@ -336,6 +361,15 @@
   overflow-wrap: break-word;
 }
 
+.ProseMirror p.is-emoji-only .emoji {
+  /* font-size: 3rem; */
+
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%; 
+}
+
 .emoji-with-text .ProseMirror span.emoji:first-of-type {
   font-size: 1rem;
   line-height: 1;
@@ -344,6 +378,7 @@
 .emoji-without-text .ProseMirror span.emoji {
   font-size: 2rem;
   line-height: 1;
+
 }
 
 
