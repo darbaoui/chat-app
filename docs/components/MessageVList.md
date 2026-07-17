@@ -4,7 +4,7 @@
 
 A high-performance, virtualized list component specifically designed for displaying a potentially large number of chat messages. It handles fetching data, infinite scrolling (loading more messages as the user scrolls up), grouping messages by date, and rendering sticky date headers.
 
-It uses `swr/infinite` for data fetching and `virtua` (wrapped in a custom `VList` component) for virtualization.
+It uses `swr/infinite` for data fetching and `@tanstack/react-virtual` for virtualization.
 
 ## Import
 

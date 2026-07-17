@@ -1,22 +1,21 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import useSWRInfinite from "swr/infinite";
+import { useVirtualizer, defaultRangeExtractor } from "@tanstack/react-virtual";
 import Message from "./Message";
 import { formatDateSeparator, } from "./helper";
 import DateSeparator from "./DateSeparator";
-// import { VList } from "virtua";
-import { VList } from "@/modules/Chat/virtua/VList";
-// import  VList from "./VList";
 import { cn } from "@/lib/utils";
 import MessageInput from "./MessageInput";
 import axios from "@/lib/axios";
 import useMessageStore from "@/modules/Chat/stores/MessageStore";
 import userStore from "@/stores/userStore";
-import { useChatContext, ChatContext } from "@/modules/Chat/contexts/chat-context";
+import { ChatContext } from "@/modules/Chat/contexts/chat-context";
 import { useContentableEcho } from "@/modules/Chat/hooks/useContentableEcho";
 const LIMIT = 50;
+const ESTIMATED_ITEM_SIZE = 80;
 
 
 const fetcher = (url) => axios.get(url).then(({ data }) => data);
@@ -27,34 +26,6 @@ const fetcher = (url) => axios.get(url).then(({ data }) => data);
 //   return `/api/messages?page=${pageIndex + 1}&limit=${LIMIT}`;
 // };
 
-
-const StickyItem = forwardRef(
-  ({ children, style, index }, ref) => {
-    const { activeIndex, stickyIndexes } = useChatContext();
-    return (
-      <div
-        ref={ref}
-        data-index={index}
-        className="item-list"
-        style={{
-          ...style,
-          ...(stickyIndexes.has(index) && {
-            zIndex: 1,
-          }),
-          ...(activeIndex === index && {
-            position: "sticky",
-            top: 0,
-            zIndex: 3,
-          }),
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-);
-
-StickyItem.displayName = 'StickyItem';
 
 const MessageVList = ({ contentableType, contentableId, className }) => {
 
@@ -129,18 +100,19 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
   const isReachingEnd = isEmpty || (data && !data?.data?.[data.length - 1]?.next_page_url); // We use laravel pagination response
 
 
-  const ref = useRef(null);
-  const isPrepend = useRef(false);
+  const scrollElementRef = useRef(null);
+  const isPrependRef = useRef(false);
+  const prevScrollHeightRef = useRef(0);
   const shouldStickToBottom = useRef(true);
-  const [activeIndex, setActiveIndex] = useState(0)
+  const activeStickyIndexRef = useRef(-1);
 
   // Group messages by date and create list items
-  const { items, dateIndexes, dateIndexesSet } = useMemo(() => {
+  const { items, dateIndexes } = useMemo(() => {
     const items = [];
     const dateIndexesSet = new Set();
     let currentDate = null;
-    if (!messages) return { items, dateIndexes: [], dateIndexesSet };
-    messages.forEach((message, index) => {
+    if (!messages) return { items, dateIndexes: [] };
+    messages.forEach((message) => {
       const messageDate = new Date(message.created_at);
 
       const messageDateString = formatDateSeparator(messageDate);
@@ -153,7 +125,6 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
           type: 'date',
           date: messageDateString,
           id: `date-${messageDateString}`,
-          // formattedDate: formatDateSeparator(messageDate),
         });
       }
 
@@ -163,7 +134,7 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
       });
     });
 
-    return { items, dateIndexes: Array.from(dateIndexesSet), dateIndexesSet };
+    return { items, dateIndexes: Array.from(dateIndexesSet) };
 
   }, [messages]);
 
@@ -172,62 +143,59 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
     shouldStickToBottom.current = true
   }
 
+  const rangeExtractor = useCallback((range) => {
+    activeStickyIndexRef.current = dateIndexes.findLast((index) => range.startIndex >= index) ?? -1;
 
-  const generateVlistKey = useMemo(() => {
-    if (ref.current) {
-      const { totalSize, viewportSize } = ref.current;
-      if (totalSize !== undefined && viewportSize !== undefined) {
-        if (totalSize <= viewportSize * 2)// We estime by test while the total size is > viewport size * 2 the items will rendering again
-        {
-          const key = crypto.randomUUID();
-          return key; // to Force re-rendering
-        }
-      }
-    }
-    // if (shouldScrollToBottom) {
-    // }
-    return "message-list";
-  }, [items]);
+    const next = new Set([
+      ...(activeStickyIndexRef.current >= 0 ? [activeStickyIndexRef.current] : []),
+      ...defaultRangeExtractor(range),
+    ]);
+    return [...next].sort((a, b) => a - b);
+  }, [dateIndexes]);
+
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => scrollElementRef.current,
+    estimateSize: useCallback(() => ESTIMATED_ITEM_SIZE, []),
+    overscan: items.length >= 20 ? 20 : 0,
+    getItemKey: useCallback((index) => items[index]?.id ?? index, [items]),
+    rangeExtractor,
+  });
 
   useEffect(() => {
-    if (!ref.current) return;
     if (!shouldStickToBottom.current) return;
-    ref.current.scrollToIndex(items.length - 1, {
+    virtualizer.scrollToIndex(items.length - 1, {
       align: "end",
     });
   }, [items.length]);
 
-
-
-  useEffect(() => {
-    if (generateVlistKey !== 'message-list') {
-      ref.current.scrollToIndex(items.length - 1, {
-        align: "end",
-      });
-    }
-  }, [ref, generateVlistKey])
-
-
+  // Compensate scroll position so prepending older messages doesn't jump the viewport
   useLayoutEffect(() => {
-    isPrepend.current = false;
-  }, [items.length]);
+    const el = scrollElementRef.current;
+    if (!el || !isPrependRef.current) {
+      isPrependRef.current = false;
+      return;
+    }
+    const delta = el.scrollHeight - prevScrollHeightRef.current;
+    if (delta !== 0) {
+      el.scrollTop += delta;
+    }
+    isPrependRef.current = false;
+  }, [items]);
 
 
-  const handleScroll = (offset) => {
-    if (!ref.current) return;
-
-    const start = ref.current.findStartIndex();
-
-    const activeStickyIndex = dateIndexes.findLast((index) => start >= index);
-
-    setActiveIndex(activeStickyIndex);
+  const handleScroll = () => {
+    const el = scrollElementRef.current;
+    if (!el) return;
 
     shouldStickToBottom.current =
-      offset - ref.current.scrollSize + ref.current.viewportSize >=
+      el.scrollHeight - el.scrollTop - el.clientHeight <
       // FIXME: The sum may not be 0 because of sub-pixel value when browser's window.devicePixelRatio has decimal value
-      -1.5;
-    if (offset < 100 && !isPrepend.current && !isValidating) {
-      isPrepend.current = true;
+      1.5;
+
+    if (el.scrollTop < 100 && !isPrependRef.current && !isValidating) {
+      isPrependRef.current = true;
+      prevScrollHeightRef.current = el.scrollHeight;
       setSize((p) => p + 1);
     }
   }
@@ -235,16 +203,12 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
   const contextValue = useMemo(() => {
     return {
       authUser,
-      activeIndex,
-      stickyIndexes: dateIndexesSet,
       contentableType,
       contentableId,
       setShouldStickToBottom,
     };
   }, [
     authUser,
-    activeIndex,
-    dateIndexesSet,
     contentableType,
     contentableId,
     setShouldStickToBottom,
@@ -275,36 +239,69 @@ const MessageVList = ({ contentableType, contentableId, className }) => {
                     </div>
                   </div>
                 )}
-                <VList
-                  ref={ref}
+                <div
+                  ref={scrollElementRef}
+                  onScroll={handleScroll}
                   style={{
                     flex: 1,
+                    overflowY: "auto",
+                    contain: "strict",
+                    width: "100%",
+                    height: "100%",
                   }}
-                  overscan={items.length >= 20 ? 20 : 0}
-                  item={StickyItem}
-                  keepMounted={[activeIndex]}
-                  reverse
-                  shift={isPrepend.current}
-                  onScroll={handleScroll}
-                  key={generateVlistKey}
                 >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "flex-end",
+                      minHeight: "100%",
+                      userSelect: "text",
+                      overflowAnchor: "none",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        height: virtualizer.getTotalSize(),
+                      }}
+                    >
+                      {virtualizer.getVirtualItems().map((virtualRow) => {
+                        const item = items[virtualRow.index];
+                        const isDateItem = item.type === 'date';
+                        const isActive = virtualRow.index === activeStickyIndexRef.current;
 
-
-                  {items.map((item, index) => {
-                    if (item.type === 'date') {
-                      return <DateSeparator dateString={item.date} index={index} key={item.id} />
-                    }
-                    return (
-
-                      <Message
-                        key={item.id}
-                        message={item}
-                        prevMessage={index > 0 ? items[index - 1] : {}}
-                      />
-                    )
-
-                  })}
-                </VList>
+                        return (
+                          <div
+                            key={virtualRow.key}
+                            data-index={virtualRow.index}
+                            ref={virtualizer.measureElement}
+                            className="item-list"
+                            style={{
+                              position: isActive ? "sticky" : "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              ...(isActive ? {} : { transform: `translateY(${virtualRow.start}px)` }),
+                              ...(isDateItem && !isActive && { zIndex: 1 }),
+                              ...(isActive && { zIndex: 3 }),
+                            }}
+                          >
+                            {isDateItem ? (
+                              <DateSeparator dateString={item.date} />
+                            ) : (
+                              <Message
+                                message={item}
+                                prevMessage={virtualRow.index > 0 ? items[virtualRow.index - 1] : {}}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
               </div>
             )
